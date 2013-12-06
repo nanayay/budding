@@ -1,4 +1,5 @@
 #include "kernel.h"
+#include "log.h"
 
 Kernel::Kernel() :
 		bRunning(true) {
@@ -110,6 +111,8 @@ void Kernel::KillAllTask() {
 }
 
 Kernel& Kernel::GetSingleton() {
+	LOGD("kernel GetSingleton() begin");
 	static Kernel instance;
+	LOGD("kernel GetSingleton() begin");
 	return instance;
 }

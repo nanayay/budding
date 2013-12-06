@@ -1,4 +1,5 @@
 #include "egl_renderer.h"
+#include "log.h"
 #include <assert.h>
 
 EGLRenderer::EGLRenderer(AndroidPlatform* pPlatform, unsigned int priority)
@@ -33,7 +34,6 @@ void EGLRenderer::Init()
 {
 	LOGD("EGLRenderer Init begin");
 	AndroidPlatform* pPlatform = (AndroidPlatform*)m_pPlatform;
-	/*
 	if (m_display == EGL_NO_DISPLAY)
 	{
 		m_display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -104,7 +104,6 @@ void EGLRenderer::Init()
 
         m_bInitialized = true;
 	}
-	*/
 	LOGD("EGLRenderer Init end");
 }
 
