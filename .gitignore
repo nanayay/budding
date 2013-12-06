@@ -14,10 +14,11 @@
 *.d
 
 #Android SDK && NDK
-*.so
+.settings/
+bin/
+libs/
+obj/
+
 local.properties
 proguard-project.txt
-*.setting
-*.prefs
-*.jar
 
