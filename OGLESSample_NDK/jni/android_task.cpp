@@ -22,23 +22,39 @@ static void android_handle_cmd(struct android_app* app, int cmd) {
 	switch (cmd) {
 	case APP_CMD_INIT_WINDOW: {
 		// get the window ready for showing
-		Renderer* pRenderer = (Renderer*)app->userData;
-		pRenderer->Init();
+		LOGD("android_handle_cmd() APP_CMD_INIT_WINDOW cmd begin");
+		if (app->window != NULL)
+		{
+			LOGD("android_handle_cmd() app->window != null");
+			Renderer* pRenderer = (Renderer*)app->userData;
+			pRenderer->Init();
+		}
+		else
+		{
+			LOGD("android_handle_cmd() app->window == null");
+		}
+		LOGD("android_handle_cmd() APP_CMD_INIT_WINDOW cmd end");
 	}
 		break;
 	case APP_CMD_DESTROY: {
 		//
+		LOGD("android_handle_cmd() APP_CMD_DESTROY cmd begin");
 		Renderer* pRenderer = (Renderer*)app->userData;
 		pRenderer->Destroy();
+		LOGD("android_handle_cmd() APP_CMD_DESTROY cmd end");
 	}
 		break;
 	case APP_CMD_TERM_WINDOW: {
 		// clean up the window because it is being hidden/closed
+		LOGD("android_handle_cmd() APP_CMD_TERM_WINDOW cmd begin");
         Renderer* pRenderer = (Renderer*)app->userData;
         pRenderer->Destroy();
+        LOGD("android_handle_cmd() APP_CMD_TERM_WINDOW cmd end");
 	}
 		break;
 	case APP_CMD_RESUME: {
+		LOGD("android_handle_cmd() APP_CMD_RESUME cmd begin");
+		LOGD("android_handle_cmd() APP_CMD_RESUME cmd end");
 	}
 		break;
 	case APP_CMD_PAUSE: {
@@ -49,22 +65,18 @@ static void android_handle_cmd(struct android_app* app, int cmd) {
 
 AndroidTask::AndroidTask(android_app* pState, Renderer* pRenderer, unsigned int priority) :
 		m_pState(pState), Task(priority) {
-	LOGD("Constructor android() begin");
 	m_pState->onAppCmd = ::android_handle_cmd;
 	m_pState->onInputEvent = ::android_handle_input;
 	m_pState->userData = (void*)pRenderer;
-	LOGD("Constructor android() end");
 }
 
 AndroidTask::AndroidTask(AndroidPlatform* pPlatform, Renderer* pRenderer, unsigned int priority) :
 		m_pState(pPlatform->GetAppState()),
 		Task(priority)
 {
-	LOGD("Constructor android() begin");
 	m_pState->onAppCmd = ::android_handle_cmd;
 	m_pState->onInputEvent = ::android_handle_input;
 	m_pState->userData = (void*)pRenderer;
-	LOGD("Constructor android() end");
 }
 
 AndroidTask::AndroidTask(const AndroidTask& _copy)
