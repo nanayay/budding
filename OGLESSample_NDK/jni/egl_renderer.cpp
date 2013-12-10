@@ -10,8 +10,6 @@ EGLRenderer::EGLRenderer(AndroidPlatform* pPlatform, unsigned int priority)
 	 m_width(0),
 	 m_height(0)
 {
-	LOGD("EGLRenderer constructor begin");
-	LOGD("EGLRenderer constructor end");
 }
 
 EGLRenderer::~EGLRenderer()
@@ -20,24 +18,34 @@ EGLRenderer::~EGLRenderer()
 
 void EGLRenderer::RenderFrame()
 {
-	LOGD("EGLRenderer RenderFrame begin");
 	if (m_bRendering == true && m_width != 0 && m_height != 0)
 	{
-		glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+		glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// draw calls begin
+		// draw calls end
+
 		eglSwapBuffers(m_display, m_renderSurface);
 	}
-	LOGD("EGLRenderer RenderFrame end");
 }
 
 void EGLRenderer::Init()
 {
-	LOGD("EGLRenderer Init begin");
 	AndroidPlatform* pPlatform = (AndroidPlatform*)m_pPlatform;
+
+	if (pPlatform->GetAppState()->window == NULL)
+	{
+		LOGD("app_state->window are null, EGLRenderer can not Init() now");
+		return;
+	}
+
+	LOGD("EGLRenderer Init() begin");
 	if (m_display == EGL_NO_DISPLAY)
 	{
 		m_display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-		assert(m_display);
+		assert(m_display!= EGL_NO_DISPLAY);
+
 		EGLBoolean res = eglInitialize(m_display, NULL, NULL);
 		assert(res);
 
@@ -74,6 +82,7 @@ void EGLRenderer::Init()
 		{
 			attribList = RGB_565_ATTRIBS;
 		}
+
 		EGLConfig config;
 		EGLint numConfigs;
 		res = eglChooseConfig(m_display, attribList, &config, 1, &numConfigs);
@@ -88,23 +97,31 @@ void EGLRenderer::Init()
 
 		EGLNativeWindowType windowType;
 		m_renderSurface = eglCreateWindowSurface(m_display, config, p_android_app_state->window, NULL);
+		assert(m_renderSurface != EGL_NO_SURFACE);
+		LOGD("EGLRenderer eglCreateWindowSurface() success");
 
 		EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
 		m_context = eglCreateContext(m_display, config, EGL_NO_CONTEXT, contextAttribs);
 		assert(m_context != EGL_NO_CONTEXT);
+		LOGD("EGLRenderer eglCreateContext() success");
 
 		res = eglMakeCurrent(m_display, m_renderSurface, m_renderSurface, m_context);
 		assert(res);
+		LOGD("EGLRenderer eglMakeCurrent() success");
 
         res = eglQuerySurface(m_display, m_renderSurface, EGL_WIDTH, &m_width);
         assert(res);
+        LOGD("EGLRenderer eglQuerySurface() success, m_width is %d", m_width);
 
         res = eglQuerySurface(m_display, m_renderSurface, EGL_HEIGHT, &m_height);
         assert(res);
+        LOGD("EGLRenderer eglQuerySurface() success, m_height is %d", m_height);
 
         m_bInitialized = true;
+        m_bRendering = true;
+        LOGD("EGLRenderer set m_bInitialized and m_bRendering be true");
 	}
-	LOGD("EGLRenderer Init end");
+	LOGD("EGLRenderer Init() end");
 }
 
 void EGLRenderer::Destroy()
