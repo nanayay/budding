@@ -9,20 +9,15 @@ Kernel::~Kernel() {
 }
 
 void Kernel::Execute() {
-	LOGD("kernel Execute() begin");
-
 	while (m_tasks.size() != 0) {
-		LOGD("kernel m_tasks is not 0 size");
 		if (this->bRunning == false) {
-			LOGD("kernel will KillAllTask");
+			LOGD("kernel KillAllTask()");
 			this->KillAllTask();
 		}
 
 		for (TaskListIterator i = m_tasks.begin(); i != m_tasks.end(); i++) {
 			if ((*i)->CanKill() != true) {
-				LOGD("kernel task begin to update");
 				(*i)->Update();
-				LOGD("kernel task end to update");
 			}
 		}
 
@@ -31,15 +26,13 @@ void Kernel::Execute() {
 			i++;
 
 			if ((*tmp)->CanKill()) {
-				LOGD("kernel begin to remove task");
+				LOGD("kernel Stop() and remove CanKill() task");
 				(*tmp)->Stop();
 				m_tasks.remove(*tmp);
 				delete *tmp;
-				LOGD("kernel end to remove task");
 			}
 		}
 	}
-	LOGD("kernel Execute() end");
 }
 
 bool Kernel::AddTask(Task* pTask) {
@@ -111,8 +104,6 @@ void Kernel::KillAllTask() {
 }
 
 Kernel& Kernel::GetSingleton() {
-	LOGD("kernel GetSingleton() begin");
 	static Kernel instance;
-	LOGD("kernel GetSingleton() begin");
 	return instance;
 }
