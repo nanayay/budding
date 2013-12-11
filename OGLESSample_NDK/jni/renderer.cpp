@@ -28,12 +28,7 @@ void Renderer::OnSuspend()
 
 void Renderer::Update()
 {
-	if (this->m_bInitialized == false)
-	{
-		this->Init();
-	}
-
-	if (this->m_bRendering == true)
+	if (this->m_bRendering == true && this->m_bInitialized == true)
 	{
 		this->RenderFrame();
 	}
