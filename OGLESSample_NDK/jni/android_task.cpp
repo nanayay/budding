@@ -20,6 +20,12 @@ static int32_t android_handle_input(struct android_app* app,
 
 static void android_handle_cmd(struct android_app* app, int cmd) {
 	switch (cmd) {
+	case APP_CMD_SAVE_STATE: {
+		// The system has asked us to save our current state. Do so
+		LOGD("android_handle_cmd() APP_CMD_SAVE_STATE cmd begin");
+		LOGD("android_handle_cmd() APP_CMD_SAVE_STATE cmd end");
+		}
+		break;
 	case APP_CMD_INIT_WINDOW: {
 		// get the window ready for showing
 		LOGD("android_handle_cmd() APP_CMD_INIT_WINDOW cmd begin");
@@ -34,7 +40,7 @@ static void android_handle_cmd(struct android_app* app, int cmd) {
 			LOGD("android_handle_cmd() app->window == null");
 		}
 		LOGD("android_handle_cmd() APP_CMD_INIT_WINDOW cmd end");
-	}
+		}
 		break;
 	case APP_CMD_DESTROY: {
 		//
@@ -42,7 +48,7 @@ static void android_handle_cmd(struct android_app* app, int cmd) {
 		Renderer* pRenderer = (Renderer*)app->userData;
 		pRenderer->Destroy();
 		LOGD("android_handle_cmd() APP_CMD_DESTROY cmd end");
-	}
+		}
 		break;
 	case APP_CMD_TERM_WINDOW: {
 		// clean up the window because it is being hidden/closed
@@ -50,15 +56,32 @@ static void android_handle_cmd(struct android_app* app, int cmd) {
         Renderer* pRenderer = (Renderer*)app->userData;
         pRenderer->Destroy();
         LOGD("android_handle_cmd() APP_CMD_TERM_WINDOW cmd end");
-	}
+		}
+		break;
+	case APP_CMD_GAINED_FOCUS: {
+		// when our app gains forcus, start some senser, like start monitoring the accelerometer, open camera, etc.
+		LOGD("android_handle_cmd() APP_CMD_GAINED_FOCUS cmd begin");
+		LOGD("android_handle_cmd() APP_CMD_GAINED_FOCUS cmd end");
+		}
+		break;
+	case APP_CMD_LOST_FOCUS: {
+		// when our app loses focus, we stop some senser, like stop monitoring the accelerometer
+		// this is to avoid consuming battery while not being used
+		LOGD("android_handle_cmd() APP_CMD_LOST_FOCUS cmd begin");
+		LOGD("android_handle_cmd() APP_CMD_LOST_FOCUS cmd end");
+		}
 		break;
 	case APP_CMD_RESUME: {
+		// 
 		LOGD("android_handle_cmd() APP_CMD_RESUME cmd begin");
 		LOGD("android_handle_cmd() APP_CMD_RESUME cmd end");
-	}
+		}
 		break;
 	case APP_CMD_PAUSE: {
-	}
+		//
+		LOGD("android_handle_cmd() APP_CMD_PAUSE cmd begin");
+		LOGD("android_handle_cmd() APP_CMD_PAUSE cmd end");
+		}
 		break;
 	}
 }
