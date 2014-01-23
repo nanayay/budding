@@ -92,6 +92,22 @@ void EGLRenderer::Init()
 		res = eglGetConfigAttrib(m_display, config, EGL_NATIVE_VISUAL_ID, &format);
 		assert(res);
 
+        EGLint max_swap_interval;
+        res = eglGetConfigAttrib(m_display, config, EGL_MAX_SWAP_INTERVAL, &max_swap_interval);
+        assert(res);
+
+        EGLint min_swap_interval;
+        res = eglGetConfigAttrib(m_display, config, EGL_MIN_SWAP_INTERVAL, &min_swap_interval);
+        assert(res);
+
+        // log the egl's max and min swap interval for eglSwapInterval
+        LOGD("EGL Max Swap Interval is %d", max_swap_interval);
+        LOGD("EGL Min Swap Interval is %d", min_swap_interval);
+
+        // try to disable vsync
+        res = eglSwapInterval(m_display, 0);
+        assert(res);
+
 		int32_t setBufRes = ANativeWindow_setBuffersGeometry(p_android_app_state->window, 0, 0, format);
 		assert(setBufRes == 0);
 
