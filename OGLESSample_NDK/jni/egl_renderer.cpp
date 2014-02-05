@@ -2,8 +2,20 @@
 #include "log.h"
 #include <assert.h>
 
+EGLRenderer::EGLRenderer(android_app* state, unsigned int priority)
+    :Renderer(priority),
+     m_pPlatform(new AndroidPlatform(state)),
+     m_display(EGL_NO_DISPLAY),
+     m_renderSurface(EGL_NO_SURFACE),
+     m_context(EGL_NO_CONTEXT),
+     m_width(0),
+     m_height(0)
+{
+}
+
 EGLRenderer::EGLRenderer(AndroidPlatform* pPlatform, unsigned int priority)
-	:Renderer(pPlatform, priority),
+	:Renderer(priority),
+     m_pPlatform(new AndroidPlatform(*pPlatform)),
 	 m_display(EGL_NO_DISPLAY),
 	 m_renderSurface(EGL_NO_SURFACE),
 	 m_context(EGL_NO_CONTEXT),
@@ -14,6 +26,7 @@ EGLRenderer::EGLRenderer(AndroidPlatform* pPlatform, unsigned int priority)
 
 EGLRenderer::~EGLRenderer()
 {
+    delete m_pPlatform;
 }
 
 void EGLRenderer::RenderFrame()

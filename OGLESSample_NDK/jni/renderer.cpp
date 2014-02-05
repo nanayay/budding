@@ -1,9 +1,8 @@
 #include "renderer.h"
 
-Renderer::Renderer(Platform* pPlatform, unsigned int priority)
+Renderer::Renderer(unsigned int priority)
 	: m_bInitialized(false),
 	  m_bRendering(false),
-	  m_pPlatform(pPlatform),
 	  Task(priority)
 {
 }
