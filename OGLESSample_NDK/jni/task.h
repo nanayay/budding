@@ -2,12 +2,23 @@
 #define AY_TASK
 
 class Task {
+public:
+	struct Priority{
+		enum _PRIORITY_ { 
+			Highest = 0,
+			High = 3,
+			Normal = 5,
+			Low = 8,
+			Lowest = 10
+		};
+	};
+
 protected:
 	unsigned int m_priority;
 	bool m_canKill;
 
 public:
-	explicit Task(unsigned int priority) :
+	explicit Task(unsigned int priority = Task::Priority::Normal) :
 			m_priority(priority), m_canKill(false) {
 	}
 	virtual ~Task() {

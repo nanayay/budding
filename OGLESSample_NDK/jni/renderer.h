@@ -9,7 +9,6 @@ class Renderer
 protected:
 	bool m_bInitialized;
 	bool m_bRendering;
-	Platform* m_pPlatform;
 
 public:
 	virtual void RenderFrame() = 0;
@@ -17,7 +16,7 @@ public:
 	virtual void Destroy() = 0;
 
 public:
-	explicit Renderer(Platform* pPlatform, unsigned int priority);
+	explicit Renderer(unsigned int priority = Task::Priority::Normal);
 	virtual ~Renderer();
 
 	virtual bool Start();

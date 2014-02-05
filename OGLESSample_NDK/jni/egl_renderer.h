@@ -17,8 +17,11 @@ private:
 	EGLint m_width;
 	EGLint m_height;
 
+	AndroidPlatform* m_pPlatform;
+
 public:
-	explicit EGLRenderer(AndroidPlatform* pPlatform, unsigned int priority);
+	explicit EGLRenderer(android_app* state, unsigned int priority = Task::Priority::Normal);
+	explicit EGLRenderer(AndroidPlatform* pPlatform, unsigned int priority = Task::Priority::Normal);
 	virtual ~EGLRenderer();
 
 	virtual void RenderFrame();

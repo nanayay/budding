@@ -10,7 +10,7 @@ private:
 	typedef std::list<Task*> TaskList;
 	typedef std::list<Task*>::iterator TaskListIterator;
 
-	TaskList m_tasks; // sorted by task's priority
+	TaskList m_tasks; // sorted by task's priority, 0 > 1 > ... > 10
 	TaskList m_pausedTasks; // unsorted list
 	bool bRunning;
 

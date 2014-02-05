@@ -10,8 +10,8 @@ private:
 	android_app* m_pState;
 
 public:
-	explicit AndroidTask(android_app* pState, Renderer* pRenderer, unsigned int priority);
-	explicit AndroidTask(AndroidPlatform* pPlatform, Renderer* pRenderer, unsigned int priority);
+	explicit AndroidTask(android_app* pState, Renderer* pRenderer, unsigned int priority = Task::Priority::Normal);
+	explicit AndroidTask(AndroidPlatform* pPlatform, Renderer* pRenderer, unsigned int priority = Task::Priority::Normal);
 	AndroidTask(const AndroidTask& _copy);
 	AndroidTask& operator=(const AndroidTask& _assign);
 	virtual ~AndroidTask();
