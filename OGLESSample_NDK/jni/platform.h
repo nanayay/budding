@@ -22,6 +22,7 @@ public:
 	virtual ~Platform() {}
 
 	std::string GetPlatformName() const { return m_name; }
+	void SetPlatformName(std::string name) { m_name = name; };
 
 };
 #endif
