@@ -1,5 +1,10 @@
 #include "android_application.h"
-
+#include "log.h"
+#include "kernel.h"
+#include "android_task.h"
+#include "android_platform.h"
+#include "egl_renderer.h"
+#include "timer_task.h"
 
 AndroidApplication::AndroidApplication(android_app* state)
     : m_pState(state)
@@ -43,6 +48,11 @@ bool AndroidApplication::AddTasks()
     Kernel::GetSingleton().AddTask(pAndroidTask);
     LOGD("android task create and add to kernel end");
 
+    LOGD("android timer create and add to kernel begin");
+    AndroidTimer* pAndroidTimer = new AndroidTimer();
+    Kernel::GetSingleton().AddTask(pAndroidTimer);
+    LOGD("android timer create and add to kernel end");
+ 
     return true;
 }
 

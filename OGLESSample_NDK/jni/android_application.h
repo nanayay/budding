@@ -1,11 +1,7 @@
 #ifndef AY_ANDROID_APPLICATION
 #define AY_ANDROID_APPLICATION
+#include <android_native_app_glue.h>
 #include "application.h"
-#include "log.h"
-#include "kernel.h"
-#include "android_task.h"
-#include "android_platform.h"
-#include "egl_renderer.h"
 
 class AndroidApplication
     : public Application
