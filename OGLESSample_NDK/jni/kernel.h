@@ -31,8 +31,8 @@ public:
 	void KillAllTask();
 
 	static Kernel& GetSingleton();
-	bool isRunning () const { return this->bRunning; }
-	void SetRunning(bool running) { this->bRunning = running; }
+	bool isRunning () const { return this->m_bRunning; }
+	void SetRunning(bool running) { this->m_bRunning = running; }
 };
 
 #endif
