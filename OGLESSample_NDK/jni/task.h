@@ -24,9 +24,10 @@ public:
 	virtual ~Task() {
 	}
 
-	virtual bool Start() = 0; // Different with Init()
-							  // Start() return true will added to kernel for run, return false will not added to kernel
-							  // Init() will make sure the task be initialized before been called Update()
+	// Different with Init()
+	// Start() return true will added to kernel for run, return false will not added to kernel
+	// Init() will make sure the task be initialized before been called Update()
+	virtual bool Start() = 0;
 	virtual void OnSuspend() = 0;
 	virtual void Update() = 0;
 	virtual void OnResume() = 0;
