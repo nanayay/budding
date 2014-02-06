@@ -4,7 +4,7 @@
 
 EGLRenderer::EGLRenderer(android_app* state, unsigned int priority)
     :Renderer(priority),
-     m_pPlatform(new AndroidPlatform(state)),
+     m_pState(state),
      m_display(EGL_NO_DISPLAY),
      m_renderSurface(EGL_NO_SURFACE),
      m_context(EGL_NO_CONTEXT),
@@ -15,7 +15,7 @@ EGLRenderer::EGLRenderer(android_app* state, unsigned int priority)
 
 EGLRenderer::EGLRenderer(AndroidPlatform* pPlatform, unsigned int priority)
 	:Renderer(priority),
-     m_pPlatform(new AndroidPlatform(*pPlatform)),
+     m_pState(pPlatform->GetAppState()),
 	 m_display(EGL_NO_DISPLAY),
 	 m_renderSurface(EGL_NO_SURFACE),
 	 m_context(EGL_NO_CONTEXT),
@@ -24,10 +24,7 @@ EGLRenderer::EGLRenderer(AndroidPlatform* pPlatform, unsigned int priority)
 {
 }
 
-EGLRenderer::~EGLRenderer()
-{
-    delete m_pPlatform;
-}
+EGLRenderer::~EGLRenderer() {}
 
 void EGLRenderer::RenderFrame()
 {
@@ -45,9 +42,7 @@ void EGLRenderer::RenderFrame()
 
 void EGLRenderer::Init()
 {
-	AndroidPlatform* pPlatform = (AndroidPlatform*)m_pPlatform;
-
-	if (pPlatform->GetAppState()->window == NULL)
+	if (m_pState->window == NULL)
 	{
 		LOGD("app_state->window are null, EGLRenderer can not Init() now");
 		return;
@@ -84,9 +79,8 @@ void EGLRenderer::Init()
 		};
 
 		const EGLint* attribList;
-		android_app* p_android_app_state = pPlatform->GetAppState();
 
-		int windowFormat = ANativeWindow_getFormat(p_android_app_state->window);
+		int windowFormat = ANativeWindow_getFormat(m_pState->window);
 		if ((windowFormat == WINDOW_FORMAT_RGBA_8888) || (windowFormat == WINDOW_FORMAT_RGBX_8888))
 		{
 			attribList = RGBX_8888_ATTRIBS;
@@ -121,11 +115,11 @@ void EGLRenderer::Init()
         res = eglSwapInterval(m_display, 0);
         assert(res);
 
-		int32_t setBufRes = ANativeWindow_setBuffersGeometry(p_android_app_state->window, 0, 0, format);
+		int32_t setBufRes = ANativeWindow_setBuffersGeometry(m_pState->window, 0, 0, format);
 		assert(setBufRes == 0);
 
 		EGLNativeWindowType windowType;
-		m_renderSurface = eglCreateWindowSurface(m_display, config, p_android_app_state->window, NULL);
+		m_renderSurface = eglCreateWindowSurface(m_display, config, m_pState->window, NULL);
 		assert(m_renderSurface != EGL_NO_SURFACE);
 		LOGD("EGLRenderer eglCreateWindowSurface() success");
 
