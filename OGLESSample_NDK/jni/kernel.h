@@ -1,8 +1,7 @@
-#include <list>
-
 #ifndef AY_KERNEL
 #define AY_KERNEL
 
+#include <list>
 #include "task.h"
 
 class Kernel {
@@ -10,15 +9,16 @@ private:
 	typedef std::list<Task*> TaskList;
 	typedef std::list<Task*>::iterator TaskListIterator;
 
+private:
 	TaskList m_tasks; // sorted by task's priority, 0 > 1 > ... > 10
 	TaskList m_pausedTasks; // unsorted list
-	bool bRunning;
+	bool m_bRunning;
 
 private:
 	Kernel();
-	Kernel(const Kernel& _copy);
-	Kernel operator=(const Kernel& _assign);
-
+	Kernel(Kernel& _copy);
+	Kernel& operator=(Kernel& _assign);
+	
 public:
 	virtual ~Kernel();
 

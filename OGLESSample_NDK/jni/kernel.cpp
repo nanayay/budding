@@ -2,15 +2,48 @@
 #include "log.h"
 
 Kernel::Kernel() :
-		bRunning(true) {
+		m_bRunning(true),
+		m_tasks(),
+		m_pausedTasks()
+{
 }
 
-Kernel::~Kernel() {
+Kernel::Kernel(Kernel& _copy)
+{
+	this->m_bRunning = _copy.isRunning();
+	this->m_tasks = _copy.m_tasks;
+	this->m_pausedTasks = _copy.m_pausedTasks;
+
+	// Remove all items in the _copy, since the tasks should have **only** one copy
+	_copy.m_tasks.clear();
+	_copy.m_pausedTasks.clear();
+	_copy.SetRunning(false);
+
+}
+
+Kernel& Kernel::operator=(Kernel& _assign)
+{
+	if (this != &_assign)
+	{
+		this->m_bRunning = _assign.isRunning();
+		this->m_tasks = _assign.m_tasks;
+		this->m_pausedTasks = _assign.m_pausedTasks;
+
+		// Remove all items in the _assign, since the tasks should have **only** one copy
+		_assign.m_tasks.clear();
+		_assign.m_pausedTasks.clear();
+		_assign.SetRunning(false);
+	}
+	return *this;
+}
+
+Kernel::~Kernel()
+{
 }
 
 void Kernel::Execute() {
 	while (m_tasks.size() != 0) {
-		if (this->bRunning == false) {
+		if (this->m_bRunning == false) {
 			LOGD("kernel KillAllTask()");
 			this->KillAllTask();
 		}
