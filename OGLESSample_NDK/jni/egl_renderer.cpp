@@ -30,6 +30,7 @@ void EGLRenderer::RenderFrame()
 {
 	if (m_bRendering == true && m_width != 0 && m_height != 0)
 	{
+        // todo, after the renderable.cpp finished, make the egl_renderer did not have any call to glFOO, and remove the header file for GLES/gl.h
 		glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
