@@ -3,8 +3,8 @@
 
 #include "renderer.h"
 #include "android_platform.h"
+#include "type_defines.h"
 #include <EGL/egl.h>
-#include <GLES/gl.h>
 
 class EGLRenderer
 	: public Renderer

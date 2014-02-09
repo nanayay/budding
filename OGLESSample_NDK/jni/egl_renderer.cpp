@@ -30,7 +30,10 @@ void EGLRenderer::RenderFrame()
 {
 	if (m_bRendering == true && m_width != 0 && m_height != 0)
 	{
-        // todo, after the renderable.cpp finished, make the egl_renderer did not have any call to glFOO, and remove the header file for GLES/gl.h
+        //TODO, after the renderable.cpp finished, make the egl_renderer did not have any call to glFOO
+        // it looks hard, since where should we place the glClear*? another redundant build for frame or a class for clear pass
+        // clear pass looks like a good idea to separate egl and ogl
+        //TODO, just add new class for render_pass
 		glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -170,5 +173,4 @@ void EGLRenderer::Destroy()
     m_height = 0;
     m_bRendering = false;
     m_bInitialized = false;
-
 }
