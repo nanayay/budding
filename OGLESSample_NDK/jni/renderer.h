@@ -1,7 +1,6 @@
 #ifndef AY_RENDERER
 #define AY_RENDERER
 #include "task.h"
-#include "platform.h"
 
 class Renderer
 	: public Task
@@ -29,4 +28,5 @@ public:
 	bool isRendering() const { return this->m_bRendering; }
 	bool SetRendering(bool rendering) { this->m_bRendering = rendering; }
 };
+
 #endif
