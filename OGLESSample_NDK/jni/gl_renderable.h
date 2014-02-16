@@ -9,21 +9,22 @@ class GLSLShader
     : public Shader
 {
 public:
-    explicit GLSLShader(const std::string& vs_source, const std::string& fs_source, bool discard_shader_source = false);
+    explicit GLSLShader(const std::string* vs_source, const std::string* fs_source, bool init_deep_copy_shader_source_str = true);
     virtual ~GLSLShader();
 
 protected:
     virtual bool CompileAndLink();
     virtual bool Setup();
+    virtual bool UnSetup();
     virtual void Remove();
     virtual void DiscardShaderSource();
 
 private:
-    void LoadShader(GLuint shader_handle, std::string& shader_source);
+    void LoadShader(GLuint shader_handle, const std::string& shader_source);
 
 protected:
-    std::string* m_pVertexShaderSource;
-    std::string* m_pFragmentShaderSource;
+    const std::string* m_pVertexShaderSource;
+    const std::string* m_pFragmentShaderSource;
 
     GLuint m_vertexShaderId;
     GLuint m_fragmentShaderId;

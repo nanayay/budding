@@ -1,32 +1,29 @@
 #include "gl_renderable.h"
 
 
-GLSLShader::GLSLShader(const std::string& vs_source, const std::string& fs_source, bool discard_shader_source)
-    : Shader(discard_shader_source),
+GLSLShader::GLSLShader(const std::string* vs_source, const std::string* fs_source, bool init_deep_copy_shader_source_str)
+    : Shader(init_deep_copy_shader_source_str),
       m_vertexShaderId(0),
       m_fragmentShaderId(0),
-      m_programId(0),
-      m_pVertexShaderSource(new std::string(vs_source)),
-      m_pFragmentShaderSource(new std::string(fs_source))
+      m_programId(0)
 {
+    if (isInitDeepCopyShaderSourceStr() == true)
+    {
+        m_pVertexShaderSource = new std::string(*vs_source);
+        m_pFragmentShaderSource = new std::string(*fs_source);
+    }
+    else
+    {
+        m_pVertexShaderSource = vs_source;
+        m_pFragmentShaderSource = fs_source;
+    }
 }
 
 GLSLShader::~GLSLShader()
 {
-    Remove();
-
-    if (m_pVertexShaderSource)
-    {
-        delete m_pVertexShaderSource;
-    }
-
-    if (m_pFragmentShaderSource)
-    {
-        delete m_pFragmentShaderSource;
-    }
 }
 
-void GLSLShader::LoadShader(GLuint shader_handle, std::string& shader_source)
+void GLSLShader::LoadShader(GLuint shader_handle, const std::string& shader_source)
 {
    const unsigned int NUM_SHADERS = 1;
    const GLchar* pSourceCode = shader_source.c_str();
@@ -52,8 +49,8 @@ bool GLSLShader::CompileAndLink()
 
     glLinkProgram(m_programId);
 
-    //TODO, add glerror check for return value
-    //maybe a class for glutil?
+    //TODO, add GL_ERROR check for return value
+    //maybe a class for GL_Utility?
 
     return result;
 }
@@ -64,12 +61,15 @@ bool GLSLShader::Setup()
 
     glUseProgram(m_programId);
 
-    //TODO, add glerror check for return value
-    //maybe a class for glutil?
+    //TODO, add GL_ERROR check for return value
+    //maybe a class for GL_Utility?
 
     return result;
 }
 
+bool GLSLShader::UnSetup()
+{
+}
 
 
 void GLSLShader::Remove()
@@ -79,7 +79,7 @@ void GLSLShader::Remove()
 
 void GLSLShader::DiscardShaderSource()
 {
-    if (isShaderSourceDiscardable() == true)
+    if (isInitDeepCopyShaderSourceStr() == true)
     {
         if (m_pVertexShaderSource)
         {
