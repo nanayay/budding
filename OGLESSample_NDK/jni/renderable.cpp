@@ -9,12 +9,15 @@ Shader::Shader(bool init_deep_copy_shader_source_str)
 
 Shader::~Shader()
 {
+    // Notice, destructor can not call any kind of pure virtual function, and better not call virtual function
+    /*
     if (isInitDeepCopyShaderSourceStr() == true)
     {
         DiscardShaderSource();
     }
 
     Remove();
+    */
 }
 
 bool Shader::Create()

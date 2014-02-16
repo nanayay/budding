@@ -21,6 +21,12 @@ GLSLShader::GLSLShader(const std::string* vs_source, const std::string* fs_sourc
 
 GLSLShader::~GLSLShader()
 {
+    if (isInitDeepCopyShaderSourceStr() == true)
+    {
+        DiscardShaderSource();
+    }
+
+    Remove();
 }
 
 void GLSLShader::LoadShader(GLuint shader_handle, const std::string& shader_source)
