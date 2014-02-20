@@ -51,7 +51,7 @@ protected:
 class Geometry
 {
 public:
-    Geometry(const std::string& name, unsigned int vertex_number, unsigned int index_number, size_t one_vertex_size, size_t one_index_size, size_t vertex_stride, const void* vertex_buffer_data, const void* index_buffer_data);
+    Geometry(const std::string& name, unsigned int vertex_number, unsigned int index_number, size_t one_vertex_size, size_t one_index_size, size_t vertex_stride, const void* vertex_buffer_data, const void* index_buffer_data, unsigned int va_position_elem_num = 4);
     virtual ~Geometry();
 
     // Always do Shallow copy, never Deep copy for saving memory for saving memory footprint
@@ -69,12 +69,6 @@ public:
     unsigned int getNumVAPositionElements() const { return m_numVAPositionElements; }
     void setNumVAPositionElements(unsigned int num) { m_numVAPositionElements = num; }
 
-    unsigned int getNumVAColorElements() const { return m_numVAColorElements; }
-    void setNumVAColorElements(unsigned int num) { m_numVAColorElements = num; }
-
-    unsigned int getNumVATexCoordElements() const { return m_numVATexCoordElements; }
-    void setNumVATexCoordElements(unsigned int num) { m_numVATexCoordElements = num; }
-
 private:
     std::string m_name;
     unsigned int m_numVertices;
@@ -87,8 +81,6 @@ private:
 
     // VA means Vertex Attribute
     unsigned int m_numVAPositionElements;
-    unsigned int m_numVAColorElements;
-    unsigned int m_numVATexCoordElements;
 
 };
 

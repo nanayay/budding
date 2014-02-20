@@ -55,7 +55,7 @@ bool Shader::Disable()
     return result;
 }
 
-Geometry::Geometry(const std::string& name, unsigned int vertex_number, unsigned int index_number, size_t one_vertex_size, size_t one_index_size, size_t vertex_stride, const void* vertex_buffer_data, const void* index_buffer_data)
+Geometry::Geometry(const std::string& name, unsigned int vertex_number, unsigned int index_number, size_t one_vertex_size, size_t one_index_size, size_t vertex_stride, const void* vertex_buffer_data, const void* index_buffer_data, unsigned int va_position_elem_num)
     : m_name(name),
       m_numVertices(vertex_number),
       m_numIndices(index_number),
@@ -64,9 +64,7 @@ Geometry::Geometry(const std::string& name, unsigned int vertex_number, unsigned
       m_vertexStride(vertex_stride),
       m_pVertices(vertex_buffer_data),
       m_pIndices(index_buffer_data),
-      m_numVAPositionElements(0),
-      m_numVAColorElements(0),
-      m_numVATexCoordElements(0)
+      m_numVAPositionElements(va_position_elem_num)
 {
 }
 
