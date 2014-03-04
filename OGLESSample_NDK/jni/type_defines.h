@@ -10,6 +10,7 @@
         #include <GLES/gl.h>
     #endif
     typedef long long TimeUnit;
+    typedef unsigned char BYTE;
 
 #elif defined(_WIN32) || defined(_WIN64)
     #error "NOT IMPLEMENT YET"
