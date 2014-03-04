@@ -30,12 +30,12 @@ void EGLRenderer::RenderFrame()
 {
 	if (m_bRendering == true && m_width != 0 && m_height != 0)
 	{
-        //TODO, no need to add new Render_Pass class for glClear calls, just add a special empty GL_Renderable to the first of m_renderables, which may called GL_ClearRenderable, which call glClear in its Draw() function
+        //TODO, no need to add new Render_Pass class for glClear calls, just add a special empty GLRenderable to the first of m_renderables, which may called GL_ClearRenderable, which call glClear in its Draw() function
 		glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// draw calls begin
-        for (std::vector<GL_Renderable>::iterator i = m_renderables.begin(); i != m_renderables.end(); ++i)
+        for (std::vector<GLRenderable>::iterator i = m_renderables.begin(); i != m_renderables.end(); ++i)
         {
             i->Draw();
         }
@@ -153,24 +153,24 @@ void EGLRenderer::Init()
 	}
     LOGD("Init EGL end");
 
-    LOGD("Init GL_Renderable begin");
-    for (std::vector<GL_Renderable>::iterator i = m_renderables.begin(); i != m_renderables.end(); ++i)
+    LOGD("Init GLRenderable begin");
+    for (std::vector<GLRenderable>::iterator i = m_renderables.begin(); i != m_renderables.end(); ++i)
     {
         i->Init();
     }
-    LOGD("Init GL_Renderable end");
+    LOGD("Init GLRenderable end");
 
 	LOGD("EGLRenderer Init() end");
 }
 
 void EGLRenderer::Destroy()
 {
-    LOGD("Destroy GL_Renderable begin");
-    for (std::vector<GL_Renderable>::iterator i = m_renderables.begin(); i != m_renderables.end(); ++i)
+    LOGD("Destroy GLRenderable begin");
+    for (std::vector<GLRenderable>::iterator i = m_renderables.begin(); i != m_renderables.end(); ++i)
     {
         i->Destroy();
     }
-    LOGD("Destroy GL_Renderable begin");
+    LOGD("Destroy GLRenderable begin");
 
     if (m_display != EGL_NO_DISPLAY)
     {

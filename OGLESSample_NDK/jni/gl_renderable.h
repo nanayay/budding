@@ -85,14 +85,14 @@ private:
     GLvoid* m_IAPointerOrOffset;
 };
 
-class GL_Renderable
+class GLRenderable
 {
 public:
-    explicit GL_Renderable(std::string name)
+    explicit GLRenderable(std::string name)
     {
         m_pGeometry = new Geometry<GLMesh, GLSLShader, GLInputVertexAttribute>(name);
     }
-    virtual ~GL_Renderable()
+    virtual ~GLRenderable()
     {
         delete m_pGeometry;
     }
