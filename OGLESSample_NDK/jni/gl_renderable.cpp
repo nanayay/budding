@@ -129,7 +129,6 @@ bool GLInputVertexAttribute::Setup(GLSLShader* shader)
 {
     bool result = false;
 
-    // TODO
     if (shader->isCreateOK() && shader->isEnableOK())
     {
         glVertexAttribPointer(m_IAHandle, m_IAElementNum, m_IAType, m_IANormalized, m_IAStride, m_IAPointerOrOffset);
