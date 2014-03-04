@@ -88,24 +88,30 @@ private:
 class GL_Renderable
 {
 public:
-    GL_Renderable();
-    virtual ~GL_Renderable();
+    explicit GL_Renderable(std::string name)
+    {
+        m_pGeometry = new Geometry<GLMesh, GLSLShader, GLInputVertexAttribute>(name);
+    }
+    virtual ~GL_Renderable()
+    {
+        delete m_pGeometry;
+    }
+
+    // getter
+    Geometry<GLMesh, GLSLShader, GLInputVertexAttribute>* getGeometry() const { return m_pGeometry; }
+
+    bool Init();
+    bool Draw();
+    bool Destroy();
 
 private:
-    Geometry<GLMesh, GLSLShader, GLInputVertexAttribute> m_pGeometry;
-
-    // TODO OGL Render-able
+    Geometry<GLMesh, GLSLShader, GLInputVertexAttribute>* m_pGeometry;
 
 };
 
-class GL_RenderPass
-{
-public:
-    GL_RenderPass();
-    virtual ~GL_RenderPass();
-
-    // TODO Render Pass
-
-};
+// TODO
+// - Render Pass class
+// - Scene class
+// - 
 
 #endif

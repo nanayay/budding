@@ -1,10 +1,12 @@
 #ifndef EGL_RENDERER
 #define EGL_RENDERER
 
+#include <EGL/egl.h>
+
 #include "renderer.h"
 #include "android_platform.h"
 #include "type_defines.h"
-#include <EGL/egl.h>
+#include "gl_renderable.h"
 
 class EGLRenderer
 	: public Renderer
@@ -18,6 +20,9 @@ private:
 	EGLint m_height;
 
 	android_app* m_pState;
+
+	// TODO, add some logic to feed the GL_Renderable
+	std::vector<GL_Renderable> m_renderables;
 
 public:
 	explicit EGLRenderer(android_app* state, unsigned int priority = Task::Priority::Normal);

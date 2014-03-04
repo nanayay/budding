@@ -30,14 +30,15 @@ void EGLRenderer::RenderFrame()
 {
 	if (m_bRendering == true && m_width != 0 && m_height != 0)
 	{
-        //TODO, after the renderable.cpp finished, make the egl_renderer did not have any call to glFOO
-        // it looks hard, since where should we place the glClear*? another redundant build for frame or a class for clear pass
-        // clear pass looks like a good idea to separate egl and ogl
-        //TODO, just add new class for render_pass
+        //TODO, no need to add new Render_Pass class for glClear calls, just add a special empty GL_Renderable to the first of m_renderables, which may called GL_ClearRenderable, which call glClear in its Draw() function
 		glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// draw calls begin
+        for (std::vector<GL_Renderable>::iterator i = m_renderables.begin(); i != m_renderables.end(); ++i)
+        {
+            i->Draw();
+        }
 		// draw calls end
 
 		eglSwapBuffers(m_display, m_renderSurface);
@@ -53,6 +54,8 @@ void EGLRenderer::Init()
 	}
 
 	LOGD("EGLRenderer Init() begin");
+
+    LOGD("Init EGL begin");
 	if (m_display == EGL_NO_DISPLAY)
 	{
 		m_display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -148,11 +151,27 @@ void EGLRenderer::Init()
         m_bRendering = true;
         LOGD("EGLRenderer set m_bInitialized and m_bRendering be true");
 	}
+    LOGD("Init EGL end");
+
+    LOGD("Init GL_Renderable begin");
+    for (std::vector<GL_Renderable>::iterator i = m_renderables.begin(); i != m_renderables.end(); ++i)
+    {
+        i->Init();
+    }
+    LOGD("Init GL_Renderable end");
+
 	LOGD("EGLRenderer Init() end");
 }
 
 void EGLRenderer::Destroy()
 {
+    LOGD("Destroy GL_Renderable begin");
+    for (std::vector<GL_Renderable>::iterator i = m_renderables.begin(); i != m_renderables.end(); ++i)
+    {
+        i->Destroy();
+    }
+    LOGD("Destroy GL_Renderable begin");
+
     if (m_display != EGL_NO_DISPLAY)
     {
         eglMakeCurrent(m_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
