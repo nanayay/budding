@@ -29,6 +29,15 @@ GLSLShader::~GLSLShader()
     Remove();
 }
 
+GLuint GLSLShader::getProgramHandle() const
+{
+    if (isCreateOK() == true)
+    {
+        return m_programId;
+    }
+    return -1;
+}
+
 void GLSLShader::LoadShader(GLuint shader_handle, const std::string& shader_source)
 {
    const unsigned int NUM_SHADERS = 1;
@@ -75,6 +84,9 @@ bool GLSLShader::Setup()
 
 bool GLSLShader::UnSetup()
 {
+    GLuint m_Invalid_Program = 0;
+    glUseProgram(m_Invalid_Program);
+    return true;
 }
 
 
@@ -98,4 +110,31 @@ void GLSLShader::DiscardShaderSource()
             m_pFragmentShaderSource = NULL;
         }
     }
+}
+
+bool GLInputVertexAttribute::Init(GLSLShader* shader)
+{
+    bool result = false;
+
+    if (shader->isCreateOK())
+    {
+        m_IAHandle = glGetAttribLocation(shader->getProgramHandle(), m_InputVertexAttributeName.c_str());
+        result = m_IAHandle != -1 ? true : false;
+    }
+
+    return result;
+}
+
+bool GLInputVertexAttribute::Setup(GLSLShader* shader)
+{
+    bool result = false;
+
+    // TODO
+    if (shader->isCreateOK() && shader->isEnableOK())
+    {
+        glVertexAttribPointer(m_IAHandle, m_IAElementNum, m_IAType, m_IANormalized, m_IAStride, m_IAPointerOrOffset);
+        glEnableVertexAttribArray(m_IAHandle);
+        result = true;
+    }
+    return result;
 }

@@ -12,6 +12,8 @@ public:
     explicit GLSLShader(const std::string* vs_source, const std::string* fs_source, bool init_deep_copy_shader_source_str = true);
     virtual ~GLSLShader();
 
+    GLuint getProgramHandle() const;
+
 protected:
     virtual bool CompileAndLink();
     virtual bool Setup();
@@ -31,6 +33,58 @@ protected:
     GLuint m_programId;
 };
 
+class GLMesh
+    : public MeshRawData
+{
+public:
+    GLMesh();
+    virtual ~GLMesh();
+
+protected:
+
+private:
+
+};
+
+class GLInputVertexAttribute
+    : public InputVertexAttribute
+{
+public:
+    GLInputVertexAttribute(std::string name)
+        : InputVertexAttribute(name),
+          m_IAHandle(-1),
+          m_IAElementNum(4),
+          m_IAType(GL_FLOAT),
+          m_IANormalized(GL_FALSE),
+          m_IAStride(0),
+          m_IAPointerOrOffset(0) 
+    {};
+    virtual ~GLInputVertexAttribute();
+
+    bool Init(GLSLShader* shader);
+    bool Setup(GLSLShader* shader);
+
+    // getter
+    GLuint getHandle() const { return m_IAHandle; }
+
+    // setter
+    void setElementNum(GLint val) { m_IAElementNum = val; };
+    void setType(GLenum val) { m_IAType = val; }
+    void setNormalized(GLboolean val) { m_IANormalized = val; };
+    void setStride(GLsizei val) { m_IAStride = val; }
+    void setPointerOrOffset(GLvoid* val) { m_IAPointerOrOffset = val; } 
+
+
+private:
+    GLuint m_IAHandle;
+
+    GLint m_IAElementNum;
+    GLenum m_IAType;
+    GLboolean m_IANormalized;
+    GLsizei m_IAStride;
+    GLvoid* m_IAPointerOrOffset;
+};
+
 class GL_Renderable
 {
 public:
@@ -38,8 +92,9 @@ public:
     virtual ~GL_Renderable();
 
 private:
-    GLSLShader* m_pShader;
-    Geometry* m_pGeometry;
+    Geometry<GLMesh, GLSLShader, GLInputVertexAttribute> m_pGeometry;
+
+    // TODO OGL Render-able
 
 };
 
@@ -48,6 +103,8 @@ class GL_RenderPass
 public:
     GL_RenderPass();
     virtual ~GL_RenderPass();
+
+    // TODO Render Pass
 
 };
 

@@ -2,6 +2,8 @@
 #define AY_RENDERABLE
 
 #include <string>
+#include <vector>
+#include <algorithm>
 
 class Shader
 {
@@ -48,39 +50,120 @@ protected:
 
 };
 
+class InputVertexAttribute
+{
+public:
+    explicit InputVertexAttribute(std::string name);
+    virtual ~InputVertexAttribute();
+
+    std::string getName() const { return m_InputVertexAttributeName; }
+
+    bool operator==(const InputVertexAttribute& val) const { return m_InputVertexAttributeName == val.getName(); }
+    bool operator()(const InputVertexAttribute* val) const
+    {
+        return m_InputVertexAttributeName == val->getName();
+    }
+
+protected:
+    std::string m_InputVertexAttributeName;
+
+};
+
+class MeshRawData
+{
+public:
+    MeshRawData();
+    virtual ~MeshRawData();
+
+    // Always do Shallow copy, never Deep copy for saving memory footprint
+    bool isDeepCopyData() const { return false; }
+
+    // necessary information
+    void*  getVertexDataPointer() const { return m_pVerticesDataPointer; }
+    size_t getVertexDataSizeInByte() const { return m_sizeOfVerticesData; }
+    void*  getIndexDataPointer() const { return m_pIndicesDataPointer; }
+    size_t getIndexDataSizeInByte() const { return m_sizeOfIndicesData; }
+
+    // maybe redundant information
+    unsigned int getNumOfVertices() const { return m_numOfVertices; }
+    unsigned int getNumOfIndices() const { return m_numOfIndices; }
+    size_t getOneVertexSizeInByte() const { return m_sizeofOneVertexInByte; }
+    size_t getOneIndexSizeInByte() const { return m_sizeofOneIndexInByte; }
+
+    // necessary information
+    void  setVertexDataPointer(void* p) { m_pVerticesDataPointer = p; }
+    void  setVertexDataSizeInByte(size_t s) { m_sizeOfVerticesData = s; }
+    void  setIndexDataPointer(void* p) { m_pIndicesDataPointer = p; }
+    void  setIndexDataSizeInByte(size_t s) { m_sizeOfIndicesData = s; }
+
+    // maybe redundant information
+    void setNumOfVertices(unsigned int num) { m_numOfVertices = num; }
+    void setNumOfIndices(unsigned int num) { m_numOfIndices = num; }
+    void setOneVertexSizeInByte(size_t size) { m_sizeofOneVertexInByte = size; }
+    void setOneIndexSizeInByte(size_t size) { m_sizeofOneIndexInByte = size; }
+
+private:
+    // necessary information
+    void* m_pVerticesDataPointer;
+    size_t m_sizeOfVerticesData;
+
+    void* m_pIndicesDataPointer;
+    size_t m_sizeOfIndicesData;
+
+    // maybe redundant information
+    unsigned int m_numOfVertices;
+    unsigned int m_numOfIndices;
+    size_t m_sizeofOneVertexInByte;
+    size_t m_sizeofOneIndexInByte;
+
+public:
+    //friend class Geometry;
+    // TODO Question? friend of is only for Geometry or about Geometry's subclass?
+    // TODO What about when Geometry is a template class?
+};
+
+// Geometry is more like a container than a normal class object, use template to hold the shader, input vertex attribute, mesh data for general manager
+template <typename MESH, typename SHADER, typename INPUTATTRIBUTE>
 class Geometry
 {
 public:
-    Geometry(const std::string& name, unsigned int vertex_number, unsigned int index_number, size_t one_vertex_size, size_t one_index_size, size_t vertex_stride, const void* vertex_buffer_data, const void* index_buffer_data, unsigned int va_position_elem_num = 4);
-    virtual ~Geometry();
+    explicit Geometry(const std::string& name) : m_name(name) {};
+    virtual ~Geometry() {};
+
+    std::string getName() const { return m_name; }
 
     // Always do Shallow copy, never Deep copy for saving memory for saving memory footprint
     bool isDeepCopyData() { return false; }
 
-    std::string getName() const { return m_name; }
-    unsigned int getNumVertices() const { return m_numVertices; }
-    unsigned int getNumIndices() const { return m_numIndices; }
-    size_t getOneVertexSizeInByte() const { return m_sizeOneVertexInByte; }
-    size_t getOneIndexSizeInByte() const { return m_sizeOneIndexInByte; }
-    size_t getVertexStride() const { return m_vertexStride; }
-    const void* getVertexBufferData() const { return m_pVertices; }
-    const void* getIndexBufferData() const { return m_pIndices; }
+    // getter
+    MESH* getMesh() const { return m_pMesh; }
+    SHADER* getShader() const { return m_pShader; }
+    std::vector<INPUTATTRIBUTE*> getAllInputVertexAttributes() const { return m_inputVertexAttributesVector; }
+    INPUTATTRIBUTE* getInputVertexAttribute(std::string name) const
+    {
+        // vector will hold the pointer to IVA, hence you can not use find for the pointer, but only find_if for some user-defined pointer reference
+        typename std::vector<INPUTATTRIBUTE*>::const_iterator i = std::find_if(m_inputVertexAttributesVector.begin(), m_inputVertexAttributesVector.end(), INPUTATTRIBUTE(name));
+        return i != m_inputVertexAttributesVector.end() ? *i : NULL;
+    }
 
-    unsigned int getNumVAPositionElements() const { return m_numVAPositionElements; }
-    void setNumVAPositionElements(unsigned int num) { m_numVAPositionElements = num; }
+    // setter
+    void setMesh(MESH* val) { m_pMesh = val; }
+    void setShader(SHADER* val) { m_pShader = val; }
+    void setAllInputVertexAttributes(std::vector<INPUTATTRIBUTE*> val) { m_inputVertexAttributesVector = val; }
+    void setInputVertexAttribute(INPUTATTRIBUTE* val)
+    {
+        typename std::vector<INPUTATTRIBUTE*>::iterator last = std::remove_if(m_inputVertexAttributesVector.begin(), m_inputVertexAttributesVector.end(), *val);
+        m_inputVertexAttributesVector.erase(last, m_inputVertexAttributesVector.end());
+        m_inputVertexAttributesVector.push_back(val);
+    }
 
 private:
     std::string m_name;
-    unsigned int m_numVertices;
-    unsigned int m_numIndices;
-    size_t m_sizeOneVertexInByte;
-    size_t m_sizeOneIndexInByte;
-    size_t m_vertexStride;
-    const void* m_pVertices;
-    const void* m_pIndices;
 
-    // VA means Vertex Attribute
-    unsigned int m_numVAPositionElements;
+private:
+    MESH*   m_pMesh;
+    SHADER* m_pShader;
+    std::vector<INPUTATTRIBUTE*> m_inputVertexAttributesVector;
 
 };
 
