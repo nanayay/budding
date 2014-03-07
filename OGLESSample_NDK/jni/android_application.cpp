@@ -38,6 +38,10 @@ void AndroidApplication::Run()
 
 bool AndroidApplication::AddTasks()
 {
+    // TODO Here, feed the renderer
+
+
+
     LOGD("EGLRenderer create and add to kernel begin");
     Renderer* pEGLRenderer = new EGLRenderer(m_pState);
     Kernel::GetSingleton().AddTask(pEGLRenderer);
