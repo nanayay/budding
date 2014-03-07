@@ -115,10 +115,6 @@ void EGLRenderer::Init()
         LOGD("EGL Max Swap Interval is %d", max_swap_interval);
         LOGD("EGL Min Swap Interval is %d", min_swap_interval);
 
-        // try to disable vsync
-        res = eglSwapInterval(m_display, 0);
-        assert(res);
-
 		int32_t setBufRes = ANativeWindow_setBuffersGeometry(m_pState->window, 0, 0, format);
 		assert(setBufRes == 0);
 
@@ -143,6 +139,11 @@ void EGLRenderer::Init()
         res = eglQuerySurface(m_display, m_renderSurface, EGL_HEIGHT, &m_height);
         assert(res);
         LOGD("EGLRenderer eglQuerySurface() success, m_height is %d", m_height);
+
+        // try to disable vsync
+        res = eglSwapInterval(m_display, 0);
+        assert(res);
+        LOGD("EGLRenderer eglSwapInterval to disable vsync success");
 	}
     LOGD("Init EGL end");
 
