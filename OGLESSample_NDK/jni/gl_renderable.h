@@ -129,6 +129,52 @@ private:
 
 };
 
+class GLClearRenderable
+    : public Renderable
+{
+public:
+    GLClearRenderable();
+    virtual ~GLClearRenderable() {};
+
+    virtual bool Init();
+    virtual bool Draw();
+    virtual bool Destroy();
+
+    // setter
+    void setClearColorRGB(float r, float g, float b, float a)
+    {
+        m_fClearColorRed = r;
+        m_fClearColorGreen = g;
+        m_fClearColorBlue = b;
+        m_fClearColorAlpha = a;
+    }
+
+    void setClearDepth(float d)
+    {
+        m_fClearDepth = d;
+    }
+
+    void setClearStencil(int s)
+    {
+        m_iClearStencil = s;
+    }
+
+    void setClearFlag(bool color, bool depth, bool stencil)
+    {
+        m_bIsClearColor = color;
+        m_bIsClearDepth = depth;
+        m_bIsClearStencil = stencil;
+    }
+
+private:
+    float m_fClearColorRed, m_fClearColorGreen, m_fClearColorBlue, m_fClearColorAlpha;
+    float m_fClearDepth;
+    int m_iClearStencil;
+
+    bool m_bIsClearColor, m_bIsClearDepth, m_bIsClearStencil;
+
+};
+
 // TODO
 // - Render Pass class
 //     - 

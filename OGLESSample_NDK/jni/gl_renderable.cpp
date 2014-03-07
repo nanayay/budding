@@ -291,3 +291,47 @@ bool GLRenderable::Destroy()
     }
     return true;
 }
+
+GLClearRenderable::GLClearRenderable()
+    : m_fClearColorRed(1.0),
+      m_fClearColorGreen(1.0),
+      m_fClearColorBlue(1.0),
+      m_fClearColorAlpha(1.0),
+      m_fClearDepth(1.0),
+      m_iClearStencil(0),
+      m_bIsClearColor(true),
+      m_bIsClearDepth(true),
+      m_bIsClearStencil(false)
+{
+}
+
+bool GLClearRenderable::Init()
+{
+    return true;
+}
+
+bool GLClearRenderable::Draw()
+{
+    GLbitfield mask = 0;
+    if (m_bIsClearColor)
+    {
+        mask |= GL_COLOR_BUFFER_BIT;
+    }
+    if (m_bIsClearDepth)
+    {
+        mask |= GL_DEPTH_BUFFER_BIT;
+    }
+    if (m_bIsClearStencil)
+    {
+        mask |= GL_STENCIL_BUFFER_BIT;
+    }
+
+    glClearColor(m_fClearColorRed, m_fClearColorGreen, m_fClearColorBlue, m_fClearColorAlpha);
+    glClear(mask);
+    return true;
+}
+
+bool GLClearRenderable::Destroy()
+{
+    return true;
+}
