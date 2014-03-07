@@ -1,30 +1,51 @@
 #include "renderable.h"
 
+bool ElementOfRenderable::Create()
+{
+    if (isCreateOK() == false)
+    {
+        bool result = false;
+        // Do what you have to do, and,
+        // Set result to true or false
+        m_bIsCreateOK = result;
+    }
+    return isCreateOK();
+}
+
+bool ElementOfRenderable::Enable()
+{
+    bool result = false;
+    // Do what you have to do, and,
+    // Set result to true or false
+    m_bIsEnableOK = result;
+    return isEnableOK();
+}
+
+bool ElementOfRenderable::Disable()
+{
+    bool result = true;
+    // Do what you have to do, and,
+    // Set result to true or false
+    m_bIsEnableOK = !result;
+    return result;
+}
+
 Shader::Shader(bool init_deep_copy_shader_source_str)
-    :m_isInitDeepCopyShaderSourceStr(init_deep_copy_shader_source_str),
-     m_isShaderCreateOK(false),
-     m_isShaderEnableOK(false)
+    :m_isInitDeepCopyShaderSourceStr(init_deep_copy_shader_source_str)
 {
 }
 
 Shader::~Shader()
 {
     // Notice, destructor can not call any kind of pure virtual function, and better not call virtual function
-    /*
-    if (isInitDeepCopyShaderSourceStr() == true)
-    {
-        DiscardShaderSource();
-    }
-
-    Remove();
-    */
 }
 
 bool Shader::Create()
 {
     if (isCreateOK() == false)
     {
-        bool result = CompileAndLink();
+        bool result = false;
+        result = CompileAndLink();
         if (isInitDeepCopyShaderSourceStr() == true)
         {
             if (result == true)
@@ -37,20 +58,20 @@ bool Shader::Create()
                 // Here discard shader source is the de-constructor's job
             }
         }
-        m_isShaderCreateOK = result;
+        m_bIsCreateOK = result;
     }
     return isCreateOK();
 }
 
 bool Shader::Enable()
 {
-    m_isShaderEnableOK = Setup();
+    m_bIsEnableOK = Setup();
     return isEnableOK();
 }
 
 bool Shader::Disable()
 {
     bool result = UnSetup();
-    m_isShaderEnableOK = !result;
+    m_bIsEnableOK = !result;
     return result;
 }

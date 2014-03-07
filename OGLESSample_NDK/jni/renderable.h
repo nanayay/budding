@@ -5,26 +5,66 @@
 #include <vector>
 #include <algorithm>
 
+// Renderable's element have same interfaces: Create(), Enable(), Disable()
+// Renderable have same interfaces: Init(), Draw(), Destroy()
+
+// Interface
+class Renderable
+{
+public:
+    Renderable() {};
+    virtual ~Renderable() {};
+
+    virtual bool Init() = 0;
+    virtual bool Draw() = 0;
+    virtual bool Destroy() = 0;
+
+};
+
+class ElementOfRenderable
+{
+public:
+    explicit ElementOfRenderable(Renderable* val = NULL)
+        : m_pRenderable(val),
+          m_bIsCreateOK(false),
+          m_bIsEnableOK(false)
+    {};
+    virtual ~ElementOfRenderable() {};
+
+    virtual bool Create() = 0;
+    virtual bool Enable() = 0;
+    virtual bool Disable() = 0;
+
+    // getter
+    bool isCreateOK() const { return m_bIsCreateOK; }
+    bool isEnableOK() const { return m_bIsEnableOK; }
+
+protected:
+    // setter and getter
+    Renderable* getRenderable() const { return m_pRenderable; }
+    void setRenderable(Renderable* val) { m_pRenderable = val; }
+
+protected:
+    Renderable* m_pRenderable;
+    bool m_bIsCreateOK;
+    bool m_bIsEnableOK;
+
+};
+
+// Class
 class Shader
+    : public ElementOfRenderable
 {
 public:
     explicit Shader(bool init_deep_copy_shader_source_str = true);
     virtual ~Shader();
 
-    // Create() not allow force re-create smoothly built shader, that is, if the shader already compile and link smoothly and OK, there should be no way for user to re-build this;
-    // If the shader is error and compile and link error, User can re-create the shader, you can re-call Create(), but it is better to assert and stop program for some debug
-    bool Create();
-
-    // Enable() allow user to re-enable the shader, for different render pass
-    bool Enable();
-
-    // Disable() allow user to disable or un-setup the shader, for something need to be un-setup from pipeline
-    bool Disable();
+    virtual bool Create();
+    virtual bool Enable();
+    virtual bool Disable();
 
 public:
     bool isInitDeepCopyShaderSourceStr() const { return m_isInitDeepCopyShaderSourceStr; }
-    bool isCreateOK() const { return m_isShaderCreateOK; }
-    bool isEnableOK() const { return m_isShaderEnableOK; }
 
 protected:
     // Build shader source code
@@ -45,16 +85,15 @@ protected:
 
 protected:
     bool m_isInitDeepCopyShaderSourceStr;
-    bool m_isShaderCreateOK;
-    bool m_isShaderEnableOK;
 
 };
 
 class InputVertexAttribute
+    : public ElementOfRenderable
 {
 public:
-    explicit InputVertexAttribute(std::string name);
-    virtual ~InputVertexAttribute();
+    explicit InputVertexAttribute(std::string name) {};
+    virtual ~InputVertexAttribute() {};
 
     std::string getName() const { return m_InputVertexAttributeName; }
 
@@ -66,14 +105,14 @@ public:
 
 protected:
     std::string m_InputVertexAttributeName;
-
 };
 
 class MeshRawData
+    : public ElementOfRenderable
 {
 public:
-    MeshRawData();
-    virtual ~MeshRawData();
+    MeshRawData() {};
+    virtual ~MeshRawData() {};
 
     // Always do Shallow copy, never Deep copy for saving memory footprint
     bool isDeepCopyData() const { return false; }
