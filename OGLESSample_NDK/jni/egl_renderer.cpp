@@ -26,20 +26,17 @@ EGLRenderer::EGLRenderer(AndroidPlatform* pPlatform, unsigned int priority)
 
 EGLRenderer::~EGLRenderer() {}
 
+// TODO, try to have a class to feed the GLRenderable in EGLRenderer
+
 void EGLRenderer::RenderFrame()
 {
-	if (m_bRendering == true && m_width != 0 && m_height != 0)
+	if ( m_bInitialized == true && m_bRendering == true && m_width != 0 && m_height != 0)
 	{
-        //TODO, no need to add new Render_Pass class for glClear calls, just add a special empty GLRenderable to the first of m_renderables, which may called GL_ClearRenderable, which call glClear in its Draw() function
+        //TODO, no need to add new Render_Pass class for glClear calls, just add a special empty GLRenderable to the first of m_pRenderables, which may called GL_ClearRenderable, which call glClear in its Draw() function
 		glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// draw calls begin
-        for (std::vector<GLRenderable>::iterator i = m_renderables.begin(); i != m_renderables.end(); ++i)
-        {
-            i->Draw();
-        }
-		// draw calls end
+        Renderer::RenderFrame();
 
 		eglSwapBuffers(m_display, m_renderSurface);
 	}
@@ -146,31 +143,21 @@ void EGLRenderer::Init()
         res = eglQuerySurface(m_display, m_renderSurface, EGL_HEIGHT, &m_height);
         assert(res);
         LOGD("EGLRenderer eglQuerySurface() success, m_height is %d", m_height);
-
-        m_bInitialized = true;
-        m_bRendering = true;
-        LOGD("EGLRenderer set m_bInitialized and m_bRendering be true");
 	}
     LOGD("Init EGL end");
 
-    LOGD("Init GLRenderable begin");
-    for (std::vector<GLRenderable>::iterator i = m_renderables.begin(); i != m_renderables.end(); ++i)
-    {
-        i->Init();
-    }
-    LOGD("Init GLRenderable end");
+    LOGD("super class Renderer::Init() begin");
+    Renderer::Init();
+    LOGD("super class Renderer::Init() end");
 
 	LOGD("EGLRenderer Init() end");
 }
 
 void EGLRenderer::Destroy()
 {
-    LOGD("Destroy GLRenderable begin");
-    for (std::vector<GLRenderable>::iterator i = m_renderables.begin(); i != m_renderables.end(); ++i)
-    {
-        i->Destroy();
-    }
-    LOGD("Destroy GLRenderable begin");
+    LOGD("super class Renderer::Destroy() begin");
+    Renderer::Destroy();
+    LOGD("super class Renderer::Destroy() end");
 
     if (m_display != EGL_NO_DISPLAY)
     {
@@ -190,6 +177,5 @@ void EGLRenderer::Destroy()
     m_renderSurface = EGL_NO_SURFACE;
     m_width = 0;
     m_height = 0;
-    m_bRendering = false;
-    m_bInitialized = false;
+
 }

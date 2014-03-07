@@ -1,6 +1,8 @@
 #ifndef AY_RENDERER
 #define AY_RENDERER
+#include <vector>
 #include "task.h"
+#include "renderable.h"
 
 class Renderer
 	: public Task
@@ -8,6 +10,13 @@ class Renderer
 protected:
 	bool m_bInitialized;
 	bool m_bRendering;
+
+	std::vector<Renderable*> * m_pRenderables;
+
+public:
+	// setter and getter
+	std::vector<Renderable*> * getRenderablsVectorPointer() const { return m_pRenderables; }
+	void setRenderablesVectorPointer(std::vector<Renderable*> * val) { m_pRenderables = val; }
 
 public:
 	virtual void RenderFrame() = 0;

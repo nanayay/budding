@@ -21,9 +21,6 @@ private:
 
 	android_app* m_pState;
 
-	// TODO, add some logic to feed the GLRenderable
-	std::vector<GLRenderable> m_renderables;
-
 public:
 	explicit EGLRenderer(android_app* state, unsigned int priority = Task::Priority::Normal);
 	explicit EGLRenderer(AndroidPlatform* pPlatform, unsigned int priority = Task::Priority::Normal);

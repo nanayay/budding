@@ -44,3 +44,38 @@ void Renderer::Stop()
 	this->m_bInitialized = false;
 	this->Destroy();
 }
+
+void Renderer::RenderFrame()
+{
+	if ( m_bInitialized == true && m_bRendering == true )
+	{
+		for (std::vector<Renderable*>::iterator i = m_pRenderables->begin(); i != m_pRenderables->end(); ++i)
+		{
+			(*i)->Draw();
+		}
+	}
+}
+
+void Renderer::Init()
+{
+	if (m_bInitialized == false)
+	{
+		for (std::vector<Renderable*>::iterator i = m_pRenderables->begin(); i != m_pRenderables->end(); ++i)
+		{
+			(*i)->Init();
+		}
+
+		m_bInitialized = true;
+		m_bRendering = true;
+	}
+}
+
+void Renderer::Destroy()
+{
+	for (std::vector<Renderable*>::iterator i = m_pRenderables->begin(); i != m_pRenderables->end(); ++i)
+	{
+		(*i)->Destroy();
+	}
+	m_bRendering = false;
+	m_bInitialized = false;
+}
