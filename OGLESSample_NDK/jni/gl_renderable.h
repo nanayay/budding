@@ -5,11 +5,43 @@
 #include "type_defines.h"
 #include "renderable.h"
 
+class GLRenderable;
+
+class GLMesh
+    : public MeshRawData
+{
+public:
+    explicit GLMesh(bool use_cpu_buffer = false, GLRenderable* renderable = NULL);
+    virtual ~GLMesh();
+
+    virtual bool Create();
+    virtual bool Enable();
+    virtual bool Disable();
+
+    // getter
+    bool isUseCPUBuffer() const { return m_bIsUseCPUBuffer; }
+    GLenum getPrimitiveTopologe(void) const { return m_PrimitiveTopologe; }
+    GLenum getIndexType(void) const { return m_IndexType; }
+    GLvoid* getIndexPointerOrOffset(void) const { return m_pIndexPointerOrOffset; }
+
+    // setter
+    void setPrimitiveTopologe(GLenum val) { m_PrimitiveTopologe = val; }
+    void setIndexType(GLenum val) { m_IndexType = val; }
+
+private:
+    bool m_bIsUseCPUBuffer;
+
+    GLenum m_PrimitiveTopologe;
+    GLenum m_IndexType;
+    GLvoid* m_pIndexPointerOrOffset;
+
+};
+
 class GLSLShader
     : public Shader
 {
 public:
-    explicit GLSLShader(const std::string* vs_source, const std::string* fs_source, bool init_deep_copy_shader_source_str = true);
+    explicit GLSLShader(const std::string* vs_source, const std::string* fs_source, GLRenderable* renderable = NULL, bool init_deep_copy_shader_source_str = false);
     virtual ~GLSLShader();
 
     GLuint getProgramHandle() const;
@@ -33,39 +65,20 @@ protected:
     GLuint m_programId;
 };
 
-class GLMesh
-    : public MeshRawData
-{
-public:
-    GLMesh();
-    virtual ~GLMesh();
-
-protected:
-
-private:
-
-};
-
 class GLInputVertexAttribute
     : public InputVertexAttribute
 {
 public:
-    GLInputVertexAttribute(std::string name)
-        : InputVertexAttribute(name),
-          m_IAHandle(-1),
-          m_IAElementNum(4),
-          m_IAType(GL_FLOAT),
-          m_IANormalized(GL_FALSE),
-          m_IAStride(0),
-          m_IAPointerOrOffset(0) 
-    {};
+    GLInputVertexAttribute(std::string name, GLRenderable* renderable = NULL);
     virtual ~GLInputVertexAttribute();
 
-    bool Init(GLSLShader* shader);
-    bool Setup(GLSLShader* shader);
+    virtual bool Create();
+    virtual bool Enable();
+    virtual bool Disable();
 
     // getter
     GLuint getHandle() const { return m_IAHandle; }
+    size_t getOffset() const { return (size_t)m_IAPointerOrOffset; }
 
     // setter
     void setElementNum(GLint val) { m_IAElementNum = val; };
@@ -86,6 +99,7 @@ private:
 };
 
 class GLRenderable
+    : public Renderable
 {
 public:
     explicit GLRenderable(std::string name)
@@ -94,15 +108,21 @@ public:
     }
     virtual ~GLRenderable()
     {
-        delete m_pGeometry;
+        // TODO, check all the delete, make sure it check the pointer is not NULL before delete
+        // TODO, check all the delete, make sure it assign it to NULL, after delete
+        if (m_pGeometry != NULL)
+        {
+            delete m_pGeometry;
+            m_pGeometry = NULL;
+        }
     }
 
     // getter
     Geometry<GLMesh, GLSLShader, GLInputVertexAttribute>* getGeometry() const { return m_pGeometry; }
 
-    bool Init();
-    bool Draw();
-    bool Destroy();
+    virtual bool Init();
+    virtual bool Draw();
+    virtual bool Destroy();
 
 private:
     Geometry<GLMesh, GLSLShader, GLInputVertexAttribute>* m_pGeometry;
@@ -111,7 +131,11 @@ private:
 
 // TODO
 // - Render Pass class
+//     - 
 // - Scene class
 // - 
+// - GLRenderable feed
+//     - renderable->getGeometry()->setMesh(val);
+//     - renderable->getGeometry()->getMesh()->setRenderable(renderable);
 
 #endif
