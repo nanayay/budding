@@ -1,11 +1,10 @@
 #include "gl_renderable.h"
 
 GLMesh::GLMesh(bool use_cpu_buffer, GLRenderable* renderable)
-    : MeshRawData(), // TODO, notebook this, not forget to add super class's constructor
+    : MeshRawData(),
       m_bIsUseCPUBuffer(use_cpu_buffer)
 {
-    m_pRenderable= renderable; // TODO, notebook this, remember, the variable from super class's super class can not be init in init list, compiler will say this variable are not in the class's scope, you can only assign value to it in the body of constructor; 
-                               // TODO, notebook this, remember, the constructor of super class's super class can't add to init list, since it is not the direct super class, on the other hand, only the direct super class can be in init list
+    m_pRenderable= renderable;
 }
 
 GLMesh::~GLMesh()
@@ -27,8 +26,6 @@ bool GLMesh::Create()
             for (std::vector<GLInputVertexAttribute*>::iterator i = inputVertexAttributes.begin(); i != inputVertexAttributes.end(); ++i)
             {
                 (*i)->setPointerOrOffset( (BYTE*)(renderable->getGeometry()->getMesh()->getVertexDataPointer()) + (*i)->getOffset() );
-                // TODO, warning here if you not add(BYTE*) or add two BYTE* to pointer and offset, only one BYTE* can solve this
-                // TODO notebook, write down how to solve this
             }
 
             // index
@@ -219,8 +216,6 @@ bool GLInputVertexAttribute::Create()
 
 bool GLInputVertexAttribute::Enable()
 {
-    // TODO, notebook this, dynamic_cast to case from super class type to subclass type
-    // TODO, notebook this, interface of ElementRender should also have the function body of constructor and destructor
     bool result = false;
     GLSLShader* shader = (dynamic_cast<GLRenderable*>(this->getRenderable()))->getGeometry()->getShader();
 
