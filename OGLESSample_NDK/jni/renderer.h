@@ -11,12 +11,15 @@ protected:
 	bool m_bInitialized;
 	bool m_bRendering;
 
-	std::vector<Renderable*> * m_pRenderables;
+	// Find some way to manager the Renderable Vector in Renderer
+	// - Renderer only use Renderable Vector, but not control it or own it
+	// - Scene will manage the life cycle of Renderable Vector
+	std::vector<Renderable*> * m_pRenderablesVector;
 
 public:
 	// setter and getter
-	std::vector<Renderable*> * getRenderablsVectorPointer() const { return m_pRenderables; }
-	void setRenderablesVectorPointer(std::vector<Renderable*> * val) { m_pRenderables = val; }
+	std::vector<Renderable*> * getRenderablsVectorPointer() const { return m_pRenderablesVector; }
+	void setRenderablesVectorPointer(std::vector<Renderable*> * val) { m_pRenderablesVector = val; }
 
 public:
 	virtual void RenderFrame() = 0;

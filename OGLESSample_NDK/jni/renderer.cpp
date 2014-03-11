@@ -3,6 +3,7 @@
 Renderer::Renderer(unsigned int priority)
 	: m_bInitialized(false),
 	  m_bRendering(false),
+	  m_pRenderablesVector(NULL),
 	  Task(priority)
 {
 }
@@ -49,7 +50,7 @@ void Renderer::RenderFrame()
 {
 	if ( m_bInitialized == true && m_bRendering == true )
 	{
-		for (std::vector<Renderable*>::iterator i = m_pRenderables->begin(); i != m_pRenderables->end(); ++i)
+		for (std::vector<Renderable*>::iterator i = m_pRenderablesVector->begin(); i != m_pRenderablesVector->end(); ++i)
 		{
 			(*i)->Draw();
 		}
@@ -60,7 +61,7 @@ void Renderer::Init()
 {
 	if (m_bInitialized == false)
 	{
-		for (std::vector<Renderable*>::iterator i = m_pRenderables->begin(); i != m_pRenderables->end(); ++i)
+		for (std::vector<Renderable*>::iterator i = m_pRenderablesVector->begin(); i != m_pRenderablesVector->end(); ++i)
 		{
 			(*i)->Init();
 		}
@@ -72,7 +73,7 @@ void Renderer::Init()
 
 void Renderer::Destroy()
 {
-	for (std::vector<Renderable*>::iterator i = m_pRenderables->begin(); i != m_pRenderables->end(); ++i)
+	for (std::vector<Renderable*>::iterator i = m_pRenderablesVector->begin(); i != m_pRenderablesVector->end(); ++i)
 	{
 		(*i)->Destroy();
 	}
