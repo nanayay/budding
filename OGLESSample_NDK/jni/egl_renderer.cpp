@@ -32,9 +32,8 @@ void EGLRenderer::RenderFrame()
 {
 	if ( m_bInitialized == true && m_bRendering == true && m_width != 0 && m_height != 0)
 	{
-        //TODO, no need to add new Render_Pass class for glClear calls, just add a special empty GLRenderable to the first of m_pRenderables, which may called GL_ClearRenderable, which call glClear in its Draw() function
-		glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // No need to add Render Pass for glClear calls, just add a special Renderable class, aka, GLClearRenderable to the first of vector in Renderer class, which named m_pRenderablesVector
+        // In GLClearRenderable's Draw(), it will call glClear
 
         Renderer::RenderFrame();
 
