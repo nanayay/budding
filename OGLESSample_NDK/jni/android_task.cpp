@@ -48,6 +48,7 @@ static void android_handle_cmd(struct android_app* app, int cmd) {
 		Renderer* pRenderer = (Renderer*)app->userData;
 		pRenderer->Destroy();
 		LOGD("android_handle_cmd() APP_CMD_DESTROY cmd end");
+		// TODO, inform kernel to kill all task?
 		}
 		break;
 	case APP_CMD_TERM_WINDOW: {
