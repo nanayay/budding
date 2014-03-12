@@ -30,9 +30,9 @@ public:
 	void RemoveTask(Task* pTask);
 	void KillAllTask();
 
-	static Kernel& GetSingleton();
+	static Kernel& getSingleton();
 	bool isRunning () const { return this->m_bRunning; }
-	void SetRunning(bool running) { this->m_bRunning = running; }
+	void setRunning(bool running) { this->m_bRunning = running; }
 };
 
 #endif

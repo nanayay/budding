@@ -16,9 +16,11 @@ public:
 	AndroidTask& operator=(const AndroidTask& _assign);
 	virtual ~AndroidTask();
 
-	android_app* GetAppState() const {
+	// getter
+	android_app* getAppState() const {
 		return m_pState;
 	}
+	Scene* getScene() const { return m_pScene; }
 
 	virtual bool Start();
 	virtual void OnSuspend();

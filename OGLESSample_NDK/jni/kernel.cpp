@@ -17,7 +17,7 @@ Kernel::Kernel(Kernel& _copy)
 	// Remove all items in the _copy, since the tasks should have **only** one copy
 	_copy.m_tasks.clear();
 	_copy.m_pausedTasks.clear();
-	_copy.SetRunning(false);
+	_copy.setRunning(false);
 
 }
 
@@ -32,7 +32,7 @@ Kernel& Kernel::operator=(Kernel& _assign)
 		// Remove all items in the _assign, since the tasks should have **only** one copy
 		_assign.m_tasks.clear();
 		_assign.m_pausedTasks.clear();
-		_assign.SetRunning(false);
+		_assign.setRunning(false);
 	}
 	return *this;
 }
@@ -121,7 +121,7 @@ void Kernel::ResumeTask(Task* pTask) {
 
 void Kernel::RemoveTask(Task* pTask) {
 	if (std::find(m_tasks.begin(), m_tasks.end(), pTask) != m_tasks.end()) {
-		pTask->SetCanKill(true);
+		pTask->setCanKill(true);
 	}
 }
 
@@ -132,11 +132,11 @@ void Kernel::KillAllTask() {
 	}
 
 	for (TaskListIterator i = m_tasks.begin(); i != m_tasks.end(); i++) {
-		(*i)->SetCanKill(true);
+		(*i)->setCanKill(true);
 	}
 }
 
-Kernel& Kernel::GetSingleton() {
+Kernel& Kernel::getSingleton() {
 	static Kernel instance;
 	return instance;
 }

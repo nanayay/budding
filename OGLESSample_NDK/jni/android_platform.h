@@ -21,8 +21,8 @@ public:
 	virtual ~AndroidPlatform() {}
 
 	AndroidPlatform(const AndroidPlatform& copy_)
-		:Platform(copy_.GetPlatformName()),
-		 m_pState(copy_.GetAppState())
+		:Platform(copy_.getPlatformName()),
+		 m_pState(copy_.getAppState())
 	{
 	}
 
@@ -30,14 +30,14 @@ public:
 	{
 		if (&assign_ != this)
 		{
-			SetPlatformName(assign_.GetPlatformName());
-			m_pState = assign_.GetAppState();
+			setPlatformName(assign_.getPlatformName());
+			m_pState = assign_.getAppState();
 		}
 
 		return *this;
 	}
 
-	android_app* GetAppState() const { return m_pState; }
+	android_app* getAppState() const { return m_pState; }
 };
 
 #endif

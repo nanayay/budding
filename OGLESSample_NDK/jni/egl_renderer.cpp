@@ -15,7 +15,7 @@ EGLRenderer::EGLRenderer(android_app* state, unsigned int priority)
 
 EGLRenderer::EGLRenderer(AndroidPlatform* pPlatform, unsigned int priority)
 	:Renderer(priority),
-     m_pState(pPlatform->GetAppState()),
+     m_pState(pPlatform->getAppState()),
 	 m_display(EGL_NO_DISPLAY),
 	 m_renderSurface(EGL_NO_SURFACE),
 	 m_context(EGL_NO_CONTEXT),

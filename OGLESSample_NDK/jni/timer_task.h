@@ -32,7 +32,7 @@ public:
         return this->m_delta;
     };
 
-    float SetFrameTimeMultiplier(const float deltaMultiplier)
+    float setFrameTimeMultiplier(const float deltaMultiplier)
     {
        this->m_deltaMultiplier = deltaMultiplier; 
     };

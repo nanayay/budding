@@ -95,7 +95,8 @@ AndroidTask::AndroidTask(android_app* pState, Renderer* pRenderer, unsigned int 
 }
 
 AndroidTask::AndroidTask(AndroidPlatform* pPlatform, Renderer* pRenderer, unsigned int priority) :
-		m_pState(pPlatform->GetAppState()),
+		m_pState(pPlatform->getAppState()),
+		m_pScene(NULL),
 		Task(priority)
 {
 	m_pState->onAppCmd = ::android_handle_cmd;
@@ -113,7 +114,8 @@ AndroidTask& AndroidTask::operator=(const AndroidTask& _assign)
 {
 	if (this == &_assign)
 		return *this;
-	m_pState = _assign.GetAppState();
+	m_pState = _assign.getAppState();
+	m_pScene = _assign.getScene();
 	m_priority = _assign.Priority();
 	m_canKill = _assign.CanKill();
 	return *this;
@@ -140,7 +142,7 @@ void AndroidTask::Update() {
 			pSource->process(this->m_pState, pSource);
 		}
 		if (this->m_pState->destroyRequested) {
-			Kernel::GetSingleton().SetRunning(false);
+			Kernel::getSingleton().setRunning(false);
 		}
 	}
 }
@@ -152,5 +154,5 @@ void AndroidTask::Stop() {
 }
 
 void AndroidTask::ClearClosing() {
-	Kernel::GetSingleton().SetRunning(true);
+	Kernel::getSingleton().setRunning(true);
 }

@@ -33,7 +33,7 @@ public:
 	virtual void OnResume() = 0;
 	virtual void Stop() = 0;
 
-	void SetCanKill(bool canKill) {
+	void setCanKill(bool canKill) {
 		m_canKill = canKill;
 	}
 	bool CanKill() const {
@@ -42,7 +42,7 @@ public:
 	unsigned int Priority() const{
 		return m_priority;
 	}
-	void SetPriority(unsigned int priority) {
+	void setPriority(unsigned int priority) {
 		m_priority = priority;
 	}
 };

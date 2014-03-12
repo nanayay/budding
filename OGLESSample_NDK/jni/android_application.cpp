@@ -39,7 +39,7 @@ bool AndroidApplication::Initialize()
 void AndroidApplication::Run()
 {
     LOGD("kernel execute begin");
-    Kernel::GetSingleton().Execute();
+    Kernel::getSingleton().Execute();
     LOGD("kernel execute end");
 
     LOGD("android clear closing begin");
@@ -86,13 +86,13 @@ bool AndroidApplication::AddTasks()
     bool result = true;
 
     LOGD("Android Timer add to kernel");
-    Kernel::GetSingleton().AddTask(m_pTimer);
+    Kernel::getSingleton().AddTask(m_pTimer);
 
     LOGD("EGLRenderer add to kernel");
-    Kernel::GetSingleton().AddTask(m_pRenderer);
+    Kernel::getSingleton().AddTask(m_pRenderer);
 
     LOGD("Android Task add to kernel");
-    Kernel::GetSingleton().AddTask(m_pAndroidTask);
+    Kernel::getSingleton().AddTask(m_pAndroidTask);
  
     return result;
 }

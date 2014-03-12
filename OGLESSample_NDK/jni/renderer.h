@@ -38,7 +38,7 @@ public:
 
 	bool isInitialized() const { return this->m_bInitialized; }
 	bool isRendering() const { return this->m_bRendering; }
-	bool SetRendering(bool rendering) { this->m_bRendering = rendering; }
+	bool setRendering(bool rendering) { this->m_bRendering = rendering; }
 };
 
 #endif
