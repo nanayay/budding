@@ -3,6 +3,9 @@
 #include <vector>
 #include "task.h"
 #include "renderable.h"
+#include "scene.h"
+
+class Scene;
 
 class Renderer
 	: public Task
@@ -20,6 +23,9 @@ public:
 	// setter and getter
 	std::vector<Renderable*> * getRenderablsVectorPointer() const { return m_pRenderablesVector; }
 	void setRenderablesVectorPointer(std::vector<Renderable*> * val) { m_pRenderablesVector = val; }
+
+	// set to bind for Scene's Renderables Vector Pointer
+	bool Bind(Scene* pScene);
 
 public:
 	virtual void RenderFrame() = 0;
