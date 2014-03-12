@@ -10,7 +10,7 @@ Scene::~Scene()
     delete m_pRenderablesVector;
 }
 
-bool Scene::MakeCurrent(Renderer* pRenderer)
+bool Scene::Bind(Renderer* pRenderer)
 {
     bool result = true;
 
@@ -19,14 +19,23 @@ bool Scene::MakeCurrent(Renderer* pRenderer)
     return result;
 }
 
-bool Scene::Init()
+bool Scene::UnBind(Renderer* pRenderer)
+{
+    bool result = true;
+
+    pRenderer->setRenderablesVectorPointer(NULL);
+
+    return result;
+}
+
+bool Scene::Load()
 {
     bool result = true;
     // Do what you have to do here
     return result;
 }
 
-bool Scene::Destroy()
+bool Scene::UnLoad()
 {
     bool result = true;
     // Do what you have to do here

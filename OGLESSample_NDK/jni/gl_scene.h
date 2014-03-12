@@ -12,8 +12,8 @@ public:
     virtual ~GLBasicScene() {};
 
 protected:
-    virtual bool Init();
-    virtual bool Destroy();
+    virtual bool Load();
+    virtual bool UnLoad();
 
     GLClearRenderable* m_pGlClear;
 

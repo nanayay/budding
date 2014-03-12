@@ -3,17 +3,23 @@
 
 #include "renderer.h"
 
+class Renderer;
+
 class Scene
 {
 public:
     Scene();
     virtual ~Scene();
 
-    virtual bool Init() = 0;
-    virtual bool MakeCurrent(Renderer* pRenderer);
-    virtual bool Destroy() = 0;
+    virtual bool Load() = 0;
+    virtual bool Bind(Renderer* pRenderer);
+    virtual bool UnBind(Renderer* pRenderer);
+    virtual bool UnLoad() = 0;
 
     // Scene own the life cycle of Renderable Vector
+    // But Scene is only a producer of Renderables
+    // And Renderer is a consumer of Renderables
+
     // One Scene match to one Renderable Vector, in which contains what need to be draw
 
     // getter
