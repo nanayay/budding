@@ -4,11 +4,9 @@
 #include <android_native_app_glue.h>
 #include "task.h"
 #include "egl_renderer.h"
+#include "gl_scene.h"
 
 class AndroidTask: public Task {
-private:
-	android_app* m_pState;
-
 public:
 	explicit AndroidTask(android_app* pState, Renderer* pRenderer, unsigned int priority = Task::Priority::Normal);
 	explicit AndroidTask(AndroidPlatform* pPlatform, Renderer* pRenderer, unsigned int priority = Task::Priority::Normal);
@@ -29,5 +27,10 @@ public:
 	virtual void Stop();
 
 	static void ClearClosing();
+
+private:
+	android_app* m_pState;
+	Scene *m_pScene;
+
 };
 #endif

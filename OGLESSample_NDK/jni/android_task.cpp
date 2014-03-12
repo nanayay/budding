@@ -75,20 +75,25 @@ static void android_handle_cmd(struct android_app* app, int cmd) {
 	case APP_CMD_RESUME: {
 		// 
 		LOGD("android_handle_cmd() APP_CMD_RESUME cmd begin");
+		// TODO, add pRenderer->Init() here
 		LOGD("android_handle_cmd() APP_CMD_RESUME cmd end");
 		}
 		break;
 	case APP_CMD_PAUSE: {
 		//
 		LOGD("android_handle_cmd() APP_CMD_PAUSE cmd begin");
+		// TODO, add pRenderer->Destory() here
 		LOGD("android_handle_cmd() APP_CMD_PAUSE cmd end");
 		}
 		break;
 	}
 }
 
-AndroidTask::AndroidTask(android_app* pState, Renderer* pRenderer, unsigned int priority) :
-		m_pState(pState), Task(priority) {
+AndroidTask::AndroidTask(android_app* pState, Renderer* pRenderer, unsigned int priority)
+	: m_pState(pState),
+	  m_pScene(NULL),
+	  Task(priority)
+{
 	m_pState->onAppCmd = ::android_handle_cmd;
 	m_pState->onInputEvent = ::android_handle_input;
 	m_pState->userData = (void*)pRenderer;
@@ -108,6 +113,7 @@ AndroidTask::AndroidTask(const AndroidTask& _copy)
 	:Task(_copy)
 {
 	this->m_pState = _copy.m_pState;
+	this->m_pScene = _copy.m_pScene;
 }
 
 AndroidTask& AndroidTask::operator=(const AndroidTask& _assign)
@@ -121,15 +127,52 @@ AndroidTask& AndroidTask::operator=(const AndroidTask& _assign)
 	return *this;
 }
 
-AndroidTask::~AndroidTask() {
+AndroidTask::~AndroidTask()
+{
+    // TODO, make some way to manage Scene, not call delete scene here
+    // TODO, add code to check the pointer before delete
+    if (m_pScene)
+    {
+        m_pScene->UnLoad();
+        delete m_pScene;
+    }
 }
 
 bool AndroidTask::Start() {
+	// Here is a good place to new the m_pScene of AndroidTask for current Scene, but not new Scene in AndroidApplication
+
+    // TODO Here
+    // SceneManager<GLScene>, scene tree, current scene, new scene, delete scene, load scene from outside files, delete them when goto other scene like menu, game scene, 
+    // Scene->GLScene->Menu Scene -> Game Scene
+    // GLBasicScene->Build(EGLRenderer)
+    //                  -> new GLRenderable vector
+    //                  -> assign to EGLRenderer
+
+	// Start() of AndroidTask only need to feed or new the Renderer, but not Init() the Renderables in Scene
+
+    // Scene only manage the memory of Renderables, but never call Renderer's Init()
+    // Scene is a producer
+    // Renderer is a consumer
+
+    // Scene's Bind will assign it own Renderables Vector Pointer to Renderer's Renderables Vector Pointer
+    // Scene should not have Init() or Destory() function, that belongs to Renderables
+    // Scene should have Load() and UnLoad() for create new renderables and delete renderables
+
+    // Rendererable's Init() will be called by Renderer's Init()
+    // Renderer's Init() will be called when AndroidTask's android_handle_cmd()'s APP_CMD_INIT_WINDOW
+    // Renderer's Destory() will be called when AndroidTask's android_handle_cmd()'s APP_CMD_TERM_WINDOW, etc
+
+    Renderer* pRenderer = NULL;
+    pRenderer = (Renderer*)(getAppState()->userData);
+
+    m_pScene = new GLBasicScene();
+    m_pScene->Load();
+    pRenderer->Bind(m_pScene);
+
 	return true;
 }
 
 void AndroidTask::OnSuspend() {
-
 }
 
 void AndroidTask::Update() {
@@ -151,6 +194,12 @@ void AndroidTask::OnResume() {
 }
 
 void AndroidTask::Stop() {
+	// No need to call Renderable's Init() and Destory() herr, since Renderer task will call the same pointer of Scene's Renderables Vector Pointer's Renderable's Init()/Destory() in Renderer's own Init() and Destory()
+    Renderer* pRenderer = NULL;
+    pRenderer = (Renderer*)(getAppState()->userData);
+    pRenderer->Bind(NULL);
+	m_pScene->UnLoad();
+	delete m_pScene;
 }
 
 void AndroidTask::ClearClosing() {

@@ -6,21 +6,12 @@ AndroidApplication::AndroidApplication(android_app* state)
     : m_pState(state),
       m_pRenderer(NULL),
       m_pTimer(NULL),
-      m_pAndroidTask(NULL),
-      m_pScene(NULL)
+      m_pAndroidTask(NULL)
 {
 }
 
 AndroidApplication::~AndroidApplication()
 {
-    // TODO, make some way to manage Scene, not call delete scene here
-    // TODO, use MyInit() is not such good way, just use Init(), that is clear for sub class's read
-    // TODO, add code to check the pointer before delete
-    if (m_pScene)
-    {
-        m_pScene->Destroy();
-        delete m_pScene;
-    }
 }
 
 bool AndroidApplication::Initialize()
@@ -62,21 +53,6 @@ bool AndroidApplication::InitTask()
 
     LOGD("Android Task create");
     m_pAndroidTask = new AndroidTask(m_pState, m_pRenderer);
-
-    // Feed the EGLRenderer with Renderables after all Tasks have been created
-
-    // TODO Here
-    // SceneManager<GLScene>, scene tree, current scene, new scene, delete scene, load scene from outside files, delete them when goto other scene like menu, game scene, 
-    // Scene->GLScene->Menu Scene -> Game Scene
-    // GLBasicScene->Build(EGLRenderer)
-    //                  -> new GLRenderable vector
-    //                  -> assign to EGLRenderer
-
-    m_pScene = new GLBasicScene();
-    m_pScene->Init();
-    m_pScene->MakeCurrent(m_pRenderer);
-
-    //TODO Here, find some place to delete m_pScene, other than delete them in application's destructor
 
     return result;
 }
