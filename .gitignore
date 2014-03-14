@@ -19,6 +19,10 @@ bin/
 libs/
 obj/
 
+#Sublime Text files
+*.sublime-project
+*.sublime-workspace
+
 local.properties
 proguard-project.txt
 
