@@ -9,13 +9,11 @@ class GLBasicScene
 {
 public:
     GLBasicScene() {};
-    virtual ~GLBasicScene() {};
+    virtual ~GLBasicScene() { UnLoad(); };
 
 protected:
     virtual bool Load();
     virtual bool UnLoad();
-
-    GLClearRenderable* m_pGlClear;
 
 };
 
