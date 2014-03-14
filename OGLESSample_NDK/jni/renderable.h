@@ -122,24 +122,24 @@ public:
     size_t getVertexDataSizeInByte() const { return m_sizeOfVerticesData; }
     void*  getIndexDataPointer() const { return m_pIndicesDataPointer; }
     size_t getIndexDataSizeInByte() const { return m_sizeOfIndicesData; }
+    unsigned int getNumOfIndices() const { return m_numOfIndices; }
 
     // maybe redundant information
-    unsigned int getNumOfVertices() const { return m_numOfVertices; }
-    unsigned int getNumOfIndices() const { return m_numOfIndices; }
-    size_t getOneVertexSizeInByte() const { return m_sizeofOneVertexInByte; }
-    size_t getOneIndexSizeInByte() const { return m_sizeofOneIndexInByte; }
+    //unsigned int getNumOfVertices() const { return m_numOfVertices; }
+    //size_t getOneVertexSizeInByte() const { return m_sizeofOneVertexInByte; }
+    //size_t getOneIndexSizeInByte() const { return m_sizeofOneIndexInByte; }
 
     // necessary information
     void  setVertexDataPointer(void* p) { m_pVerticesDataPointer = p; }
     void  setVertexDataSizeInByte(size_t s) { m_sizeOfVerticesData = s; }
     void  setIndexDataPointer(void* p) { m_pIndicesDataPointer = p; }
     void  setIndexDataSizeInByte(size_t s) { m_sizeOfIndicesData = s; }
+    void setNumOfIndices(unsigned int num) { m_numOfIndices = num; }
 
     // maybe redundant information
-    void setNumOfVertices(unsigned int num) { m_numOfVertices = num; }
-    void setNumOfIndices(unsigned int num) { m_numOfIndices = num; }
-    void setOneVertexSizeInByte(size_t size) { m_sizeofOneVertexInByte = size; }
-    void setOneIndexSizeInByte(size_t size) { m_sizeofOneIndexInByte = size; }
+    //void setNumOfVertices(unsigned int num) { m_numOfVertices = num; }
+    //void setOneVertexSizeInByte(size_t size) { m_sizeofOneVertexInByte = size; }
+    //void setOneIndexSizeInByte(size_t size) { m_sizeofOneIndexInByte = size; }
 
 private:
     // necessary information
@@ -149,11 +149,12 @@ private:
     void* m_pIndicesDataPointer;
     size_t m_sizeOfIndicesData;
 
-    // maybe redundant information
-    unsigned int m_numOfVertices;
     unsigned int m_numOfIndices;
-    size_t m_sizeofOneVertexInByte;
-    size_t m_sizeofOneIndexInByte;
+
+    // maybe redundant information
+    // unsigned int m_numOfVertices;
+    // size_t m_sizeofOneVertexInByte;
+    // size_t m_sizeofOneIndexInByte;
 
 public:
     //friend class Geometry;
