@@ -56,7 +56,7 @@ class Shader
     : public ElementOfRenderable
 {
 public:
-    explicit Shader(bool init_deep_copy_shader_source_str = true);
+    explicit Shader(bool init_deep_copy_shader_source_str = false);
     virtual ~Shader();
 
     virtual bool Create();
@@ -189,7 +189,7 @@ public:
     void setMesh(MESH* val) { m_pMesh = val; }
     void setShader(SHADER* val) { m_pShader = val; }
     void setAllInputVertexAttributes(std::vector<INPUTATTRIBUTE*> val) { m_inputVertexAttributesVector = val; }
-    void setInputVertexAttribute(INPUTATTRIBUTE* val)
+    void addInputVertexAttribute(INPUTATTRIBUTE* val)
     {
         typename std::vector<INPUTATTRIBUTE*>::iterator last = std::remove_if(m_inputVertexAttributesVector.begin(), m_inputVertexAttributesVector.end(), *val);
         m_inputVertexAttributesVector.erase(last, m_inputVertexAttributesVector.end());
