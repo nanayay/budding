@@ -39,7 +39,7 @@ public:
     bool isCreateOK() const { return m_bIsCreateOK; }
     bool isEnableOK() const { return m_bIsEnableOK; }
 
-protected:
+public:
     // setter and getter
     Renderable* getRenderable() const { return m_pRenderable; }
     void setRenderable(Renderable* val) { m_pRenderable = val; }
@@ -92,7 +92,9 @@ class InputVertexAttribute
     : public ElementOfRenderable
 {
 public:
-    explicit InputVertexAttribute(std::string name) {};
+    explicit InputVertexAttribute(std::string name)
+        : m_InputVertexAttributeName(name)
+    {};
     virtual ~InputVertexAttribute() {};
 
     std::string getName() const { return m_InputVertexAttributeName; }
@@ -130,10 +132,10 @@ public:
     //size_t getOneIndexSizeInByte() const { return m_sizeofOneIndexInByte; }
 
     // necessary information
-    void  setVertexDataPointer(void* p) { m_pVerticesDataPointer = p; }
-    void  setVertexDataSizeInByte(size_t s) { m_sizeOfVerticesData = s; }
-    void  setIndexDataPointer(void* p) { m_pIndicesDataPointer = p; }
-    void  setIndexDataSizeInByte(size_t s) { m_sizeOfIndicesData = s; }
+    void setVertexDataPointer(void* p) { m_pVerticesDataPointer = p; }
+    void setVertexDataSizeInByte(size_t s) { m_sizeOfVerticesData = s; }
+    void setIndexDataPointer(void* p) { m_pIndicesDataPointer = p; }
+    void setIndexDataSizeInByte(size_t s) { m_sizeOfIndicesData = s; }
     void setNumOfIndices(unsigned int num) { m_numOfIndices = num; }
 
     // maybe redundant information
