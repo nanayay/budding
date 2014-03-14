@@ -1,6 +1,9 @@
 #include <algorithm>
 #include "gl_scene.h"
 
+// GL Scene will not keep class variable for each Renderable [GLClearRenderable(), GLRenderable("Rectangle"), etc], but just new it in its Load() function, and append to its Renderable Vector Pointer, delete them in UnLoad()
+// Destructor of GL Scene will also call UnLoad() in case it's forgot
+
 namespace Models
 {
 

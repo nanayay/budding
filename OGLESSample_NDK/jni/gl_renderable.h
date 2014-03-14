@@ -7,6 +7,12 @@
 
 class GLRenderable;
 
+// TODO, notebook
+// IA only hold the vertex attribute's offset, the real pointer will be get from Mesh
+// Mesh will hold the index's pointer or offset
+// Mesh will hold the vertex [all vertex attributes] array's beginning pointer, but the offset is in IA
+// IA's Enable() need both Mesh and Shader
+
 class GLMesh
     : public MeshRawData
 {
