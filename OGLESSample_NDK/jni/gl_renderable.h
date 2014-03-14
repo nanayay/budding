@@ -78,15 +78,14 @@ public:
 
     // getter
     GLuint getHandle() const { return m_IAHandle; }
-    size_t getOffset() const { return (size_t)m_IAPointerOrOffset; }
+    size_t getOffset() const { return (size_t)m_IAOffset; }
 
     // setter
     void setElementNum(GLint val) { m_IAElementNum = val; };
     void setType(GLenum val) { m_IAType = val; }
-    void setNormalized(GLboolean val) { m_IANormalized = val; };
+    void setNormalized(bool val) { m_IANormalized = val ? GL_TRUE : GL_FALSE; };
     void setStride(GLsizei val) { m_IAStride = val; }
-    void setPointerOrOffset(GLvoid* val) { m_IAPointerOrOffset = val; } 
-
+    void setOffset(size_t val) { m_IAOffset = val; } 
 
 private:
     GLuint m_IAHandle;
@@ -95,7 +94,9 @@ private:
     GLenum m_IAType;
     GLboolean m_IANormalized;
     GLsizei m_IAStride;
-    GLvoid* m_IAPointerOrOffset;
+    size_t m_IAOffset;
+
+    // Note, IA only hold the offset in a vertex array buffer, but the mesh will hold the beginning of vertex array buffer
 };
 
 class GLRenderable
@@ -106,6 +107,7 @@ public:
     {
         m_pGeometry = new Geometry<GLMesh, GLSLShader, GLInputVertexAttribute>(name);
     }
+
     virtual ~GLRenderable()
     {
         // TODO, check all the delete, make sure it check the pointer is not NULL before delete
@@ -118,7 +120,15 @@ public:
     }
 
     // getter
-    Geometry<GLMesh, GLSLShader, GLInputVertexAttribute>* getGeometry() const { return m_pGeometry; }
+    GLMesh* getMesh() const;
+    GLSLShader* getShader() const;
+    GLInputVertexAttribute* getInputVertexAttribute(std::string name) const;
+    std::vector<GLInputVertexAttribute*> getAllInputVertexAttributes() const;
+
+    // setter
+    bool setMesh(GLMesh* val);
+    bool setShader(GLSLShader* val);
+    bool addInputVertexAttribute(GLInputVertexAttribute* val);
 
     virtual bool Init();
     virtual bool Draw();
@@ -181,7 +191,7 @@ private:
 // - Scene class
 // - 
 // - GLRenderable feed
-//     - renderable->getGeometry()->setMesh(val);
-//     - renderable->getGeometry()->getMesh()->setRenderable(renderable);
+//     - renderable->setMesh(val);
+//     - renderable->getMesh()->setRenderable(renderable);
 
 #endif

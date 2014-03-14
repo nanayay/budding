@@ -1,4 +1,5 @@
 #include "gl_renderable.h"
+#include "log.h"
 
 GLMesh::GLMesh(bool use_cpu_buffer, GLRenderable* renderable)
     : MeshRawData(),
@@ -20,13 +21,7 @@ bool GLMesh::Create()
         if (m_bIsUseCPUBuffer == true)
         {
             // use vertex and index in CPU memory
-            // vertex
-            GLRenderable* renderable = dynamic_cast<GLRenderable*>(m_pRenderable);
-            std::vector<GLInputVertexAttribute*> inputVertexAttributes = renderable->getGeometry()->getAllInputVertexAttributes();
-            for (std::vector<GLInputVertexAttribute*>::iterator i = inputVertexAttributes.begin(); i != inputVertexAttributes.end(); ++i)
-            {
-                (*i)->setPointerOrOffset( (BYTE*)(renderable->getGeometry()->getMesh()->getVertexDataPointer()) + (*i)->getOffset() );
-            }
+            // vertex array buffer's cpu memory pointer will be set in IA's Enable()
 
             // index
             this->m_pIndexPointerOrOffset = this->getIndexDataPointer();
@@ -141,6 +136,7 @@ bool GLSLShader::Setup()
 {
     bool result = true;
 
+    LOGD("begin to call glUseProgram(%d)", m_programId);
     glUseProgram(m_programId);
 
     //TODO, add GL_ERROR check for return value
@@ -186,7 +182,7 @@ GLInputVertexAttribute::GLInputVertexAttribute(std::string name, GLRenderable* r
       m_IAType(GL_FLOAT),
       m_IANormalized(GL_FALSE),
       m_IAStride(0),
-      m_IAPointerOrOffset(0) 
+      m_IAOffset(0) 
 {
     m_pRenderable = renderable;
 };
@@ -200,10 +196,11 @@ bool GLInputVertexAttribute::Create()
     if (isCreateOK() == false)
     {
         bool result = false;
-        GLSLShader* shader = (dynamic_cast<GLRenderable*>(this->getRenderable()))->getGeometry()->getShader();
+        GLSLShader* shader = (dynamic_cast<GLRenderable*>(this->getRenderable()))->getShader();
 
         if (shader->isCreateOK())
         {
+            LOGD("begin to call glGetAttribLocation(%d, %s)", shader->getProgramHandle(), m_InputVertexAttributeName.c_str());
             m_IAHandle = glGetAttribLocation(shader->getProgramHandle(), m_InputVertexAttributeName.c_str());
             result = m_IAHandle != -1 ? true : false;
         }
@@ -217,11 +214,12 @@ bool GLInputVertexAttribute::Create()
 bool GLInputVertexAttribute::Enable()
 {
     bool result = false;
-    GLSLShader* shader = (dynamic_cast<GLRenderable*>(this->getRenderable()))->getGeometry()->getShader();
+    GLSLShader* shader = (dynamic_cast<GLRenderable*>(this->getRenderable()))->getShader();
+    GLMesh* mesh = (dynamic_cast<GLRenderable*>(this->getRenderable()))->getMesh();
 
-    if (shader->isCreateOK() && shader->isEnableOK())
+    if (shader->isCreateOK() && shader->isEnableOK() && mesh != NULL)
     {
-        glVertexAttribPointer(m_IAHandle, m_IAElementNum, m_IAType, m_IANormalized, m_IAStride, m_IAPointerOrOffset);
+        glVertexAttribPointer(m_IAHandle, m_IAElementNum, m_IAType, m_IANormalized, m_IAStride, (BYTE*)(mesh->getVertexDataPointer()) + m_IAOffset);
         glEnableVertexAttribArray(m_IAHandle);
         result = true;
     }
@@ -284,6 +282,47 @@ bool GLRenderable::Destroy()
     {
         (*i)->Disable();
     }
+    return true;
+}
+
+GLMesh* GLRenderable::getMesh() const
+{
+    return this->m_pGeometry->getMesh();
+}
+
+GLSLShader* GLRenderable::getShader() const
+{
+    return this->m_pGeometry->getShader();
+}
+
+GLInputVertexAttribute* GLRenderable::getInputVertexAttribute(std::string name) const
+{
+    return this->m_pGeometry->getInputVertexAttribute(name);
+}
+
+std::vector<GLInputVertexAttribute*> GLRenderable::getAllInputVertexAttributes() const
+{
+    return this->m_pGeometry->getAllInputVertexAttributes();
+}
+
+bool GLRenderable::setMesh(GLMesh* val)
+{
+    val->setRenderable(this);
+    this->m_pGeometry->setMesh(val);
+    return true;
+}
+
+bool GLRenderable::setShader(GLSLShader* val)
+{
+    val->setRenderable(this);
+    this->m_pGeometry->setShader(val);
+    return true;
+}
+
+bool GLRenderable::addInputVertexAttribute(GLInputVertexAttribute* val)
+{
+    val->setRenderable(this);
+    this->m_pGeometry->addInputVertexAttribute(val);
     return true;
 }
 
