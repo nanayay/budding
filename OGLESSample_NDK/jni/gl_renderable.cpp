@@ -129,6 +129,9 @@ bool GLSLShader::CompileAndLink()
     //TODO, add GL_ERROR check for return value
     //maybe a class for GL_Utility?
 
+    glDeleteShader(m_vertexShaderId);
+    glDeleteShader(m_fragmentShaderId);
+
     return result;
 }
 
@@ -155,7 +158,7 @@ bool GLSLShader::UnSetup()
 
 void GLSLShader::Remove()
 {
-    // TODO, remove the created shader handle, program id from system, for release system resource
+    glDeleteProgram(m_programId);
 }
 
 void GLSLShader::DiscardShaderSource()
@@ -202,6 +205,7 @@ bool GLInputVertexAttribute::Create()
         {
             LOGD("begin to call glGetAttribLocation(%d, %s)", shader->getProgramHandle(), m_InputVertexAttributeName.c_str());
             m_IAHandle = glGetAttribLocation(shader->getProgramHandle(), m_InputVertexAttributeName.c_str());
+            LOGD("get the input attribute handle for %s is %d", m_InputVertexAttributeName.c_str(), m_IAHandle);
             result = m_IAHandle != -1 ? true : false;
         }
 
