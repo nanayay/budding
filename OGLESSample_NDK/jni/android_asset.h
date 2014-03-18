@@ -2,6 +2,7 @@
 #define AY_ANDROID_ASSET
 
 #include <string>
+#include <android/asset_manager.h>
 
 class AndroidAsset
 {
@@ -26,6 +27,7 @@ private:
 
 private:
     std::string m_name;
+    AAsset* m_pAsset;
 
 };
 
