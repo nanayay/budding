@@ -45,28 +45,27 @@ namespace Models
     std::string ia_pos("a_vPosition");
     std::string ia_color("a_vColor");
 
-    // TODO Notebook
-    // if you use char* s = "";, it will be a warning, use const char* s = ""; is good
     const char* vs = 
-    " \
-        attribute vec4 a_vPosition;\
-        attribute vec4 a_vColor;\
-        varying vec4 v_vColor;\
-        \
-        void main()\
-        {\
-            gl_Position = a_vPosition;\
-            v_vColor = a_vColor;\
-        }\
-    ";
+        "#version 100\n"
+        "attribute vec4 a_vPosition;\n"
+        "attribute vec4 a_vColor;\n"
+        "varying vec4 v_vColor;\n"
+        "void main()\n"
+        "{\n"
+            "gl_Position = a_vPosition;\n"
+            "v_vColor = a_vColor;\n"
+        "}\n";
+
     const char* fs =
-    " \
-    varying vec4 v_vColor; \
-    void main() \
-    { \
-        gl_FragColor = v_vColor; \
-    } \
-    ";
+        "#version 100\n"
+        //"precision lowp float;\n"
+        //"precision mediump float;\n"
+        "precision highp float;\n"
+        "varying vec4 v_vColor;\n"
+        "void main()\n"
+        "{\n"
+            "gl_FragColor = v_vColor;\n"
+        "}\n";
 
     std::string vss(vs);
     std::string fss(fs);
