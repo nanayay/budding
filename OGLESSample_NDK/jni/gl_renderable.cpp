@@ -63,8 +63,6 @@ bool GLMesh::Disable()
 
 GLSLShader::GLSLShader(const std::string* vs_source, const std::string* fs_source, GLRenderable* renderable, bool init_deep_copy_shader_source_str)
     : Shader(init_deep_copy_shader_source_str),
-      m_vertexShaderId(0),
-      m_fragmentShaderId(0),
       m_programId(0)
 {
     m_pRenderable = renderable;
@@ -100,7 +98,11 @@ GLuint GLSLShader::getProgramHandle() const
     return -1;
 }
 
-void GLSLShader::LoadShader(GLuint shader_handle, const std::string& shader_source)
+GLuint GLSLShader::LoadShader(GLenum shader_type, const std::string& shader_source)
+{
+    GLuint shader_handle = glCreateShader(shader_type);
+
+    if (shader_handle)
 {
    const unsigned int NUM_SHADERS = 1;
    const GLchar* pSourceCode = shader_source.c_str();
@@ -108,31 +110,86 @@ void GLSLShader::LoadShader(GLuint shader_handle, const std::string& shader_sour
 
    glShaderSource(shader_handle, NUM_SHADERS, &pSourceCode, &length);
    glCompileShader(shader_handle);
+
+        GLint shader_compiled = 0;
+        glGetShaderiv(shader_handle, GL_COMPILE_STATUS, &shader_compiled);
+        if (!shader_compiled)
+        {
+            GLint length = 0;
+            glGetShaderiv(shader_handle, GL_INFO_LOG_LENGTH, &length);
+            if (length)
+            {
+                std::string log(static_cast<size_t>(length), ' ');
+                glGetShaderInfoLog(shader_handle, length, NULL, &log[0]);
+
+                std::string shader_type_str;
+                if (shader_type == GL_VERTEX_SHADER)
+                {
+                    shader_type_str = std::string("Vertex Shader");
+                }
+                else if (shader_type == GL_FRAGMENT_SHADER)
+                {
+                    shader_type_str = std::string("Fragment Shader");
+                }
+                else
+                {
+                    shader_type_str = std::string("Unknown Shader");
+}
+
+                LOGE("Could not compile shader %d [%s]:\n%s\n", shader_type, shader_type_str.c_str(), log.c_str());
+                glDeleteShader(shader_handle);
+                shader_handle = 0;
+            }
+        }
+    }
+
+    return shader_handle;
+}
+
+GLuint GLSLShader::CreateProgram(const char* vertex_source, const char* fragment_source)
+{
+    GLuint vertex_shader = LoadShader(GL_VERTEX_SHADER, vertex_source);
+    if (vertex_shader == 0)
+        return 0;
+
+    GLuint pixel_shader = LoadShader(GL_FRAGMENT_SHADER, fragment_source);
+    if (pixel_shader == 0)
+        return 0;
+
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vertex_shader);
+    glAttachShader(program, pixel_shader);
+    glLinkProgram(program);
+
+    GLint link_status = GL_FALSE;
+    glGetProgramiv(program, GL_LINK_STATUS, &link_status);
+    if (link_status != GL_TRUE)
+    {
+        GLint length = 0;
+        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
+        if (length)
+        {
+            std::string log(static_cast<size_t>(length), ' ');
+            glGetProgramInfoLog(program, length, NULL, &log[0]);
+            LOGE("Could not link program:\n%s\n", log.c_str());
+        }
+        glDeleteProgram(program);
+        program = 0;
+    }
+
+    glDeleteShader(vertex_shader);
+    glDeleteShader(pixel_shader);
+
+    return program;
 }
 
 bool GLSLShader::CompileAndLink()
 {
-    bool result = true;
+    m_programId = CreateProgram(m_pVertexShaderSource->c_str(), m_pFragmentShaderSource->c_str());
 
-    m_programId = glCreateProgram();
+    LOGE("GLSL program handle create: %d", m_programId);
 
-    m_vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
-    LoadShader(m_vertexShaderId, *m_pVertexShaderSource);
-    glAttachShader(m_programId, m_vertexShaderId);
-
-    m_fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
-    LoadShader(m_fragmentShaderId, *m_pFragmentShaderSource);
-    glAttachShader(m_programId, m_fragmentShaderId);
-
-    glLinkProgram(m_programId);
-
-    //TODO, add GL_ERROR check for return value
-    //maybe a class for GL_Utility?
-
-    glDeleteShader(m_vertexShaderId);
-    glDeleteShader(m_fragmentShaderId);
-
-    return result;
+    return m_programId == 0 ? false : true;
 }
 
 bool GLSLShader::Setup()

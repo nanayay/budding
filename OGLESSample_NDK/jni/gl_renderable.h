@@ -60,14 +60,13 @@ protected:
     virtual void DiscardShaderSource();
 
 private:
-    void LoadShader(GLuint shader_handle, const std::string& shader_source);
+    GLuint LoadShader(GLenum shader_type, const std::string& shader_source);
+    GLuint CreateProgram(const char* vertex_source, const char* fragment_source);
 
 protected:
     const std::string* m_pVertexShaderSource;
     const std::string* m_pFragmentShaderSource;
 
-    GLuint m_vertexShaderId;
-    GLuint m_fragmentShaderId;
     GLuint m_programId;
 };
 
