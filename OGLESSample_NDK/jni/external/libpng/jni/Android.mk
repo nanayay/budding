@@ -3,23 +3,11 @@ include $(CLEAR_VARS)
 
 LOCAL_CFLAGS += 
 
+LS_C = $(subst $(1)/,,$(wildcard $(1)/*.c))
+
 LOCAL_MODULE    := libpng
-LOCAL_SRC_FILES :=\
-    png.c \
-    pngerror.c \
-    pngget.c \
-    pngmem.c \
-    pngpread.c \
-    pngread.c \
-    pngrio.c \
-    pngrtran.c \
-    pngrutil.c \
-    pngset.c \
-    pngtrans.c \
-    pngwio.c \
-    pngwrite.c \
-    pngwtran.c \
-    pngwutil.c 
+LOCAL_SRC_FILES := \
+    $(filter-out example.c pngtest.c,$(call LS_C,$(LOCAL_PATH)))
     
 LOCAL_LDLIBS := -lz
 
