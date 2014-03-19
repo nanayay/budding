@@ -41,7 +41,6 @@ namespace Models
     };
     unsigned int num_of_index = sizeof(indices)/sizeof(indices[0]);
 
-    // TODO, add some logic to parser a string and generate the IA array
     std::string ia_pos("a_vPosition");
     std::string ia_color("a_vColor");
 
@@ -127,9 +126,6 @@ bool GLBasicScene::Load()
 
     // Draw a Rectangle
     GLRenderable* m_pGLRect = new GLRenderable("Rectangle");
-
-    // TODO, notebook
-    // 设计的时候, 既然Renderable包装了Geom的类, 那么将Geom类的接口也提供同样的一份, 是十分必要的, 因为可以缩短后续访问Renderable内部Geom对象的代码长度, 而且有利于将ElementOfRenderable的上级Renderable的指针和当前的Renderable对象绑定
 
     Models::Import();
 

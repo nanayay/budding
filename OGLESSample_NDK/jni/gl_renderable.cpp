@@ -23,18 +23,19 @@ bool GLMesh::Create()
             // use vertex and index in CPU memory
             // vertex array buffer's cpu memory pointer will be set in IA's Enable()
 
-            // index
+            // index array buffer's cpu memory pointer will be set here
             this->m_pIndexPointerOrOffset = this->getIndexDataPointer();
 
         }
         else
         {
             // use vertex and index buffer in GPU memory
-            // TODO Here
-            // create buffer of GPU for this
+            // todo here
 
-            // TODO Here, for test
-            // write some class to feed shader, mesh, IA, and combine a renderable, assign to renderer's list
+            // vertex buffer object create
+
+            // index buffer object create
+
         }
 
         m_bIsCreateOK = result;
@@ -103,13 +104,13 @@ GLuint GLSLShader::LoadShader(GLenum shader_type, const std::string& shader_sour
     GLuint shader_handle = glCreateShader(shader_type);
 
     if (shader_handle)
-{
-   const unsigned int NUM_SHADERS = 1;
-   const GLchar* pSourceCode = shader_source.c_str();
-   GLint length = shader_source.length();
+    {
+        const unsigned int NUM_SHADERS = 1;
+        const GLchar* pSourceCode = shader_source.c_str();
+        GLint length = shader_source.length();
 
-   glShaderSource(shader_handle, NUM_SHADERS, &pSourceCode, &length);
-   glCompileShader(shader_handle);
+        glShaderSource(shader_handle, NUM_SHADERS, &pSourceCode, &length);
+        glCompileShader(shader_handle);
 
         GLint shader_compiled = 0;
         glGetShaderiv(shader_handle, GL_COMPILE_STATUS, &shader_compiled);
@@ -134,7 +135,7 @@ GLuint GLSLShader::LoadShader(GLenum shader_type, const std::string& shader_sour
                 else
                 {
                     shader_type_str = std::string("Unknown Shader");
-}
+                }
 
                 LOGE("Could not compile shader %d [%s]:\n%s\n", shader_type, shader_type_str.c_str(), log.c_str());
                 glDeleteShader(shader_handle);
@@ -196,7 +197,6 @@ bool GLSLShader::Setup()
 {
     bool result = true;
 
-    LOGD("begin to call glUseProgram(%d)", m_programId);
     glUseProgram(m_programId);
 
     //TODO, add GL_ERROR check for return value
