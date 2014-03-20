@@ -21,8 +21,9 @@ public:
     // getter
     bool isUseCPUBuffer() const { return m_bIsUseCPUBuffer; }
     GLenum getPrimitiveTopologe(void) const { return m_PrimitiveTopologe; }
-    GLenum getIndexType(void) const { return m_IndexType; }
-    GLvoid* getIndexPointerOrOffset(void) const { return m_pIndexPointerOrOffset; }
+    GLenum getIndexDataType(void) const { return m_IndexType; }
+    GLuint getVBOHandle(void) const { return m_vbo; }
+    GLuint getIBOHandle(void) const { return m_ibo; }
 
     // setter
     void setPrimitiveTopologe(GLenum val) { m_PrimitiveTopologe = val; }
@@ -32,8 +33,11 @@ private:
     bool m_bIsUseCPUBuffer;
 
     GLenum m_PrimitiveTopologe;
+
     GLenum m_IndexType;
-    GLvoid* m_pIndexPointerOrOffset;
+
+    GLuint m_vbo;
+    GLuint m_ibo;
 
 };
 

@@ -22,10 +22,7 @@ bool GLMesh::Create()
         {
             // use vertex and index in CPU memory
             // vertex array buffer's cpu memory pointer will be set in IA's Enable()
-
-            // index array buffer's cpu memory pointer will be set here
-            this->m_pIndexPointerOrOffset = this->getIndexDataPointer();
-
+            // index array buffer's cpu memory pointer no need to be set, it will get it directly when draw
         }
         else
         {

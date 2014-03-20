@@ -88,10 +88,11 @@ namespace Models
         // TODO Here, the GLSL's pointer will be undefined if out-of-scope
 
         m_pGLMesh->setVertexDataPointer(vertes);
-        m_pGLMesh->setVertexDataSizeInByte(sizeof(vertes));
+        m_pGLMesh->setVertexDataSize(sizeof(vertes));
         m_pGLMesh->setIndexDataPointer(indices);
-        m_pGLMesh->setIndexDataSizeInByte(sizeof(indices));
+        m_pGLMesh->setIndexDataSize(sizeof(indices));
         m_pGLMesh->setNumOfIndices(num_of_index);
+        m_pGLMesh->setIndexDataOffset(0);
 
         // TODO Here, make these be default and in the constructor
         m_pGLMesh->setPrimitiveTopologe(GL_TRIANGLES);

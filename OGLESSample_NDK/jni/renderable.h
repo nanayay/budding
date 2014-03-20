@@ -113,7 +113,8 @@ class MeshRawData
     : public ElementOfRenderable
 {
 public:
-    MeshRawData() {};
+    MeshRawData() : m_IndicesDataOffset(0)
+    {};
     virtual ~MeshRawData() {};
 
     // Always do Shallow copy, never Deep copy for saving memory footprint
@@ -121,27 +122,29 @@ public:
 
     // necessary information
     void*  getVertexDataPointer() const { return m_pVerticesDataPointer; }
-    size_t getVertexDataSizeInByte() const { return m_sizeOfVerticesData; }
+    size_t getVertexDataSize() const { return m_sizeOfVerticesData; }
     void*  getIndexDataPointer() const { return m_pIndicesDataPointer; }
-    size_t getIndexDataSizeInByte() const { return m_sizeOfIndicesData; }
+    size_t getIndexDataSize() const { return m_sizeOfIndicesData; }
     unsigned int getNumOfIndices() const { return m_numOfIndices; }
+    size_t getIndexDataOffset() const { return m_IndicesDataOffset; }
 
     // maybe redundant information
     //unsigned int getNumOfVertices() const { return m_numOfVertices; }
-    //size_t getOneVertexSizeInByte() const { return m_sizeofOneVertexInByte; }
-    //size_t getOneIndexSizeInByte() const { return m_sizeofOneIndexInByte; }
+    //size_t getOneVertexSize() const { return m_sizeofOneVertex; }
+    //size_t getOneIndexSize() const { return m_sizeofOneIndex; }
 
     // necessary information
     void setVertexDataPointer(void* p) { m_pVerticesDataPointer = p; }
-    void setVertexDataSizeInByte(size_t s) { m_sizeOfVerticesData = s; }
+    void setVertexDataSize(size_t s) { m_sizeOfVerticesData = s; }
     void setIndexDataPointer(void* p) { m_pIndicesDataPointer = p; }
-    void setIndexDataSizeInByte(size_t s) { m_sizeOfIndicesData = s; }
+    void setIndexDataSize(size_t s) { m_sizeOfIndicesData = s; }
     void setNumOfIndices(unsigned int num) { m_numOfIndices = num; }
+    void setIndexDataOffset(size_t offset) { m_IndicesDataOffset = offset; }
 
     // maybe redundant information
     //void setNumOfVertices(unsigned int num) { m_numOfVertices = num; }
-    //void setOneVertexSizeInByte(size_t size) { m_sizeofOneVertexInByte = size; }
-    //void setOneIndexSizeInByte(size_t size) { m_sizeofOneIndexInByte = size; }
+    //void setOneVertexSize(size_t size) { m_sizeofOneVertex = size; }
+    //void setOneIndexSize(size_t size) { m_sizeofOneIndex = size; }
 
 private:
     // necessary information
@@ -152,11 +155,12 @@ private:
     size_t m_sizeOfIndicesData;
 
     unsigned int m_numOfIndices;
+    size_t m_IndicesDataOffset;
 
     // maybe redundant information
     // unsigned int m_numOfVertices;
-    // size_t m_sizeofOneVertexInByte;
-    // size_t m_sizeofOneIndexInByte;
+    // size_t m_sizeofOneVertex;
+    // size_t m_sizeofOneIndex;
 
 public:
     //friend class Geometry;
