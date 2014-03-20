@@ -1,3 +1,4 @@
+#include "type_defines.h"
 #include "gl_renderable.h"
 #include "log.h"
 
@@ -27,12 +28,21 @@ bool GLMesh::Create()
         else
         {
             // use vertex and index buffer in GPU memory
-            // todo here
+            GLuint vbos[2] = {0, 0};
+            glGenBuffers(2, vbos);
 
             // vertex buffer object create
+            m_vbo = vbos[0];
+            glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+            glBufferData(GL_ARRAY_BUFFER, this->getVertexDataSize(), this->getVertexDataPointer(), GL_STATIC_DRAW);
 
             // index buffer object create
+            m_ibo = vbos[1];
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->getIndexDataSize(), this->getIndexDataPointer(), GL_STATIC_DRAW);
 
+            // TODO here
+            // make these glBindBuffer to unbind when tear down
         }
 
         m_bIsCreateOK = result;
@@ -277,8 +287,19 @@ bool GLInputVertexAttribute::Enable()
 
     if (shader->isCreateOK() && shader->isEnableOK() && mesh != NULL)
     {
-        glVertexAttribPointer(m_IAHandle, m_IAElementNum, m_IAType, m_IANormalized, m_IAStride, (BYTE*)(mesh->getVertexDataPointer()) + m_IAOffset);
         glEnableVertexAttribArray(m_IAHandle);
+
+        if (mesh->isUseCPUBuffer())
+        {
+            // use cpu memory's vertex buffer pointer
+            glVertexAttribPointer(m_IAHandle, m_IAElementNum, m_IAType, m_IANormalized, m_IAStride, (BYTE*)(mesh->getVertexDataPointer()) + m_IAOffset);
+        }
+        else
+        {
+            // use gpu memory's vertex buffer
+            glBindBuffer(GL_ARRAY_BUFFER, mesh->getVBOHandle());
+            glVertexAttribPointer(m_IAHandle, m_IAElementNum, m_IAType, m_IANormalized, m_IAStride, (BYTE*)m_IAOffset);
+        }
         result = true;
     }
 
@@ -322,10 +343,20 @@ bool GLRenderable::Draw()
 
     GLenum mode = m_pGeometry->getMesh()->getPrimitiveTopologe(); // primitive mode in GLenum
     GLsizei count = m_pGeometry->getMesh()->getNumOfIndices(); // number of Index
-    GLenum type = m_pGeometry->getMesh()->getIndexType(); // type of one Index in GLenum
-    GLvoid* indices = m_pGeometry->getMesh()->getIndexPointerOrOffset(); // pointer to index array in CPU or offset of index buffer's offset
+    GLenum type = m_pGeometry->getMesh()->getIndexDataType(); // type of one Index in GLenum
 
-    glDrawElements(mode, count, type, indices);
+    if (m_pGeometry->getMesh()->isUseCPUBuffer())
+    {
+        GLvoid* indices = (BYTE*)(m_pGeometry->getMesh()->getIndexDataPointer()) + m_pGeometry->getMesh()->getIndexDataOffset(); // pointer to index array pointer or offset
+        glDrawElements(mode, count, type, indices);
+    }
+    else
+    {
+        GLvoid* offset = (BYTE*)(m_pGeometry->getMesh()->getIndexDataOffset());
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_pGeometry->getMesh()->getIBOHandle());
+        glDrawElements(mode, count, type, offset);
+    }
+
 
     return true;
 }

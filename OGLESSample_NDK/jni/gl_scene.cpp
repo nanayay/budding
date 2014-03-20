@@ -78,7 +78,11 @@ namespace Models
     {
         // TODO,
         // Memory leak for ElementOfRenderable? leave it??
-        m_pGLMesh = new GLMesh(true);
+        #if 0
+            m_pGLMesh = new GLMesh(true); // true will use client buffer, false [default] will use gpu buffer
+        #else
+            m_pGLMesh = new GLMesh();
+        #endif
         m_pGLSL = new GLSLShader(&vss, &fss);
         m_IAPos = new GLInputVertexAttribute(ia_pos);
         m_IAColor = new GLInputVertexAttribute(ia_color);
