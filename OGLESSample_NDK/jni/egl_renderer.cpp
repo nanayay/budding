@@ -147,7 +147,6 @@ void EGLRenderer::Init()
     LOGD("Init EGL end");
 
     LOGD("super class Renderer::Init() begin");
-    // TODO Here, try to feed renderer's renderable vector, other wise will show crash
     Renderer::Init();
     LOGD("super class Renderer::Init() end");
 
