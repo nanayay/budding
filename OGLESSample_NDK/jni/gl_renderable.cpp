@@ -1,6 +1,4 @@
-#include "type_defines.h"
 #include "gl_renderable.h"
-#include "log.h"
 
 GLMesh::GLMesh(bool use_cpu_buffer, GLRenderable* renderable)
     : MeshRawData(),
@@ -31,21 +29,22 @@ bool GLMesh::Create()
         {
             // use vertex and index buffer in GPU memory
             GLuint vbos[2] = {0, 0};
-            glGenBuffers(2, vbos);
+            CALL_GL(glGenBuffers(2, vbos));
 
             // vertex buffer object create
             m_vbo = vbos[0];
-            glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-            glBufferData(GL_ARRAY_BUFFER, this->getVertexDataSize(), this->getVertexDataPointer(), GL_STATIC_DRAW);
+            CALL_GL(glBindBuffer(GL_ARRAY_BUFFER, m_vbo));
+            CALL_GL(glBufferData(GL_ARRAY_BUFFER, this->getVertexDataSize(), this->getVertexDataPointer(), GL_STATIC_DRAW));
 
             // index buffer object create
             m_ibo = vbos[1];
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->getIndexDataSize(), this->getIndexDataPointer(), GL_STATIC_DRAW);
+            CALL_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo));
+            CALL_GL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->getIndexDataSize(), this->getIndexDataPointer(), GL_STATIC_DRAW));
 
-            // TODO here
-            // make these glBindBuffer to unbind when tear down
+            // add glUnBindBuffer, add glDeleteBuffer to these
+            // check glDisableVertexAttribArray() is called properly
         }
+        result = true;
 
         m_bIsCreateOK = result;
     }
@@ -56,12 +55,12 @@ bool GLMesh::Enable()
 {
     if (isCreateOK() && isEnableOK() != true)
     {
-    bool result = false;
+        bool result = false;
 
         // Note, glBindBuffer for VBO and IBO will be called in IA's Enable, and Renderable's Draw(), no need to call here
         result = true;
 
-    m_bIsEnableOK = result;
+        m_bIsEnableOK = result;
     }
     return isEnableOK();
 }
@@ -75,7 +74,7 @@ bool GLMesh::Disable()
         // Note, UnBind buffer for VBO will be called in IA's Disable, but IBO's unbind will be called in Renderable's Destroy() 
         result = true;
 
-    m_bIsEnableOK = !result;
+        m_bIsEnableOK = !result;
     }
     return !isEnableOK();
 }
@@ -231,7 +230,8 @@ bool GLSLShader::Setup()
 {
     bool result = true;
 
-    glUseProgram(m_programId);
+    CALL_GL(glUseProgram(m_programId));
+    LOGD("glUseProgram(%d)", m_programId);
 
     //TODO, add GL_ERROR check for return value
     //maybe a class for GL_Utility?
@@ -242,14 +242,15 @@ bool GLSLShader::Setup()
 bool GLSLShader::UnSetup()
 {
     GLuint m_Invalid_Program = 0;
-    glUseProgram(m_Invalid_Program);
+    CALL_GL(glUseProgram(m_Invalid_Program));
+    LOGD("glUseProgram(%d)", m_Invalid_Program);
     return true;
 }
 
 
 void GLSLShader::Remove()
 {
-    glDeleteProgram(m_programId);
+    CALL_GL(glDeleteProgram(m_programId));
 }
 
 void GLSLShader::DiscardShaderSource()
@@ -308,13 +309,13 @@ bool GLInputVertexAttribute::Enable()
 {
     if (isCreateOK() && isEnableOK() != true)
     {
-    bool result = false;
+        bool result = false;
 
-    GLSLShader* shader = (dynamic_cast<GLRenderable*>(this->getRenderable()))->getShader();
-    GLMesh* mesh = (dynamic_cast<GLRenderable*>(this->getRenderable()))->getMesh();
+        GLSLShader* shader = (dynamic_cast<GLRenderable*>(this->getRenderable()))->getShader();
+        GLMesh* mesh = (dynamic_cast<GLRenderable*>(this->getRenderable()))->getMesh();
 
-    if (shader->isCreateOK() && shader->isEnableOK() && mesh != NULL)
-    {
+        if (shader->isCreateOK() && shader->isEnableOK() && mesh != NULL)
+        {
 
             m_IAHandle = glGetAttribLocation(shader->getProgramHandle(), m_InputVertexAttributeName.c_str());
             LOGD("call glGetAttribLocation(%d, %s), get the input attribute handle is %d", shader->getProgramHandle(), m_InputVertexAttributeName.c_str(), m_IAHandle);
@@ -323,26 +324,26 @@ bool GLInputVertexAttribute::Enable()
             {
                 CALL_GL(glEnableVertexAttribArray(m_IAHandle));
 
-        if (mesh->isUseCPUBuffer())
-        {
-            // use cpu memory's vertex buffer pointer
+                if (mesh->isUseCPUBuffer())
+                {
+                    // use cpu memory's vertex buffer pointer
                     CALL_GL(glVertexAttribPointer(m_IAHandle, m_IAElementNum, m_IAType, m_IANormalized, m_IAStride, (BYTE*)(mesh->getVertexDataPointer()) + m_IAOffset));
-        }
-        else
-        {
-            // use gpu memory's vertex buffer
+                }
+                else
+                {
+                    // use gpu memory's vertex buffer
                     CALL_GL(glBindBuffer(GL_ARRAY_BUFFER, mesh->getVBOHandle()));
                     CALL_GL(glVertexAttribPointer(m_IAHandle, m_IAElementNum, m_IAType, m_IANormalized, m_IAStride, (BYTE*)m_IAOffset));
-        }
-        result = true;
-    }
+                }
+                result = true;
+            }
             else
             {
                 LOGE("glGetAttribLocation return -1");
                 result = false;
             }
         }
-    m_bIsEnableOK = result;
+        m_bIsEnableOK = result;
     }
     return isEnableOK();
 }
@@ -362,7 +363,7 @@ bool GLInputVertexAttribute::Disable()
         }
         result = true;
 
-    m_bIsEnableOK = !result;
+        m_bIsEnableOK = !result;
     }
     return !isEnableOK();
 }
@@ -411,21 +412,22 @@ bool GLRenderable::Draw()
     if (m_pGeometry->getMesh()->isUseCPUBuffer())
     {
         GLvoid* indices = (BYTE*)(m_pGeometry->getMesh()->getIndexDataPointer()) + m_pGeometry->getMesh()->getIndexDataOffset(); // pointer to index array pointer or offset
-        glDrawElements(mode, count, type, indices);
+        CALL_GL(glDrawElements(mode, count, type, indices));
     }
     else
     {
         GLvoid* offset = (BYTE*)(m_pGeometry->getMesh()->getIndexDataOffset());
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_pGeometry->getMesh()->getIBOHandle());
-        glDrawElements(mode, count, type, offset);
+        CALL_GL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_pGeometry->getMesh()->getIBOHandle()));
+        CALL_GL(glDrawElements(mode, count, type, offset));
     }
-
 
     return true;
 }
 
 bool GLRenderable::Destroy()
 {
+    // Renderable only call Disable of ElementOfRenderable, but not Dispose() of ElementOfRenderable, that is because "Renderable did not hold the life cycle of ElementOfRenderable, but juse use them"
+    // Scene will call ElementOfRenderable's Dispose(), that is because "Scene hold the life cycle of ElementOfRenderable"
     m_pGeometry->getMesh()->Disable();
     m_pGeometry->getShader()->Disable();
     std::vector<GLInputVertexAttribute*> m_InputAttributes = m_pGeometry->getAllInputVertexAttributes();
@@ -433,6 +435,11 @@ bool GLRenderable::Destroy()
     for (std::vector<GLInputVertexAttribute*>::iterator i = m_InputAttributes.begin(); i != m_InputAttributes.end(); ++i)
     {
         (*i)->Disable();
+    }
+
+    if (m_pGeometry->getMesh()->isUseCPUBuffer() == false)
+    {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
     return true;
 }

@@ -4,6 +4,26 @@
 #include <string>
 #include "type_defines.h"
 #include "renderable.h"
+#include "log.h"
+
+// glGetError
+#ifdef GLDEBUG 
+    #define CALL_GL(exp) {                                        \
+    exp;                                                          \
+    unsigned int err = GL_NO_ERROR;                               \
+    do{                                                           \
+          err = glGetError();                                     \
+          if(err != GL_NO_ERROR){                                 \
+               LOGE("glGetError() show error %d at %s at %d", err, __FILE__,__LINE__);\
+          }                                                       \
+     }while(err != GL_NO_ERROR);                                  \
+    }
+
+    #define FAILED_GL(res)  (res) != GL_NO_ERROR 
+
+#else 
+    #define CALL_GL(exp) exp 
+#endif  
 
 class GLRenderable;
 

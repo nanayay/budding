@@ -1,3 +1,7 @@
+#ifdef _GDB_DEBUG_
+    #include <unistd.h>
+#endif
+
 #include "android_application.h"
 #include "log.h"
 #include "kernel.h"
@@ -18,6 +22,10 @@ bool AndroidApplication::Initialize()
 {
     LOGD("app_dummy");
     app_dummy();
+
+#ifdef _GDB_DEBUG_
+    sleep(10);
+#endif
 
     bool result = false;
 
