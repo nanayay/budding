@@ -76,13 +76,11 @@ namespace Models
 
     bool Import()
     {
-        // TODO,
-        // Memory leak for ElementOfRenderable? leave it??
-        #if 0
-            m_pGLMesh = new GLMesh(true); // true will use client buffer, false [default] will use gpu buffer
-        #else
-            m_pGLMesh = new GLMesh();
-        #endif
+    #if 0
+        m_pGLMesh = new GLMesh(true); // true will use client buffer, false [default] will use gpu buffer
+    #else
+        m_pGLMesh = new GLMesh();
+    #endif
         m_pGLSL = new GLSLShader(&vss, &fss);
         m_IAPos = new GLInputVertexAttribute(ia_pos);
         m_IAColor = new GLInputVertexAttribute(ia_color);
@@ -116,8 +114,35 @@ namespace Models
         m_IAColor->setElementNum(num_of_element_in_color_for_one_vertex);
         m_IAColor->setOffset(offset_of_color);
 
+        // Todo Notebook
+        // Note, can not call these Create() here, if you call it, when you call GLRenderable::Draw()'s glDrawElements will show crash
+        // This crash is very hard to debug, since it is not part of glGetError, nor part of gdb catch-able crash, only test-try-log can help this, you can see the debug.create.later.log and debug.create.first.log to compare
+        // The root of this crash is when the Create() is calling glFoo, the EGL is not init yet, you must wait the EGL be initialized done, then call these Create()
+        //m_pGLMesh->Create();
+        //m_pGLSL ->Create();
+        //m_IAPos->Create();
+        //m_IAColor->Create();
+
         return true;
     }
+
+    bool DisImport()
+    {
+        // TODO, find some place to Call DisImport to ignore the memory leak about ElementOfRenderable
+        m_pGLMesh->Dispose();
+        m_pGLSL->Dispose();
+        m_IAPos->Dispose();
+        m_IAColor->Dispose();
+
+        delete m_pGLMesh;
+        delete m_pGLSL;
+        delete m_IAPos;
+        delete m_IAColor;
+
+        return true;
+    }
+
+
 };
 
 bool GLBasicScene::Load()

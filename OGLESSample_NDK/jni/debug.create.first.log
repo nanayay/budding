@@ -1,0 +1,64 @@
+D/OGLESSample( 1534): Android Timer create
+D/OGLESSample( 1534): EGLRenderer create
+D/OGLESSample( 1534): Android Task create
+D/OGLESSample( 1534): Android Timer add to kernel
+D/OGLESSample( 1534): EGLRenderer add to kernel
+D/OGLESSample( 1534): Android Task add to kernel
+D/OGLESSample( 1534): Calling glGenBuffers(2, vbos)
+D/OGLESSample( 1534): Calling glBindBuffer(GL_ARRAY_BUFFER, m_vbo)
+D/OGLESSample( 1534): Calling glBufferData(GL_ARRAY_BUFFER, this->getVertexDataS
+ize(), this->getVertexDataPointer(), GL_STATIC_DRAW)
+D/OGLESSample( 1534): Calling glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo)
+D/OGLESSample( 1534): Calling glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->getInd
+exDataSize(), this->getIndexDataPointer(), GL_STATIC_DRAW)
+E/OGLESSample( 1534): GLSL program handle create: 0
+D/OGLESSample( 1534): kernel execute begin
+D/OGLESSample( 1534): android_handle_cmd() APP_CMD_RESUME cmd begin
+D/OGLESSample( 1534): android_handle_cmd() APP_CMD_RESUME cmd end
+D/OGLESSample( 1534): android_handle_cmd() APP_CMD_INIT_WINDOW cmd begin
+D/OGLESSample( 1534): android_handle_cmd() app->window != null
+D/OGLESSample( 1534): EGLRenderer Init() begin
+D/OGLESSample( 1534): Init EGL begin
+D/libEGL  ( 1534): loaded /system/lib/egl/libEGL_emulation.so
+D/        ( 1534): HostConnection::get() New Host Connection established 0x2a1be
+ae8, tid 1547
+D/libEGL  ( 1534): loaded /system/lib/egl/libGLESv1_CM_emulation.so
+D/libEGL  ( 1534): loaded /system/lib/egl/libGLESv2_emulation.so
+D/OGLESSample( 1534): EGL Max Swap Interval is 10
+I/ActivityManager(  279): Displayed com.ayan.oglsample/android.app.NativeActivit
+y: +11s401ms
+D/OGLESSample( 1534): EGL Min Swap Interval is 1
+D/OGLESSample( 1534): EGLRenderer eglCreateWindowSurface() success
+D/OGLESSample( 1534): EGLRenderer eglCreateContext() success
+D/OGLESSample( 1534): EGLRenderer eglMakeCurrent() success
+D/OGLESSample( 1534): EGLRenderer eglQuerySurface() success, m_width is 768
+D/OGLESSample( 1534): EGLRenderer eglQuerySurface() success, m_height is 1184
+D/OGLESSample( 1534): EGLRenderer eglSwapInterval to disable vsync success
+D/OGLESSample( 1534): Init EGL end
+D/OGLESSample( 1534): super class Renderer::Init() begin
+E/OGLESSample( 1534): GLSL program handle create: 3
+D/OGLESSample( 1534): super class Renderer::Init() end
+D/OGLESSample( 1534): EGLRenderer Init() end
+D/OGLESSample( 1534): android_handle_cmd() APP_CMD_INIT_WINDOW cmd end
+D/OGLESSample( 1534): Calling glUseProgram(m_programId)
+D/OGLESSample( 1534): glUseProgram(3)
+D/OGLESSample( 1534): call glGetAttribLocation(3, a_vPosition), get the input at
+tribute handle is 0
+D/OGLESSample( 1534): Calling glEnableVertexAttribArray(m_IAHandle)
+D/OGLESSample( 1534): Calling glBindBuffer(GL_ARRAY_BUFFER, mesh->getVBOHandle()
+)
+D/OGLESSample( 1534): Calling glVertexAttribPointer(m_IAHandle, m_IAElementNum,
+m_IAType, m_IANormalized, m_IAStride, (BYTE*)m_IAOffset)
+D/OGLESSample( 1534): call glGetAttribLocation(3, a_vColor), get the input attri
+bute handle is 1
+D/OGLESSample( 1534): Calling glEnableVertexAttribArray(m_IAHandle)
+D/OGLESSample( 1534): Calling glBindBuffer(GL_ARRAY_BUFFER, mesh->getVBOHandle()
+)
+D/OGLESSample( 1534): Calling glVertexAttribPointer(m_IAHandle, m_IAElementNum,
+m_IAType, m_IANormalized, m_IAStride, (BYTE*)m_IAOffset)
+D/OGLESSample( 1534): Calling glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_pGeometry-
+>getMesh()->getIBOHandle())
+D/OGLESSample( 1534): Calling glDrawElements(mode, count, type, offset)
+F/libc    ( 1534): Fatal signal 11 (SIGSEGV) at 0x00000000 (code=1), thread 1547
+ (.ayan.oglsample)
+I/DEBUG   (   34): *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *
