@@ -17,6 +17,7 @@ public:
     virtual bool Create();
     virtual bool Enable();
     virtual bool Disable();
+    virtual bool Dispose();
 
     // getter
     bool isUseCPUBuffer() const { return m_bIsUseCPUBuffer; }
@@ -78,6 +79,7 @@ public:
     virtual bool Create();
     virtual bool Enable();
     virtual bool Disable();
+    virtual bool Dispose();
 
     // getter
     GLuint getHandle() const { return m_IAHandle; }

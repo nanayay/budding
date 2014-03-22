@@ -11,6 +11,8 @@ GLMesh::GLMesh(bool use_cpu_buffer, GLRenderable* renderable)
 
 GLMesh::~GLMesh()
 {
+    this->Disable();
+    this->Dispose();
 }
 
 bool GLMesh::Create()
@@ -66,6 +68,20 @@ bool GLMesh::Disable()
     // Set result to true or false
     m_bIsEnableOK = !result;
     return result;    
+
+bool GLMesh::Dispose()
+{
+    if (isCreateOK())
+    {
+        bool result = false;
+
+        GLuint vbos[] = {m_vbo, m_ibo};
+        CALL_GL(glDeleteBuffers(sizeof(vbos)/sizeof(vbos[0]), vbos));
+        result = true;
+
+        m_bIsCreateOK = !result;
+    }
+    return !isCreateOK();
 }
 
 
@@ -256,6 +272,8 @@ GLInputVertexAttribute::GLInputVertexAttribute(std::string name, GLRenderable* r
 
 GLInputVertexAttribute::~GLInputVertexAttribute()
 {
+    this->Disable();
+    this->Dispose();
 }
 
 bool GLInputVertexAttribute::Create()
@@ -315,6 +333,18 @@ bool GLInputVertexAttribute::Disable()
 
     m_bIsEnableOK = !result;
     return result;
+
+bool GLInputVertexAttribute::Dispose()
+{
+    if (isCreateOK())
+    {
+        bool result = false;
+
+        result = true;
+
+        m_bIsCreateOK = !result;
+    }
+    return !isCreateOK();
 }
 
 bool GLRenderable::Init()

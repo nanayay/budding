@@ -28,6 +28,18 @@ bool ElementOfRenderable::Disable()
     // Set result to true or false
     m_bIsEnableOK = !result;
     return result;
+
+bool ElementOfRenderable::Dispose()
+{
+    if (isCreateOK())
+    {
+        bool result = false;
+        // Do what you have to do, and,
+        result = true;
+        // Set result to true or false
+        m_bIsCreateOK = !result;
+    }
+    return !isCreateOK();
 }
 
 Shader::Shader(bool init_deep_copy_shader_source_str)
@@ -74,4 +86,18 @@ bool Shader::Disable()
     bool result = UnSetup();
     m_bIsEnableOK = !result;
     return result;
+
+bool Shader::Dispose()
+{
+    if (isCreateOK())
+    {
+        bool result = false;
+
+        DiscardShaderSource();
+        Remove();
+        result = true;
+
+        m_bIsCreateOK = !result;
+    }
+    return !isCreateOK();
 }
