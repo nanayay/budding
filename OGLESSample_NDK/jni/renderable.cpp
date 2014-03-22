@@ -6,6 +6,7 @@ bool ElementOfRenderable::Create()
     {
         bool result = false;
         // Do what you have to do, and,
+        result = true;
         // Set result to true or false
         m_bIsCreateOK = result;
     }
@@ -14,20 +15,29 @@ bool ElementOfRenderable::Create()
 
 bool ElementOfRenderable::Enable()
 {
-    bool result = false;
-    // Do what you have to do, and,
-    // Set result to true or false
-    m_bIsEnableOK = result;
+    if (isCreateOK() && isEnableOK() != true)
+    {
+        bool result = false;
+        // Do what you have to do, and,
+        result = true;
+        // Set result to true or false
+        m_bIsEnableOK = result;
+    }
     return isEnableOK();
 }
 
 bool ElementOfRenderable::Disable()
 {
-    bool result = true;
-    // Do what you have to do, and,
-    // Set result to true or false
-    m_bIsEnableOK = !result;
-    return result;
+    if (isCreateOK() && isEnableOK())
+    {
+        bool result = false;
+        // Do what you have to do, and,
+        result = true;
+        // Set result to true or false
+        m_bIsEnableOK = !result;
+    }
+    return !isEnableOK();
+}
 
 bool ElementOfRenderable::Dispose()
 {
@@ -77,15 +87,25 @@ bool Shader::Create()
 
 bool Shader::Enable()
 {
-    m_bIsEnableOK = Setup();
+    if (isCreateOK() && isEnableOK() != true)
+    {
+        bool result = false;
+        result = Setup();
+        m_bIsEnableOK = result;
+    }
     return isEnableOK();
 }
 
 bool Shader::Disable()
 {
-    bool result = UnSetup();
-    m_bIsEnableOK = !result;
-    return result;
+    if (isCreateOK() && isEnableOK())
+    {
+        bool result = false;
+        result = UnSetup();
+        m_bIsEnableOK = !result;
+    }
+    return !isEnableOK();
+}
 
 bool Shader::Dispose()
 {
