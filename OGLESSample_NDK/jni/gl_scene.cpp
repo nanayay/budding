@@ -134,8 +134,6 @@ bool GLBasicScene::Load()
 
     Models::Import();
 
-    // TODO Here, make sure the IA and Mesh will not be cycle refer here, for example, you want to init IA, but did not find mesh and shader
-    
     // it would say, make Geometry also hold the memory of Mesh, Shader, IA, than it will make the scene easy
     // but, it is not good when you have a big scene and you want to reuse others
     m_pGLRect->setMesh(Models::m_pGLMesh);
