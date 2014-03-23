@@ -290,6 +290,11 @@ GLInputVertexAttribute::~GLInputVertexAttribute()
 
 bool GLInputVertexAttribute::Create()
 {
+    // TODO Here
+    // Enable and Disable should be called several times
+    // Create and Dispose should not be called several times
+
+    // Move glGetAttribLocation from Create to Enable, IA handle should be queried in real time
     if (isCreateOK() == false)
     {
         bool result = false;
