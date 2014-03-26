@@ -19,6 +19,9 @@ public:
     virtual bool Draw() = 0;
     virtual bool Destroy() = 0;
 
+protected:
+    virtual bool BindElementOfRenderableToMe() = 0;
+
 };
 
 class ElementOfRenderable

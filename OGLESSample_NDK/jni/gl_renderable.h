@@ -163,6 +163,9 @@ public:
     virtual bool Draw();
     virtual bool Destroy();
 
+protected:
+    virtual bool BindElementOfRenderableToMe();
+
 private:
     Geometry<GLMesh, GLSLShader, GLInputVertexAttribute>* m_pGeometry;
 
@@ -204,6 +207,9 @@ public:
         m_bIsClearDepth = depth;
         m_bIsClearStencil = stencil;
     }
+
+protected:
+    virtual bool BindElementOfRenderableToMe();
 
 private:
     float m_fClearColorRed, m_fClearColorGreen, m_fClearColorBlue, m_fClearColorAlpha;

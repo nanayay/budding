@@ -388,6 +388,7 @@ bool GLInputVertexAttribute::Dispose()
 
 bool GLRenderable::Init()
 {
+    BindElementOfRenderableToMe();
     m_pGeometry->getMesh()->Create();
     m_pGeometry->getShader()->Create();
     std::vector<GLInputVertexAttribute*> m_InputAttributes = m_pGeometry->getAllInputVertexAttributes();
@@ -401,6 +402,7 @@ bool GLRenderable::Init()
 
 bool GLRenderable::Draw()
 {
+    BindElementOfRenderableToMe();
     m_pGeometry->getMesh()->Enable();
     m_pGeometry->getShader()->Enable();
     std::vector<GLInputVertexAttribute*> m_InputAttributes = m_pGeometry->getAllInputVertexAttributes();
@@ -431,6 +433,7 @@ bool GLRenderable::Draw()
 
 bool GLRenderable::Destroy()
 {
+    BindElementOfRenderableToMe();
     // Renderable only call Disable of ElementOfRenderable, but not Dispose() of ElementOfRenderable, that is because "Renderable did not hold the life cycle of ElementOfRenderable, but juse use them"
     // Scene will call ElementOfRenderable's Dispose(), that is because "Scene hold the life cycle of ElementOfRenderable"
     m_pGeometry->getMesh()->Disable();
@@ -471,22 +474,40 @@ std::vector<GLInputVertexAttribute*> GLRenderable::getAllInputVertexAttributes()
 
 bool GLRenderable::setMesh(GLMesh* val)
 {
-    val->setRenderable(this);
     this->m_pGeometry->setMesh(val);
     return true;
 }
 
 bool GLRenderable::setShader(GLSLShader* val)
 {
-    val->setRenderable(this);
     this->m_pGeometry->setShader(val);
     return true;
 }
 
 bool GLRenderable::addInputVertexAttribute(GLInputVertexAttribute* val)
 {
-    val->setRenderable(this);
     this->m_pGeometry->addInputVertexAttribute(val);
+    return true;
+}
+
+bool GLRenderable::BindElementOfRenderableToMe()
+{
+    if (m_pGeometry->getMesh()->getRenderable() != this)
+    {
+        m_pGeometry->getMesh()->setRenderable(this);
+    }
+    if (m_pGeometry->getShader()->getRenderable() != this)
+    {
+        m_pGeometry->getShader()->setRenderable(this);
+    }
+    std::vector<GLInputVertexAttribute*> allIAs = m_pGeometry->getAllInputVertexAttributes();
+    for (std::vector<GLInputVertexAttribute*>::iterator i = allIAs.begin(); i != allIAs.end(); ++i)
+    {
+        if ((*i)->getRenderable() != this)
+        {
+            (*i)->setRenderable(this);
+        }
+    }
     return true;
 }
 
@@ -533,3 +554,9 @@ bool GLClearRenderable::Destroy()
 {
     return true;
 }
+
+bool GLClearRenderable::BindElementOfRenderableToMe()
+{
+    return true;
+}
+
