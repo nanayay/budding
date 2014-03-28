@@ -53,7 +53,7 @@ bool GLMesh::Create()
 
 bool GLMesh::Enable()
 {
-    if (isCreateOK() && isEnableOK() != true)
+    if (isCreateOK())
     {
         bool result = false;
 
@@ -67,7 +67,7 @@ bool GLMesh::Enable()
 
 bool GLMesh::Disable()
 {
-    if (isCreateOK() && isEnableOK())
+    if (isCreateOK())
     {
         bool result = false;
 
@@ -363,7 +363,7 @@ bool GLInputVertexAttribute::Create()
 
 bool GLInputVertexAttribute::Enable()
 {
-    if (isCreateOK() && isEnableOK() != true)
+    if (isCreateOK())
     {
         bool result = false;
 
@@ -406,7 +406,7 @@ bool GLInputVertexAttribute::Enable()
 
 bool GLInputVertexAttribute::Disable()
 {
-    if (isCreateOK() && isEnableOK())
+    if (isCreateOK())
     {
         bool result = false;
 

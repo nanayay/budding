@@ -15,7 +15,7 @@ bool ElementOfRenderable::Create()
 
 bool ElementOfRenderable::Enable()
 {
-    if (isCreateOK() && isEnableOK() != true)
+    if (isCreateOK())
     {
         bool result = false;
         // Do what you have to do, and,
@@ -28,7 +28,7 @@ bool ElementOfRenderable::Enable()
 
 bool ElementOfRenderable::Disable()
 {
-    if (isCreateOK() && isEnableOK())
+    if (isCreateOK())
     {
         bool result = false;
         // Do what you have to do, and,
@@ -87,7 +87,7 @@ bool Shader::Create()
 
 bool Shader::Enable()
 {
-    if (isCreateOK() && isEnableOK() != true)
+    if (isCreateOK())
     {
         bool result = false;
         result = Setup();
@@ -98,7 +98,7 @@ bool Shader::Enable()
 
 bool Shader::Disable()
 {
-    if (isCreateOK() && isEnableOK())
+    if (isCreateOK())
     {
         bool result = false;
         result = UnSetup();
