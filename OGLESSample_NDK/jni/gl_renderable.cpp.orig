@@ -519,6 +519,7 @@ bool GLRenderable::Draw()
 
 bool GLRenderable::Destroy()
 {
+<<<<<<< HEAD
     // Renderable did not hold the life cycle of ElementOfRenderable, but juse use them
     // Scene hold the life cycle of ElementOfRenderable
     // Although, ElementOfRenderable's Create() and Dispose() can be called several times, but it is not fine to call it in Renderable
@@ -528,9 +529,11 @@ bool GLRenderable::Destroy()
     // GLRenderable's Destory() will be called in Renderer's Destory() or when GLScene's UnLoad() is called
     // Since Renderable did not hold the lifecycle of ElementOfRenderable, just Disable them when Destroy Renderable
 
+=======
     BindElementOfRenderableToMe();
     // Renderable only call Disable of ElementOfRenderable, but not Dispose() of ElementOfRenderable, that is because "Renderable did not hold the life cycle of ElementOfRenderable, but juse use them"
     // Scene will call ElementOfRenderable's Dispose(), that is because "Scene hold the life cycle of ElementOfRenderable"
+>>>>>>> origin/master
     m_pGeometry->getMesh()->Disable();
     m_pGeometry->getShader()->Disable();
     std::vector<GLInputVertexAttribute*> m_InputAttributes = m_pGeometry->getAllInputVertexAttributes();
@@ -601,13 +604,13 @@ bool GLRenderable::addInputVertexAttribute(GLInputVertexAttribute* val)
     return true;
 }
 
+<<<<<<< HEAD
 bool addTexture(GLTexture* val)
 {
     this->m_pGeometry->addTexture(val);
     return true;
 
-}
-
+=======
 bool GLRenderable::BindElementOfRenderableToMe()
 {
     if (m_pGeometry->getMesh()->getRenderable() != this)
@@ -627,6 +630,7 @@ bool GLRenderable::BindElementOfRenderableToMe()
         }
     }
     return true;
+>>>>>>> origin/master
 }
 
 GLClearRenderable::GLClearRenderable()

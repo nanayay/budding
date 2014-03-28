@@ -271,11 +271,14 @@ public:
     virtual bool Draw();
     virtual bool Destroy();
 
+<<<<<<< HEAD
     // todo here
     // add check to render, in which texture's array should be no zero size, then apply the texture, sampler is not null, then apply the sampler
 
+=======
 protected:
     virtual bool BindElementOfRenderableToMe();
+>>>>>>> origin/master
 
 private:
     Geometry<GLMesh, GLSLShader, GLSampler, GLTexture, GLInputVertexAttribute>* m_pGeometry;
