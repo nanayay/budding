@@ -57,7 +57,11 @@ bool GLMesh::Enable()
     {
         bool result = false;
 
-        // Note, glBindBuffer for VBO and IBO will be called in IA's Enable, and Renderable's Draw(), no need to call here
+        // Note, glBindBuffer for VBO will be called in IA's Enable, and IBO's bind will be called in GLMesh's Enable
+        if (isUseCPUBuffer() == false)
+        {
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
+        }
         result = true;
 
         m_bIsEnableOK = result;
@@ -71,7 +75,13 @@ bool GLMesh::Disable()
     {
         bool result = false;
 
-        // Note, UnBind buffer for VBO will be called in IA's Disable, but IBO's unbind will be called in Renderable's Destroy() 
+        // Note, UnBind buffer for VBO will be called in IA's Disable, but IBO's unbind will be called in GLMesh's Disable
+
+        if (isUseCPUBuffer() == false)
+        {
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        }
+
         result = true;
 
         m_bIsEnableOK = !result;
@@ -341,9 +351,20 @@ GLInputVertexAttribute::~GLInputVertexAttribute()
 
 bool GLInputVertexAttribute::Create()
 {
-    // TODO Here
-    // Enable and Disable should be called several times
-    // Create and Dispose should not be called several times
+    // Note
+    // Notebook here
+    
+    // Mesh's Create and Dispose will call glGenBuffers and glDeleteBuffers, and upload data to it
+    // Mesh's Enable and Disable will do nothing
+    // IA's Create and Dispose will do nothing
+    // IA's Enable and Disable will call glGetAttribLocation, glEnableVertexAttribArray, glVertexAttribPointer, etc
+    // Shader's Create and Dispose will call glCreateProgram, glDeleteProgram
+    // Shader's Enable and Disable will call glUseProgram
+
+    // Enable and Disable should can be called several times
+    //     - Way 1: after call Enable() in Draw() of Renderable, call Disable() before out-of-scope [good OOP, but bad performance]
+    //     - Way 2: just make Enable & Disable did not hold the flag for is_Enable_OK, call Enable will do what it have to do [good performance, good OOP] [Choose this one]
+    // Create and Dispose should can not be called several times
 
     // Move glGetAttribLocation from Create to Enable, IA handle should be queried in real time
     if (isCreateOK() == false)
@@ -437,6 +458,17 @@ bool GLInputVertexAttribute::Dispose()
     return !isCreateOK();
 }
 
+
+
+
+// Renderable will also call ElementOfRenderable's Create and Dispose
+// Scene will also do call ElementOfRenderable's Create and Dispose
+// but ElementOfRenderable's Create and Dispose can be called several times
+// Although, it is fine to call ElementOfRenderable's Create and Dispose in different places, in theory, Scene hold the lifecycle of ElementOfRenderable, Renderable just use it
+// Enable() and Disable() of ElementOfRenderable will be re-call-able
+//    - in Renderable's Draw() will no need to call Disable() before exit, that is a good cpu performance improvement
+//    - Enable() and Disable() re-call-able will make the next Renderable's Draw() can over-write the current one's OGL states, in case they share the same IA, Mesh, or Shader
+
 bool GLRenderable::Init()
 {
     m_pGeometry->getMesh()->Create();
@@ -485,8 +517,15 @@ bool GLRenderable::Draw()
 
 bool GLRenderable::Destroy()
 {
-    // Renderable only call Disable of ElementOfRenderable, but not Dispose() of ElementOfRenderable, that is because "Renderable did not hold the life cycle of ElementOfRenderable, but juse use them"
-    // Scene will call ElementOfRenderable's Dispose(), that is because "Scene hold the life cycle of ElementOfRenderable"
+    // Renderable did not hold the life cycle of ElementOfRenderable, but juse use them
+    // Scene hold the life cycle of ElementOfRenderable
+    // Although, ElementOfRenderable's Create() and Dispose() can be called several times, but it is not fine to call it in Renderable
+    // Only GLScene's UnLoad() can call ElementOfRenderable's Dispose()
+    // And, Renderable and GLScene's Load() can call ElementOfRenderable's Create()
+
+    // GLRenderable's Destory() will be called in Renderer's Destory() or when GLScene's UnLoad() is called
+    // Since Renderable did not hold the lifecycle of ElementOfRenderable, just Disable them when Destroy Renderable
+
     m_pGeometry->getMesh()->Disable();
     m_pGeometry->getShader()->Disable();
     std::vector<GLInputVertexAttribute*> m_InputAttributes = m_pGeometry->getAllInputVertexAttributes();
@@ -494,11 +533,6 @@ bool GLRenderable::Destroy()
     for (std::vector<GLInputVertexAttribute*>::iterator i = m_InputAttributes.begin(); i != m_InputAttributes.end(); ++i)
     {
         (*i)->Disable();
-    }
-
-    if (m_pGeometry->getMesh()->isUseCPUBuffer() == false)
-    {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
     return true;
 }

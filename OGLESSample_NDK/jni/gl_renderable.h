@@ -219,13 +219,4 @@ private:
 
 };
 
-// TODO
-// - Render Pass class
-//     - 
-// - Scene class
-// - 
-// - GLRenderable feed
-//     - renderable->setMesh(val);
-//     - renderable->getMesh()->setRenderable(renderable);
-
 #endif

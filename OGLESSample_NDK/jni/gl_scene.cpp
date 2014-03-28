@@ -118,6 +118,8 @@ namespace Models
         // Note, can not call these Create() here, if you call it, when you call GLRenderable::Draw()'s glDrawElements will show crash
         // This crash is very hard to debug, since it is not part of glGetError, nor part of gdb catch-able crash, only test-try-log can help this, you can see the debug.create.later.log and debug.create.first.log to compare
         // The root of this crash is when the Create() is calling glFoo, the EGL is not init yet, you must wait the EGL be initialized done, then call these Create()
+
+        // TODO here, make GLScene's Import() can call Create() after EGL init finished
         //m_pGLMesh->Create();
         //m_pGLSL ->Create();
         //m_IAPos->Create();
@@ -194,5 +196,8 @@ bool GLBasicScene::UnLoad()
 
         m_pRenderablesVector->erase(m_pRenderablesVector->begin(), m_pRenderablesVector->end());
     }
+
+    Models::DisImport();
+
     return true;
 }
