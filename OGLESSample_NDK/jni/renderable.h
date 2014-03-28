@@ -170,12 +170,45 @@ public:
     // TODO What about when Geometry is a template class?
 };
 
+class Texture
+    :public ElementOfRenderable
+{
+public:
+    explicit Texture(const std::string& name)
+        : m_name(name),
+          m_pTextureSampler(NULL)
+    {};
+    virtual ~Texture() {};
+
+public:
+    std::string getName() const { return m_name; }
+
+    bool operator==(const Texture& val) const { return m_name == val.getName(); }
+    bool operator()(const Texture* val) const { return m_name == val->getName(); }
+
+    void setSampler(TextureSampler* val) { m_pTextureSampler = val; }
+
+protected:
+    std::string m_name;
+    TextureSampler* m_pTextureSampler;
+
+};
+
+class TextureSampler
+    : public ElementOfRenderable
+{
+public:
+    explicit TextureSampler() {};
+    virtual ~TextureSampler() {};
+};
+
+
 // Geometry is more like a container than a normal class object, use template to hold the shader, input vertex attribute, mesh data for general manager
-template <typename MESH, typename SHADER, typename INPUTATTRIBUTE>
+template <typename MESH, typename SHADER, typename SAMPLER, typename TEXTURE, typename INPUTATTRIBUTE>
 class Geometry
 {
 public:
-    explicit Geometry(const std::string& name) : m_name(name) {};
+    explicit Geometry(const std::string& name) : m_name(name), m_pSampler(NULL) {};
     virtual ~Geometry() {};
 
     std::string getName() const { return m_name; }
@@ -186,6 +219,7 @@ public:
     // getter
     MESH* getMesh() const { return m_pMesh; }
     SHADER* getShader() const { return m_pShader; }
+    SAMPLER* getSampler() const { return m_pSampler; }
     std::vector<INPUTATTRIBUTE*> getAllInputVertexAttributes() const { return m_inputVertexAttributesVector; }
     INPUTATTRIBUTE* getInputVertexAttribute(std::string name) const
     {
@@ -193,16 +227,36 @@ public:
         typename std::vector<INPUTATTRIBUTE*>::const_iterator i = std::find_if(m_inputVertexAttributesVector.begin(), m_inputVertexAttributesVector.end(), INPUTATTRIBUTE(name));
         return i != m_inputVertexAttributesVector.end() ? *i : NULL;
     }
+    std::vector<TEXTURE*> getAllTextures() const { return m_textureVector; }
+    TEXTURE* getTexture(std::string name) const
+    {
+        typename std::vector<TEXTURE*>::const_iterator i = std::find_if(m_textureVector.begin(), m_textureVector.end(), TEXTURE(name));
+        return i != m_textureVector.end() ? *i : NULL;
+    }
 
     // setter
     void setMesh(MESH* val) { m_pMesh = val; }
     void setShader(SHADER* val) { m_pShader = val; }
-    void setAllInputVertexAttributes(std::vector<INPUTATTRIBUTE*> val) { m_inputVertexAttributesVector = val; }
+    void setSampler(SAMPLER* val) { m_pSampler = val; }
+    void setAllInputVertexAttributes(std::vector<INPUTATTRIBUTE*> val)
+    { 
+        m_inputVertexAttributesVector = val;
+    }
     void addInputVertexAttribute(INPUTATTRIBUTE* val)
     {
         typename std::vector<INPUTATTRIBUTE*>::iterator last = std::remove_if(m_inputVertexAttributesVector.begin(), m_inputVertexAttributesVector.end(), *val);
         m_inputVertexAttributesVector.erase(last, m_inputVertexAttributesVector.end());
         m_inputVertexAttributesVector.push_back(val);
+    }
+    void setAllTextures(std::vector<TEXTURE*> val)
+    {
+        m_textureVector = val;
+    }
+    void addTexture(TEXTURE* val)
+    {
+        typename std::vector<TEXTURE*>::iterator last = std::remove_if(m_textureVector.begin(), m_textureVector.end(), *val);
+        m_textureVector.erase(last, m_textureVector.end());
+        m_textureVector.push_back(val);
     }
 
 private:
@@ -211,6 +265,8 @@ private:
 private:
     MESH*   m_pMesh;
     SHADER* m_pShader;
+    SAMPLER* m_pSampler;
+    std::vector<TEXTURE*> m_textureVector;
     std::vector<INPUTATTRIBUTE*> m_inputVertexAttributesVector;
 
 };

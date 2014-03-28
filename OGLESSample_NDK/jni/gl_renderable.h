@@ -133,13 +133,111 @@ private:
     // IA's Enable() need both Mesh and Shader
 };
 
+// TODO here, glBindTexture in OGLES 2.0 only support GL_TEXTURE_2D, or GL_TEXTURE_CUBE_MAP, hence we should have two class for texture, one is texture2d, another one is texturecubemap
+class GLTexture
+    : public Texture
+{
+public:
+    explicit GLTexture(std::string uniform_name, GLRenderable* renderable = NULL);
+    virtual ~GLTexture();
+
+    virtual bool Create();
+    virtual bool Enable();
+    virtual bool Disable();
+    virtual bool Dispose();
+
+    // getter
+    GLuint  getTextureHandle() const { return m_textureHandle; }
+    GLenum  getTextureTarget() const { return m_texTarget; }
+    // GLint   getTextureMipLevelsNum() const { return m_mipLevels; }
+    // GLint   getTextureInternalFormat() const { return m_internalFormat; }
+    GLsizei getTextureWidth() const { return m_width; }
+    GLsizei getTextureHeight() const { return m_height; }
+    // GLint   getTextureBorder() const { return m_border; }
+    // GLenum  getTextureFormat() const { return m_format; }
+    // GLenum  getTextureType() const { return m_type; }
+    // void*   getTextureData() const { return m_pImageData; }
+
+    // setter
+    void setTextureTarget(GLenum val) { m_texTarget = val; }
+    void setTextureMipLevelsNum(GLint val) { m_mipLevels = val; }
+    void setTextureInternalFormat(GLint val) { m_internalFormat = val; }
+    void setTextureWidth(GLsizei val) { m_width = val; }
+    void setTextureHeight(GLsizei val) { m_height = val; }
+    void setTextureFormat(GLenum val) { m_format = val; }
+    void setTextureType(GLenum val) { m_type = val; }
+    void setTextureData(void* val) { m_pImageData = val; }
+    void setTextureUnPackAlignmentNum(GLint val) { m_unPackAlignmentNum = val; }
+    void setTextureSampler(GLSampler* val) { m_pSampler = val; }
+
+private:
+    // for glTexImage2D
+    GLuint m_textureHandle;
+    GLenum m_texTarget; // todo here, set it as default = GL_TEXTURE_2D;
+    GLint m_mipLevels;
+    GLint m_internalFormat;
+    GLsizei m_width;
+    GLsizei m_height;
+    const GLint m_border = 0;
+    GLenum m_format;
+    GLenum m_type;
+    void* m_pImageData;
+
+    // for glPixelStorei
+    const GLenum m_unPackAlignmentTarget = GL_UNPACK_ALIGNMENT;
+    GLint m_unPackAlignmentNum;
+
+    // for texture's sampler
+    GLSampler* m_pSampler;
+
+    // Todo here
+    // Add Sampler object
+
+    // Todo here
+    // only make sure texture object is not null, then set it
+
+    // todo here
+    // if sampler is null, that means no need to set, just use default value
+    // if renderable has sampler also not null, set renderable's sampler first, then when goto texture's sampler is also not null, set texture's sample also
+
+};
+
+class GLSampler
+    : public TextureSampler
+{
+public:
+    explicit GLSampler(GLRenderable* renderable = NULL);
+    virtual ~GLSampler();
+
+    virtual bool Create();
+    virtual bool Enable();
+    virtual bool Disable();
+    virtual bool Dispose();
+
+    // setter
+    void setSamplerTarget(GLenum val) { m_texTarget = val; }
+    void setSamplerParameter(GLenum name, GLint val) { m_texParameterName = name; m_texParameterVal.m_texIntParameterVal = val; }
+    void setSamplerParameter(GLenum name, GLfloat val) { m_texParameterName = name; m_texParameterVal.m_texFloatParameterVal = val; }
+
+private:
+    // for glTexParameter
+    GLenum m_texTarget;
+    GLenum m_texParameterName;
+    union
+    {
+        GLint m_texIntParameterVal;
+        GLfloat m_texFloatParameterVal;
+    } m_texParameterVal;
+};
+
+
 class GLRenderable
     : public Renderable
 {
 public:
     explicit GLRenderable(std::string name)
     {
-        m_pGeometry = new Geometry<GLMesh, GLSLShader, GLInputVertexAttribute>(name);
+        m_pGeometry = new Geometry<GLMesh, GLSLShader, GLSampler, GLTexture, GLInputVertexAttribute>(name);
     }
 
     virtual ~GLRenderable()
@@ -156,20 +254,29 @@ public:
     // getter
     GLMesh* getMesh() const;
     GLSLShader* getShader() const;
+    GLSampler* getSampler() const;
     GLInputVertexAttribute* getInputVertexAttribute(std::string name) const;
     std::vector<GLInputVertexAttribute*> getAllInputVertexAttributes() const;
+    GLTexture* getTexture(std::string name) const;
+    std::vector<GLTexture*> getAllTextures() const;
 
     // setter
     bool setMesh(GLMesh* val);
     bool setShader(GLSLShader* val);
+    bool setSampler(GLSampler* val);
     bool addInputVertexAttribute(GLInputVertexAttribute* val);
+    bool addTexture(GLTexture* val);
 
     virtual bool Init();
     virtual bool Draw();
     virtual bool Destroy();
 
+    // todo here
+    // add check to render, in which texture's array should be no zero size, then apply the texture, sampler is not null, then apply the sampler
+
+
 private:
-    Geometry<GLMesh, GLSLShader, GLInputVertexAttribute>* m_pGeometry;
+    Geometry<GLMesh, GLSLShader, GLSampler, GLTexture, GLInputVertexAttribute>* m_pGeometry;
 
 };
 

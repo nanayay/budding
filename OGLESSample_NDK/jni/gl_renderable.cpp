@@ -547,6 +547,11 @@ GLSLShader* GLRenderable::getShader() const
     return this->m_pGeometry->getShader();
 }
 
+GLSampler* getSampler() const
+{
+    return this->m_pGeometry->getSampler();
+}
+
 GLInputVertexAttribute* GLRenderable::getInputVertexAttribute(std::string name) const
 {
     return this->m_pGeometry->getInputVertexAttribute(name);
@@ -555,6 +560,16 @@ GLInputVertexAttribute* GLRenderable::getInputVertexAttribute(std::string name) 
 std::vector<GLInputVertexAttribute*> GLRenderable::getAllInputVertexAttributes() const
 {
     return this->m_pGeometry->getAllInputVertexAttributes();
+}
+
+GLTexture* getTexture(std::string name) const
+{
+    return this->m_pGeometry->getTexture(name);
+}
+
+std::vector<GLTexture*> getAllTextures() const
+{
+    return this->m_pGeometry->getAllTextures();
 }
 
 bool GLRenderable::setMesh(GLMesh* val)
@@ -571,11 +586,24 @@ bool GLRenderable::setShader(GLSLShader* val)
     return true;
 }
 
+bool setSampler(GLSampler* val)
+{
+    this->m_pGeometry->setSampler(val); 
+    return true;
+}
+
 bool GLRenderable::addInputVertexAttribute(GLInputVertexAttribute* val)
 {
     val->setRenderable(this);
     this->m_pGeometry->addInputVertexAttribute(val);
     return true;
+}
+
+bool addTexture(GLTexture* val)
+{
+    this->m_pGeometry->addTexture(val);
+    return true;
+
 }
 
 GLClearRenderable::GLClearRenderable()
