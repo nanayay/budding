@@ -71,6 +71,11 @@ public:
 
     GLuint getProgramHandle() const;
 
+    bool Create();
+    bool Enable();
+    bool Disable();
+    bool Dispose();
+
 protected:
     virtual bool CompileAndLink();
     virtual bool Setup();

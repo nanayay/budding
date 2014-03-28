@@ -60,10 +60,10 @@ public:
     explicit Shader(bool init_deep_copy_shader_source_str = false);
     virtual ~Shader();
 
-    virtual bool Create();
-    virtual bool Enable();
-    virtual bool Disable();
-    virtual bool Dispose();
+    virtual bool Create() = 0;
+    virtual bool Enable() = 0;
+    virtual bool Disable() = 0;
+    virtual bool Dispose() = 0;
 
 public:
     bool isInitDeepCopyShaderSourceStr() const { return m_isInitDeepCopyShaderSourceStr; }

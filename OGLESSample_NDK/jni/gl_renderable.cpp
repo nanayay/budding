@@ -270,6 +270,61 @@ void GLSLShader::DiscardShaderSource()
     }
 }
 
+bool GLSLShader::Create()
+{
+    if (isCreateOK() == false)
+    {
+        bool result = false;
+        result = CompileAndLink();
+        if (isInitDeepCopyShaderSourceStr() == true)
+        {
+            if (result == true)
+            {
+                DiscardShaderSource();
+            }
+        }
+        m_bIsCreateOK = result;
+    }
+    return isCreateOK();
+}
+
+bool GLSLShader::Enable()
+{
+    if (isCreateOK())
+    {
+        bool result = false;
+        result = Setup();
+        m_bIsEnableOK = result;
+    }
+    return isEnableOK();
+}
+
+bool GLSLShader::Disable()
+{
+    if (isCreateOK())
+    {
+        bool result = false;
+        result = UnSetup();
+        m_bIsEnableOK = !result;
+    }
+    return !isEnableOK();
+}
+
+bool GLSLShader::Dispose()
+{
+    if (isCreateOK())
+    {
+        bool result = false;
+
+        DiscardShaderSource();
+        Remove();
+        result = true;
+
+        m_bIsCreateOK = !result;
+    }
+    return !isCreateOK();
+}
+
 GLInputVertexAttribute::GLInputVertexAttribute(std::string name, GLRenderable* renderable)
     : InputVertexAttribute(name),
       m_IAHandle(-1),
