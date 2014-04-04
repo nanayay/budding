@@ -458,8 +458,183 @@ bool GLInputVertexAttribute::Dispose()
     return !isCreateOK();
 }
 
+GLTexture::GLTexture(const std::string& texture_name_id, const std::string& texture_uniform_name, GLSampler* texture_sampler)
+    : Texture(texture_name_id),
+      m_uniformName(texture_uniform_name),
+      m_texHandle(-1),
+      m_texTarget(GL_TEXTURE_2D),
+      m_mipLevels(1),
+      m_internalFormat(GL_RGBA),
+      m_width(0),
+      m_height(0),
+      m_border(0),
+      m_format(GL_RGBA),
+      m_type(GL_UNSIGNED_BYTE),
+      m_unPackAlignmentTarget(GL_UNPACK_ALIGNMENT),
+      m_unPackAlignmentNum(4)
+{
+    m_pTextureSampler = texture_sampler;
+}
 
+GLTexture::~GLTexture()
+{
+}
 
+GLTexture2D::GLTexture2D(const std::string& texture_name_id, const std::string& texture_uniform_name, GLSampler* texture_sampler, GLRenderable* renderable)
+    : GLTexture(texture_name_id, texture_uniform_name, texture_sampler),
+      m_pImageData(NULL)
+{
+    m_pRenderable = renderable;
+    m_texTarget = GL_TEXTURE_2D;
+}
+
+GLTexture2D::~GLTexture2D()
+{
+    this->Disable();
+    this->Dispose();
+}
+
+bool GLTexture2D::Create()
+{
+    if (isCreateOK() == false)
+    {
+        bool result = false;
+
+        glGenTextures(1, &m_texHandle);
+        glBindTexture(m_texTarget, m_texHandle);
+
+        glPixelStorei(m_unPackAlignmentTarget, m_unPackAlignmentNum);
+
+        glTexImage2D(m_texTarget, m_mipLevels, m_internalFormat, m_width, m_height, m_border, m_format, m_type, m_pImageData);
+
+        result = true;
+
+        m_bIsCreateOK = result;
+    }
+    return isCreateOK();
+}
+
+bool GLTexture2D::Enable()
+{
+    if (isCreateOK())
+    {
+        bool result = false;
+
+        GLuint program_handle = dynamic_cast<GLRenderable*>(this->getRenderable())->getShader()->getProgramHandle();
+
+        if (program_handle != 0)
+        {
+            GLint uniformLocation = glGetUniformLocation(program_handle, m_uniformName.c_str());
+
+            if (uniformLocation >= 0)
+            {
+                glActiveTexture(GL_TEXTURE0 + m_textureUnit);
+                glBindTexture(m_texTarget, m_texHandle);
+                glUniform1i(uniformLocation, m_textureUnit);
+
+                if (m_pTextureSampler != NULL)
+                {
+                    dynamic_cast<GLSampler*>(m_pTextureSampler)->setSamplerTarget(m_texTarget);
+                    dynamic_cast<GLSampler*>(m_pTextureSampler)->Enable();
+                }
+
+                result = true;
+            }
+            else
+            {
+                result = false;
+            }
+
+        }
+        else
+        {
+            result = false;
+        }
+
+        m_bIsEnableOK = result;
+    }
+    return isEnableOK();
+}
+
+bool GLTexture2D::Disable()
+{
+    if (isCreateOK())
+    {
+        bool result = false;
+
+        // Texture2D's Disable just no need to do anything, the later setting will overwrite it
+        result = true;
+
+        m_bIsEnableOK = !result;
+    }
+    return !isEnableOK();
+
+}
+
+bool GLTexture2D::Dispose()
+{
+    if (isCreateOK())
+    {
+        bool result = false;
+
+        glDeleteTextures(1, &m_texHandle);
+        result = true;
+
+        m_bIsCreateOK = !result;
+    }
+    return !isCreateOK();
+}
+
+GLSampler::GLSampler(GLRenderable* renderable)
+    : m_texTarget(GL_TEXTURE_2D)
+{
+    m_pRenderable = renderable;
+}
+
+GLSampler::~GLSampler()
+{
+    this->Disable();
+    this->Dispose();
+}
+
+bool GLSampler::Create()
+{
+    ElementOfRenderable::Create();
+}
+
+bool GLSampler::Enable()
+{
+    if (isCreateOK())
+    {
+        bool result = false;
+
+        for (std::vector<SamplerVal>::iterator i = m_SamplerVal.begin(); i != m_SamplerVal.end(); ++i)
+        {
+            if (i->first)
+            {
+                glTexParameteri(m_texTarget, i->second.first, i->second.second.m_texIntParameterVal);
+            }
+            else
+            {
+                glTexParameterf(m_texTarget, i->second.first, i->second.second.m_texFloatParameterVal);
+            }
+        }
+
+        result = true;
+        m_bIsEnableOK = result;
+    }
+    return isEnableOK();
+}
+
+bool GLSampler::Disable()
+{
+    ElementOfRenderable::Disable();
+}
+
+bool GLSampler::Dispose()
+{
+    ElementOfRenderable::Dispose();
+}
 
 // Renderable will also call ElementOfRenderable's Create and Dispose
 // Scene will also do call ElementOfRenderable's Create and Dispose
@@ -474,9 +649,19 @@ bool GLRenderable::Init()
     BindElementOfRenderableToMe();
     m_pGeometry->getMesh()->Create();
     m_pGeometry->getShader()->Create();
-    std::vector<GLInputVertexAttribute*> m_InputAttributes = m_pGeometry->getAllInputVertexAttributes();
+    if (m_pGeometry->getSampler() != NULL)
+    {
+        m_pGeometry->getSampler()->Create();
+    }
 
+    std::vector<GLInputVertexAttribute*> m_InputAttributes = m_pGeometry->getAllInputVertexAttributes();
     for (std::vector<GLInputVertexAttribute*>::iterator i = m_InputAttributes.begin(); i != m_InputAttributes.end(); ++i)
+    {
+        (*i)->Create();
+    }
+
+    std::vector<GLTexture2D*> m_Textures = m_pGeometry->getAllTextures();
+    for (std::vector<GLTexture2D*>::iterator i = m_Textures.begin(); i != m_Textures.end(); ++i)
     {
         (*i)->Create();
     }
@@ -486,11 +671,23 @@ bool GLRenderable::Init()
 bool GLRenderable::Draw()
 {
     BindElementOfRenderableToMe();
+
     m_pGeometry->getMesh()->Enable();
     m_pGeometry->getShader()->Enable();
-    std::vector<GLInputVertexAttribute*> m_InputAttributes = m_pGeometry->getAllInputVertexAttributes();
 
+    if (m_pGeometry->getSampler() != NULL)
+    {
+        m_pGeometry->getSampler()->Enable();
+    }
+
+    std::vector<GLInputVertexAttribute*> m_InputAttributes = m_pGeometry->getAllInputVertexAttributes();
     for (std::vector<GLInputVertexAttribute*>::iterator i = m_InputAttributes.begin(); i != m_InputAttributes.end(); ++i)
+    {
+        (*i)->Enable();
+    }
+
+    std::vector<GLTexture2D*> m_Textures = m_pGeometry->getAllTextures();
+    for (std::vector<GLTexture2D*>::iterator i = m_Textures.begin(); i != m_Textures.end(); ++i)
     {
         (*i)->Enable();
     }
@@ -528,17 +725,31 @@ bool GLRenderable::Destroy()
     // GLRenderable's Destory() will be called in Renderer's Destory() or when GLScene's UnLoad() is called
     // Since Renderable did not hold the lifecycle of ElementOfRenderable, just Disable them when Destroy Renderable
 
-    BindElementOfRenderableToMe();
     // Renderable only call Disable of ElementOfRenderable, but not Dispose() of ElementOfRenderable, that is because "Renderable did not hold the life cycle of ElementOfRenderable, but juse use them"
     // Scene will call ElementOfRenderable's Dispose(), that is because "Scene hold the life cycle of ElementOfRenderable"
+
+    BindElementOfRenderableToMe();
+
     m_pGeometry->getMesh()->Disable();
     m_pGeometry->getShader()->Disable();
-    std::vector<GLInputVertexAttribute*> m_InputAttributes = m_pGeometry->getAllInputVertexAttributes();
 
+    if (m_pGeometry->getSampler() != NULL)
+    {
+        m_pGeometry->getSampler()->Disable();
+    }
+
+    std::vector<GLInputVertexAttribute*> m_InputAttributes = m_pGeometry->getAllInputVertexAttributes();
     for (std::vector<GLInputVertexAttribute*>::iterator i = m_InputAttributes.begin(); i != m_InputAttributes.end(); ++i)
     {
         (*i)->Disable();
     }
+
+    std::vector<GLTexture2D*> m_Textures = m_pGeometry->getAllTextures();
+    for (std::vector<GLTexture2D*>::iterator i = m_Textures.begin(); i != m_Textures.end(); ++i)
+    {
+        (*i)->Disable();
+    }
+
     return true;
 }
 
@@ -552,7 +763,7 @@ GLSLShader* GLRenderable::getShader() const
     return this->m_pGeometry->getShader();
 }
 
-GLSampler* getSampler() const
+GLSampler* GLRenderable::getSampler() const
 {
     return this->m_pGeometry->getSampler();
 }
@@ -567,12 +778,12 @@ std::vector<GLInputVertexAttribute*> GLRenderable::getAllInputVertexAttributes()
     return this->m_pGeometry->getAllInputVertexAttributes();
 }
 
-GLTexture* getTexture(std::string name) const
+GLTexture2D* GLRenderable::getTexture(std::string name) const
 {
     return this->m_pGeometry->getTexture(name);
 }
 
-std::vector<GLTexture*> getAllTextures() const
+std::vector<GLTexture2D*> GLRenderable::getAllTextures() const
 {
     return this->m_pGeometry->getAllTextures();
 }
@@ -589,7 +800,7 @@ bool GLRenderable::setShader(GLSLShader* val)
     return true;
 }
 
-bool setSampler(GLSampler* val)
+bool GLRenderable::setSampler(GLSampler* val)
 {
     this->m_pGeometry->setSampler(val); 
     return true;
@@ -601,11 +812,10 @@ bool GLRenderable::addInputVertexAttribute(GLInputVertexAttribute* val)
     return true;
 }
 
-bool addTexture(GLTexture* val)
+bool GLRenderable::addTexture(GLTexture2D* val)
 {
     this->m_pGeometry->addTexture(val);
     return true;
-
 }
 
 bool GLRenderable::BindElementOfRenderableToMe()
@@ -618,8 +828,20 @@ bool GLRenderable::BindElementOfRenderableToMe()
     {
         m_pGeometry->getShader()->setRenderable(this);
     }
+    if (m_pGeometry->getSampler() != NULL && m_pGeometry->getSampler()->getRenderable() != this)
+    {
+        m_pGeometry->getSampler()->setRenderable(this);
+    }
     std::vector<GLInputVertexAttribute*> allIAs = m_pGeometry->getAllInputVertexAttributes();
     for (std::vector<GLInputVertexAttribute*>::iterator i = allIAs.begin(); i != allIAs.end(); ++i)
+    {
+        if ((*i)->getRenderable() != this)
+        {
+            (*i)->setRenderable(this);
+        }
+    }
+    std::vector<GLTexture2D*> allTextures = m_pGeometry->getAllTextures();
+    for (std::vector<GLTexture2D*>::iterator i = allTextures.begin(); i != allTextures.end(); ++i)
     {
         if ((*i)->getRenderable() != this)
         {

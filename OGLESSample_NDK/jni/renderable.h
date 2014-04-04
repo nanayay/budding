@@ -173,30 +173,6 @@ public:
     // TODO What about when Geometry is a template class?
 };
 
-class Texture
-    :public ElementOfRenderable
-{
-public:
-    explicit Texture(const std::string& name)
-        : m_name(name),
-          m_pTextureSampler(NULL)
-    {};
-    virtual ~Texture() {};
-
-public:
-    std::string getName() const { return m_name; }
-
-    bool operator==(const Texture& val) const { return m_name == val.getName(); }
-    bool operator()(const Texture* val) const { return m_name == val->getName(); }
-
-    void setSampler(TextureSampler* val) { m_pTextureSampler = val; }
-
-protected:
-    std::string m_name;
-    TextureSampler* m_pTextureSampler;
-
-};
-
 class TextureSampler
     : public ElementOfRenderable
 {
@@ -205,6 +181,28 @@ public:
     virtual ~TextureSampler() {};
 };
 
+class Texture
+    :public ElementOfRenderable
+{
+public:
+    explicit Texture(const std::string& texture_name)
+        : m_nameID(texture_name),
+          m_pTextureSampler(NULL)
+    {};
+    virtual ~Texture() {};
+
+public:
+    std::string getName() const { return m_nameID; }
+
+    bool operator==(const Texture& val) const { return m_nameID == val.getName(); }
+    bool operator()(const Texture* val) const { return m_nameID == val->getName(); }
+
+    void setTextureSampler(TextureSampler* val) { m_pTextureSampler = val; }
+
+protected:
+    std::string m_nameID;
+    TextureSampler* m_pTextureSampler;
+};
 
 // Geometry is more like a container than a normal class object, use template to hold the shader, input vertex attribute, mesh data for general manager
 template <typename MESH, typename SHADER, typename SAMPLER, typename TEXTURE, typename INPUTATTRIBUTE>
