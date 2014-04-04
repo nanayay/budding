@@ -507,6 +507,11 @@ bool GLTexture2D::Create()
 
         glTexImage2D(m_texTarget, m_mipLevels, m_internalFormat, m_width, m_height, m_border, m_format, m_type, m_pImageData);
 
+        if (m_pTextureSampler != NULL)
+        {
+            m_pTextureSampler->Create();
+        }
+
         result = true;
 
         m_bIsCreateOK = result;
