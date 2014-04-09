@@ -1,5 +1,6 @@
 #include <algorithm>
 #include "gl_scene.h"
+#include "image.h"
 
 // GL Scene will not keep class variable for each Renderable [GLClearRenderable(), GLRenderable("Rectangle"), etc], but just new it in its Load() function, and append to its Renderable Vector Pointer, delete them in UnLoad()
 // Destructor of GL Scene will also call UnLoad() in case it's forgot
@@ -73,9 +74,10 @@ namespace Models
         "varying vec4 v_vColor;\n"
         "varying vec2 v_vTexCoord;\n"
         "uniform sampler2D u_sampleTexture2D_0;\n"
+        "uniform sampler2D u_sampleTexture2D_1;\n"
         "void main()\n"
         "{\n"
-            "gl_FragColor = v_vColor * 0.5 + texture2D(u_sampleTexture2D_0, v_vTexCoord);\n"
+            "gl_FragColor = v_vColor * 0.1 + 0.1 * texture2D(u_sampleTexture2D_0, v_vTexCoord) + 0.8 * texture2D(u_sampleTexture2D_1, v_vTexCoord);\n"
             // todo here, notebook, if you not use v_vColor, the compiler will optimized color, then in glGetAttribLocation to get that attribute, it will be failed
         "}\n";
 
@@ -87,26 +89,51 @@ namespace Models
     GLInputVertexAttribute* m_pIAPos;
     GLInputVertexAttribute* m_pIAColor;
     GLInputVertexAttribute* m_pIATexCoord;
-    GLTexture2D* m_pTex2D;
+    GLTexture2D* m_pTex2DChess;
+    GLTexture2D* m_pTex2DSDCard;
     GLSampler* m_pSampler;
 
-    std::string tex_uniform_name = std::string("u_sampleTexture2D_0");
-    unsigned int tex_unit_id = 0;
-    unsigned int tex_mip_levels = 0;
-    GLint tex_internalFormat = GL_RGBA;
-    int tex_width = 2;
-    int tex_height = 2;
-    GLenum tex_pixels_format = GL_RGBA;
-    GLenum tex_pixel_type = GL_UNSIGNED_BYTE;
-    GLint tex_pixel_alignment = 1;
-
-    GLubyte pixels[4*4] =
+    std::string tex_chess_uniform_name = std::string("u_sampleTexture2D_0");
+    unsigned int tex_chess_unit_id = 0;
+    unsigned int tex_chess_mip_levels = 0;
+    GLint tex_chess_internalFormat = GL_RGBA;
+    int tex_chess_width = 2;
+    int tex_chess_height = 2;
+    GLenum tex_chess_pixels_format = GL_RGBA;
+    GLenum tex_chess_pixel_type = GL_UNSIGNED_BYTE;
+    GLint tex_chess_pixel_alignment = 1;
+    GLubyte tex_chess_pixels[4*4] =
     {
         255, 0, 0, 255,
         0, 255, 0, 255,
         0, 0, 255, 255,
         255, 255, 0, 255,
     };
+
+    std::string tex_sdcard_filepath = std::string("/sdcard/ayan/sdcard.png");
+    std::string tex_sdcard_uniform_name = std::string("u_sampleTexture2D_1");
+    unsigned int tex_sdcard_unit_id = 1;
+
+    ::PNG png_texture(tex_sdcard_filepath);
+    // todo here, why un-comment these two below will make compile fail
+    //::LOGD("Debug info for texture in sdcard");
+    //::LOGD("Image %s : alpha: %d width %dpx height %dpx", tex_sdcard_filepath.c_str(), png_texture.has_alpha(), png_texture.get_width(), png_texture.get_height());
+
+    // todo here, if the sdcard.png not exist in device or emulator, it will crash
+    // todo here, notebook, how to make emulator be write-able, and restart will missing the data in sdcard folder
+    // todo here, notebook, adb push sdcard.png /sdcard/ayan will rename sdcard.png locally to ayan, which not means to /sdcard/ayan/sdcard.png, but just sdcard/ayan, since ayan is only a file
+    // correct way is only adb push sdcard.png /sdcard/ayan/sdcard.png
+
+    // todo here, use some png in assets, that is better for test
+
+    unsigned int tex_sdcard_mip_levels = 0;
+    GLint tex_sdcard_internalFormat = png_texture.has_alpha() ? GL_RGBA : GL_RGB;
+    int tex_sdcard_width = png_texture.get_width();
+    int tex_sdcard_height = png_texture.get_height();
+    GLenum tex_sdcard_pixels_format = png_texture.has_alpha() ? GL_RGBA : GL_RGB;
+    GLenum tex_sdcard_pixel_type = GL_UNSIGNED_BYTE;
+    GLint tex_sdcard_pixel_alignment = 1;
+    GLubyte* tex_sdcard_pixels = png_texture.get_data();
 
     bool Import()
     {
@@ -119,7 +146,8 @@ namespace Models
         m_pIAPos = new GLInputVertexAttribute(ia_pos);
         m_pIAColor = new GLInputVertexAttribute(ia_color);
         m_pIATexCoord = new GLInputVertexAttribute(ia_texCoord);
-        m_pTex2D = new GLTexture2D(std::string("Texture0"), Models::tex_uniform_name);
+        m_pTex2DChess = new GLTexture2D(std::string("Texture0"), Models::tex_chess_uniform_name);
+        m_pTex2DSDCard = new GLTexture2D(std::string("Texture1"), Models::tex_sdcard_uniform_name);
         m_pSampler = new GLSampler();
 
         // TODO Here, make the GLSLShader can also accept the char* as input
@@ -162,17 +190,29 @@ namespace Models
         m_pSampler->addSamplerParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         m_pSampler->addSamplerParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-        m_pTex2D->setTextureData(Models::pixels);
-        m_pTex2D->setTextureUniformName(Models::tex_uniform_name);
-        m_pTex2D->setTextureUnitID(Models::tex_unit_id);
-        m_pTex2D->setTextureMipLevelsNum(Models::tex_mip_levels);
-        m_pTex2D->setTextureInternalFormat(Models::tex_internalFormat);
-        m_pTex2D->setTextureWidth(Models::tex_width);
-        m_pTex2D->setTextureHeight(Models::tex_height);
-        m_pTex2D->setTextureFormat(Models::tex_pixels_format);
-        m_pTex2D->setTextureType(Models::tex_pixel_type);
-        m_pTex2D->setTextureUnPackAlignmentNum(Models::tex_pixel_alignment);
-        m_pTex2D->setTextureSampler(m_pSampler);
+        m_pTex2DChess->setTextureData(Models::tex_chess_pixels);
+        m_pTex2DChess->setTextureUniformName(Models::tex_chess_uniform_name); // redundant setting
+        m_pTex2DChess->setTextureUnitID(Models::tex_chess_unit_id);
+        m_pTex2DChess->setTextureMipLevelsNum(Models::tex_chess_mip_levels);
+        m_pTex2DChess->setTextureInternalFormat(Models::tex_chess_internalFormat);
+        m_pTex2DChess->setTextureWidth(Models::tex_chess_width);
+        m_pTex2DChess->setTextureHeight(Models::tex_chess_height);
+        m_pTex2DChess->setTextureFormat(Models::tex_chess_pixels_format);
+        m_pTex2DChess->setTextureType(Models::tex_chess_pixel_type);
+        m_pTex2DChess->setTextureUnPackAlignmentNum(Models::tex_chess_pixel_alignment);
+        m_pTex2DChess->setTextureSampler(m_pSampler);
+
+        m_pTex2DSDCard->setTextureData(Models::tex_sdcard_pixels);
+        m_pTex2DSDCard->setTextureUniformName(Models::tex_sdcard_uniform_name); // redundant setting
+        m_pTex2DSDCard->setTextureUnitID(Models::tex_sdcard_unit_id);
+        m_pTex2DSDCard->setTextureMipLevelsNum(Models::tex_sdcard_mip_levels);
+        m_pTex2DSDCard->setTextureInternalFormat(Models::tex_sdcard_internalFormat);
+        m_pTex2DSDCard->setTextureWidth(Models::tex_sdcard_width);
+        m_pTex2DSDCard->setTextureHeight(Models::tex_sdcard_height);
+        m_pTex2DSDCard->setTextureFormat(Models::tex_sdcard_pixels_format);
+        m_pTex2DSDCard->setTextureType(Models::tex_sdcard_pixel_type);
+        m_pTex2DSDCard->setTextureUnPackAlignmentNum(Models::tex_sdcard_pixel_alignment);
+        m_pTex2DSDCard->setTextureSampler(m_pSampler);
 
         // Todo Notebook
         // Note, can not call these Create() here, if you call it, when you call GLRenderable::Draw()'s glDrawElements will show crash
@@ -197,7 +237,8 @@ namespace Models
         m_pIAColor->Dispose();
         m_pIATexCoord->Dispose();
         m_pSampler->Dispose();
-        m_pTex2D->Dispose();
+        m_pTex2DChess->Dispose();
+        m_pTex2DSDCard->Dispose();
 
         delete m_pGLMesh;
         delete m_pGLSL;
@@ -205,7 +246,8 @@ namespace Models
         delete m_pIAColor;
         delete m_pIATexCoord;
         delete m_pSampler;
-        delete m_pTex2D;
+        delete m_pTex2DChess;
+        delete m_pTex2DSDCard;
 
         return true;
     }
@@ -234,7 +276,8 @@ bool GLBasicScene::Load()
     m_pGLRect->addInputVertexAttribute(Models::m_pIAPos);
     m_pGLRect->addInputVertexAttribute(Models::m_pIAColor);
     m_pGLRect->addInputVertexAttribute(Models::m_pIATexCoord);
-    m_pGLRect->addTexture(Models::m_pTex2D);
+    m_pGLRect->addTexture(Models::m_pTex2DChess);
+    m_pGLRect->addTexture(Models::m_pTex2DSDCard);
 
     m_pRenderablesVector->push_back(m_pGLRect);
 
