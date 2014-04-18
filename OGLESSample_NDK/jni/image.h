@@ -4,22 +4,40 @@
 #include <string>
 #include <png.h>
 
+#include "resource.h"
+#include "type_defines.h"
+
 class PNG
 {
 public:
-    PNG(const std::string& file_name);
-    ~PNG();
-    unsigned int get_width();   
-    unsigned int get_height();  
-    bool has_alpha();
-    unsigned char* get_data();
+    explicit PNG(ReadResource* pResource);
+    virtual ~PNG();
+
+    bool Load();
+    bool UnLoad();
+
+    // getter
+    unsigned int getWidth();
+    unsigned int getHeight();
+    GLenum getFormat();
+    BYTE* getData();
+    bool hasAlpha();
 
 private:
-    const std::string file_name_;
-    unsigned char* data_;
-    png_uint_32 width_, height_;
-    int bit_depth_, color_type_, interlace_type_;
-    int compression_type_, filter_method_;
+    static void callback_read(png_structp pStruct, png_bytep pData, png_size_t pSize);
+
+private:
+    ReadResource* m_pResource;
+    BYTE* m_pData;
+    png_uint_32 m_Width;
+    png_uint_32 m_Height;
+    GLenum m_Format;
+    int m_BitDepth;
+    int m_ColorType;
+    int m_InterlaceType;
+    int m_CompressionType;
+    int m_FilterMethod;
+
 };
 
 #endif
