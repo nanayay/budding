@@ -26,7 +26,6 @@ class ReadFile
 public:
     explicit ReadFile(const std::string file_path);
     virtual ~ReadFile();
-    explicit ReadFile(ReadFile& copy_);
 
     virtual bool Open();
     virtual size_t Read(void* pDestBuffer, const size_t bytesToRead);
@@ -38,6 +37,8 @@ private:
     std::ifstream m_FileInputStream;
     size_t m_Length;
 
+    // todo notebook, all file stream should not be copy-able
+    explicit ReadFile(ReadFile& copy_);
     ReadFile& operator=(ReadFile& assign_);
 
 };

@@ -16,20 +16,12 @@ ReadFile::ReadFile(const std::string file_path)
       m_Length(0)
 {
     // todo notebook, only the class itself own variables can be in init list, others like the super class's, can not be in init list: on the super class's ctor func's argument list, or in this class' ctor's body
+    // todo, notebook here, copy ctor is also a ctor, not like assign operator, copy ctor also have init list, you should better add some super class's ctor there, it is good, although not bring compiler error
 }
 
 ReadFile::~ReadFile()
 {
     Close();
-}
-
-ReadFile::ReadFile(ReadFile& copy_)
-    : ReadResource(copy_.getPath())
-{
-    copy_.Close();
-    // m_path = copy_.getPath();
-    // todo, notebook here, copy ctor is also a ctor, not like assign operator, copy ctor also have init list, you should better add some super class's ctor there, it is good, although not bring compiler error
-    m_Length = 0;
 }
 
 bool ReadFile::Open()

@@ -491,12 +491,10 @@ GLTexture2D::GLTexture2D(const std::string& texture_name_id)
     m_pRenderable = NULL;
 }
 
-GLTexture2D::GLTexture2D(const std::string& texture_name_id, const std::string& texture_uniform_name, const unsigned int texture_unit_id, ReadFile* texture_resource, GLSampler* texture_sampler, GLRenderable* renderable)
+GLTexture2D::GLTexture2D(const std::string& texture_name_id, const std::string& texture_uniform_name, const unsigned int texture_unit_id, const std::string file_path, GLSampler* texture_sampler, GLRenderable* renderable)
     : GLTexture(texture_name_id, texture_uniform_name, texture_unit_id, texture_sampler),
-      m_pResource(new ReadFile(*texture_resource))
+      m_pResource(new ReadFile(file_path))
 {
-    // todo here
-    // this will be a bug fix: not use ReadFile wrap here, just pass the file path to GLTexture2D class, another ctor will be work with android asset
     m_texTarget = GL_TEXTURE_2D;
     m_pRenderable = renderable;
 }

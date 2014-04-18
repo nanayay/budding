@@ -248,7 +248,7 @@ class GLTexture2D
 {
 public:
     explicit GLTexture2D(const std::string& texture_name_id);
-    explicit GLTexture2D(const std::string& texture_name_id, const std::string& texture_uniform_name, const unsigned int texture_unit_id, ReadFile* texture_resource, GLSampler* texture_sampler = NULL, GLRenderable* renderable = NULL);
+    explicit GLTexture2D(const std::string& texture_name_id, const std::string& texture_uniform_name, const unsigned int texture_unit_id, const std::string file_path, GLSampler* texture_sampler = NULL, GLRenderable* renderable = NULL);
     explicit GLTexture2D(const std::string& texture_name_id, const std::string& texture_uniform_name, const unsigned int texture_unit_id, const AndroidAsset* texture_resource, GLSampler* texture_sampler = NULL, GLRenderable* renderable = NULL);
     virtual ~GLTexture2D();
 
