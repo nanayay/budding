@@ -185,9 +185,9 @@ class Texture
     :public ElementOfRenderable
 {
 public:
-    explicit Texture(const std::string& texture_name)
+    explicit Texture(const std::string& texture_name, TextureSampler* texture_sampler = NULL)
         : m_nameID(texture_name),
-          m_pTextureSampler(NULL)
+          m_pTextureSampler(texture_sampler)
     {};
     virtual ~Texture() {};
 
