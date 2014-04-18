@@ -458,10 +458,11 @@ bool GLInputVertexAttribute::Dispose()
     return !isCreateOK();
 }
 
-GLTexture::GLTexture(const std::string& texture_name_id, const std::string& texture_uniform_name, GLSampler* texture_sampler)
-    : Texture(texture_name_id),
+GLTexture::GLTexture(const std::string& texture_name_id, const std::string& texture_uniform_name, const unsigned int texture_unit_id, GLSampler* texture_sampler)
+    : Texture(texture_name_id, texture_sampler),
       m_uniformName(texture_uniform_name),
-      m_texHandle(-1),
+      m_textureUnit(texture_unit_id),
+      m_texHandle(0),
       m_texTarget(GL_TEXTURE_2D),
       m_mipLevels(1),
       m_internalFormat(GL_RGBA),
@@ -473,25 +474,49 @@ GLTexture::GLTexture(const std::string& texture_name_id, const std::string& text
       m_unPackAlignmentTarget(GL_UNPACK_ALIGNMENT),
       m_unPackAlignmentNum(4)
 {
-    m_pTextureSampler = texture_sampler;
 }
 
 GLTexture::~GLTexture()
 {
 }
 
-GLTexture2D::GLTexture2D(const std::string& texture_name_id, const std::string& texture_uniform_name, GLSampler* texture_sampler, GLRenderable* renderable)
-    : GLTexture(texture_name_id, texture_uniform_name, texture_sampler),
-      m_pImageData(NULL)
+GLTexture2D::GLTexture2D(const std::string& texture_name_id)
+    : GLTexture(texture_name_id, std::string(), -1, NULL),
+      m_pResource(NULL)
 {
-    m_pRenderable = renderable;
+    // todo here
+    // - make sure texture_uniform_name will not work on null and empty size string
+    // - make sure -1 will not work on unsigned int
     m_texTarget = GL_TEXTURE_2D;
+    m_pRenderable = NULL;
+}
+
+GLTexture2D::GLTexture2D(const std::string& texture_name_id, const std::string& texture_uniform_name, const unsigned int texture_unit_id, ReadFile* texture_resource, GLSampler* texture_sampler, GLRenderable* renderable)
+    : GLTexture(texture_name_id, texture_uniform_name, texture_unit_id, texture_sampler),
+      m_pResource(new ReadFile(*texture_resource))
+{
+    // todo here
+    // this will be a bug fix: not use ReadFile wrap here, just pass the file path to GLTexture2D class, another ctor will be work with android asset
+    m_texTarget = GL_TEXTURE_2D;
+    m_pRenderable = renderable;
+}
+
+GLTexture2D::GLTexture2D(const std::string& texture_name_id, const std::string& texture_uniform_name, const unsigned int texture_unit_id, const AndroidAsset* texture_resource, GLSampler* texture_sampler, GLRenderable* renderable)
+    : GLTexture(texture_name_id, texture_uniform_name, texture_unit_id, texture_sampler),
+      m_pResource(new AndroidAsset(*texture_resource))
+{
+    m_texTarget = GL_TEXTURE_2D;
+    m_pRenderable = renderable;
 }
 
 GLTexture2D::~GLTexture2D()
 {
     this->Disable();
     this->Dispose();
+    if (m_pResource != NULL)
+    {
+        delete m_pResource;
+    }
 }
 
 bool GLTexture2D::Create()
@@ -500,6 +525,7 @@ bool GLTexture2D::Create()
     {
         bool result = false;
 
+        // todo here, add the PNG reader function for m_pResource, then have the m_pImageData be the correct pointer to the texture pixel memory
         glGenTextures(1, &m_texHandle);
         glBindTexture(m_texTarget, m_texHandle);
 
@@ -568,6 +594,7 @@ bool GLTexture2D::Disable()
         bool result = false;
 
         // Texture2D's Disable just no need to do anything, the later setting will overwrite it
+        // todo here, bug fix, we need to active texture, then bind 0 to texture_2d, this is the correct way to disable texture
         result = true;
 
         m_bIsEnableOK = !result;

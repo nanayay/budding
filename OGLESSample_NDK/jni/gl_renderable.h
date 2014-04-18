@@ -7,6 +7,7 @@
 
 #include "type_defines.h"
 #include "renderable.h"
+#include "android_asset.h"
 #include "log.h"
 
 // glGetError
@@ -188,7 +189,7 @@ class GLTexture
     : public Texture
 {
 public:
-    explicit GLTexture(const std::string& texture_name_id, const std::string& texture_uniform_name, GLSampler* texture_sampler = NULL);
+    explicit GLTexture(const std::string& texture_name_id, const std::string& texture_uniform_name, const unsigned int texture_unit_id, GLSampler* texture_sampler = NULL);
     virtual ~GLTexture();
 
     // getter
@@ -219,10 +220,12 @@ public:
 
 protected:
     std::string m_uniformName;
-    GLuint m_texHandle;
 
     // for glActiveTexture
     unsigned int m_textureUnit;
+
+    // for glGenTexture 
+    GLuint m_texHandle;
 
     // for glTexImage2D
     GLenum m_texTarget;
@@ -244,7 +247,9 @@ class GLTexture2D
     : public GLTexture
 {
 public:
-    explicit GLTexture2D(const std::string& texture_name_id, const std::string& texture_uniform_name = std::string("uTexture2D"), GLSampler* texture_sampler = NULL, GLRenderable* renderable = NULL);
+    explicit GLTexture2D(const std::string& texture_name_id);
+    explicit GLTexture2D(const std::string& texture_name_id, const std::string& texture_uniform_name, const unsigned int texture_unit_id, ReadFile* texture_resource, GLSampler* texture_sampler = NULL, GLRenderable* renderable = NULL);
+    explicit GLTexture2D(const std::string& texture_name_id, const std::string& texture_uniform_name, const unsigned int texture_unit_id, const AndroidAsset* texture_resource, GLSampler* texture_sampler = NULL, GLRenderable* renderable = NULL);
     virtual ~GLTexture2D();
 
     virtual bool Create();
@@ -252,14 +257,10 @@ public:
     virtual bool Disable();
     virtual bool Dispose();
 
-    // getter
-    // void*   getTextureData() const { return m_pImageData; }
-
-    // setter
-    void setTextureData(void* val) { m_pImageData = val; }
-
 private:
-    void* m_pImageData;
+    // for image files load from out storage
+    ReadResource* m_pResource;
+
 };
 
 class GLRenderable
