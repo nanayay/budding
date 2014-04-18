@@ -1,6 +1,7 @@
 #include <algorithm>
 #include "gl_scene.h"
 #include "image.h"
+#include "android_asset.h"
 
 // GL Scene will not keep class variable for each Renderable [GLClearRenderable(), GLRenderable("Rectangle"), etc], but just new it in its Load() function, and append to its Renderable Vector Pointer, delete them in UnLoad()
 // Destructor of GL Scene will also call UnLoad() in case it's forgot
@@ -93,6 +94,7 @@ namespace Models
     GLTexture2D* m_pTex2DSDCard;
     GLSampler* m_pSampler;
 
+    // pixel in hard-code
     std::string tex_chess_uniform_name = std::string("u_sampleTexture2D_0");
     unsigned int tex_chess_unit_id = 0;
     unsigned int tex_chess_mip_levels = 0;
@@ -110,14 +112,16 @@ namespace Models
         255, 255, 0, 255,
     };
 
+    // load png file in sdcard
     std::string tex_sdcard_filepath = std::string("/sdcard/ayan/sdcard.png");
     std::string tex_sdcard_uniform_name = std::string("u_sampleTexture2D_1");
     unsigned int tex_sdcard_unit_id = 1;
 
-    ::PNG png_texture(tex_sdcard_filepath);
+    ReadFile tex_sdcard_png_readfile(tex_sdcard_filepath);
+    ::PNG png_sdcard_texture(&tex_sdcard_png_readfile);
     // todo here, why un-comment these two below will make compile fail
     //::LOGD("Debug info for texture in sdcard");
-    //::LOGD("Image %s : alpha: %d width %dpx height %dpx", tex_sdcard_filepath.c_str(), png_texture.has_alpha(), png_texture.get_width(), png_texture.get_height());
+    //::LOGD("Image %s : alpha: %d width %dpx height %dpx", tex_sdcard_filepath.c_str(), png_sdcard_texture.has_alpha(), png_sdcard_texture.get_width(), png_sdcard_texture.get_height());
 
     // todo here, if the sdcard.png not exist in device or emulator, it will crash
     // todo here, notebook, how to make emulator be write-able, and restart will missing the data in sdcard folder
@@ -127,16 +131,43 @@ namespace Models
     // todo here, use some png in assets, that is better for test
 
     unsigned int tex_sdcard_mip_levels = 0;
-    GLint tex_sdcard_internalFormat = png_texture.has_alpha() ? GL_RGBA : GL_RGB;
-    int tex_sdcard_width = png_texture.get_width();
-    int tex_sdcard_height = png_texture.get_height();
-    GLenum tex_sdcard_pixels_format = png_texture.has_alpha() ? GL_RGBA : GL_RGB;
+    GLint tex_sdcard_internalFormat = png_sdcard_texture.getFormat();
+    int tex_sdcard_width = png_sdcard_texture.getWidth();
+    int tex_sdcard_height = png_sdcard_texture.getHeight();
+    GLenum tex_sdcard_pixels_format = png_sdcard_texture.getFormat();
     GLenum tex_sdcard_pixel_type = GL_UNSIGNED_BYTE;
     GLint tex_sdcard_pixel_alignment = 1;
-    GLubyte* tex_sdcard_pixels = png_texture.get_data();
+    GLubyte* tex_sdcard_pixels = png_sdcard_texture.getData();
+
+    // load png file in apk's asset
+    std::string tex_asset_filepath = std::string("android_robot.png");
+    std::string tex_asset_uniform_name = std::string("u_sampleTexture2D_2");
+    unsigned int tex_asset_unit_id = 2;
+
+    AndroidAsset tex_asset_png(tex_asset_filepath);
+    ::PNG png_asset_texture(&tex_asset_png);
 
     bool Import()
     {
+        // prepare the asset png files' data and loat it
+        // todo, here
+        // first, make sure the file's png is still ok, since i have changed the png reader
+        // second, make the png in asset works
+        // - png_asset_texture should have some place to call UnLoad()
+        // - in OGL texture's created finished, call the UnLoad()
+        // - move the pixel memory, pixel in file's body to Import, but not the outside of Import()
+        // - add Asset or Resource be a part of OGL texture's parameter
+
+        png_asset_texture.Load();
+        unsigned int tex_asset_mip_levels = 0;
+        GLint tex_asset_internalFormat = png_asset_texture.getFormat();
+        int tex_asset_width = png_asset_texture.getWidth();
+        int tex_asset_height = png_asset_texture.getHeight();
+        GLenum tex_asset_pixels_format = png_asset_texture.getFormat();
+        GLenum tex_asset_pixel_type = GL_UNSIGNED_BYTE;
+        GLint tex_asset_pixel_alignment = 1;
+        GLubyte* tex_asset_pixels = png_asset_texture.getData();
+
     #if 0
         m_pGLMesh = new GLMesh(true); // true will use client buffer, false [default] will use gpu buffer
     #else
