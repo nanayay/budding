@@ -3,10 +3,14 @@
 
 AAssetManager* AndroidAsset::m_pAssetManager = NULL;
 
-AndroidAsset::AndroidAsset(std::string name)
-    : m_name(name),
+AndroidAsset::AndroidAsset(std::string path, AAssetManager* assetManager)
+    : ReadResource(path),
       m_pAsset(NULL)
 {
+    if (assetManager != NULL)
+    {
+        AndroidAsset::m_pAssetManager = assetManager;
+    }
     assert(m_pAssetManager != NULL);
 }
 
@@ -17,14 +21,15 @@ AndroidAsset::~AndroidAsset()
 
 bool AndroidAsset::Open()
 {
-    m_pAsset = AAssetManager_open(m_pAssetManager, m_name.c_str(), AASSET_MODE_UNKNOWN);
+    assert(m_pAssetManager != NULL);
+    assert(m_path.length() != 0);
+    m_pAsset = AAssetManager_open(m_pAssetManager, m_path.c_str(), AASSET_MODE_UNKNOWN);
     return m_pAsset ? true : false;
 }
 
-bool AndroidAsset::Read(void* pBuffer, const unsigned int bytesToRead, size_t& bytesRead)
+size_t AndroidAsset::Read(void* pDestBuffer, const size_t bytesToRead)
 {
-    bytesRead = AAsset_read(m_pAsset, pBuffer, bytesToRead);
-    return true;
+    return AAsset_read(m_pAsset, pDestBuffer, bytesToRead);
 }
 
 bool AndroidAsset::Close()

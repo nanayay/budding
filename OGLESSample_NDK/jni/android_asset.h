@@ -4,20 +4,20 @@
 #include <string>
 #include <android/asset_manager.h>
 
+#include "resource.h"
+
 class AndroidAsset
+    : public ReadResource
 {
 public:
-    explicit AndroidAsset(std::string name);
+    explicit AndroidAsset(std::string path, AAssetManager* assetManager = NULL);
     virtual ~AndroidAsset();
 
-    bool Open();
-    bool Read(void* pBuffer, const unsigned int bytesToRead, size_t& bytesRead);
-    bool Close();
-    unsigned int Length() const;
+    virtual bool Open();
+    virtual size_t Read(void* pDestBuffer, const size_t bytesToRead);
+    virtual bool Close();
 
-public:
-    // getter
-    std::string getName() const { return m_name; }
+    unsigned int Length() const;
 
 public:
     static void setAssetManager(AAssetManager* val) { m_pAssetManager = val; }
@@ -26,7 +26,6 @@ private:
     static AAssetManager* m_pAssetManager;
 
 private:
-    std::string m_name;
     AAsset* m_pAsset;
 
 };

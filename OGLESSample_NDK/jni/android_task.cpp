@@ -1,6 +1,7 @@
 #include "kernel.h"
 #include "android_task.h"
 #include "log.h"
+#include "android_asset.h"
 
 static int32_t android_handle_input(struct android_app* app,
 		AInputEvent* event) {
@@ -161,6 +162,10 @@ bool AndroidTask::Start() {
     // Rendererable's Init() will be called by Renderer's Init()
     // Renderer's Init() will be called when AndroidTask's android_handle_cmd()'s APP_CMD_INIT_WINDOW
     // Renderer's Destory() will be called when AndroidTask's android_handle_cmd()'s APP_CMD_TERM_WINDOW, etc
+
+    // todo here, add some init job here for overall app, and only need to be run once
+    ANativeActivity* nativeActivity = m_pState->activity;
+    AndroidAsset::setAssetManager(nativeActivity->assetManager);
 
     Renderer* pRenderer = NULL;
     pRenderer = (Renderer*)(getAppState()->userData);
