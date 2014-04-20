@@ -2,16 +2,19 @@
 #include "log.h"
 
 PNG::PNG(ReadResource* pResource) :
-    m_pResource(pResource),
+    Image(),
     m_pData(NULL),
     m_Width(0),
     m_Height(0),
     m_Format(GL_RGBA),
-    m_BitDepth(0),
+    m_BitPerChannel(0),
+    m_BytePerPixel(0),
+    m_BytePerRow(0),
     m_ColorType(0),
     m_InterlaceType(0),
     m_CompressionType(0),
-    m_FilterMethod(0)
+    m_FilterMethod(0),
+    m_pResource(pResource)
 {
 }
 
@@ -37,118 +40,180 @@ bool PNG::Load()
     png_byte* lImageBuffer = NULL;
     png_bytep* lRowPtrs = NULL;
     png_int_32 lRowSize;
+    png_int_32 lBitDepth;
     bool lTransparency;
 
-    // Opens and checks image signature (first 8 bytes).
-    if (m_pResource->Open() != true)
-        goto ERROR;
-    if (m_pResource->Read(lHeader, sizeof(lHeader)) != true)
-        goto ERROR;
-    if (png_sig_cmp(lHeader, 0, 8) != 0)
-        goto ERROR;
-
-    // Creates required structures.
-    lPngPtr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-    if (!lPngPtr)
-        goto ERROR;
-    lInfoPtr = png_create_info_struct(lPngPtr);
-    if (!lInfoPtr)
-        goto ERROR;
-
-    // Prepares reading operation by setting-up a read callback.
-    png_set_read_fn(lPngPtr, m_pResource, PNG::callback_read);
-
-    // Set-up error management. If an error occurs while reading,
-    // code will come back here and jump
-    if (setjmp(png_jmpbuf(lPngPtr)))
-        goto ERROR;
-
-    // Ignores first 8 bytes already read and processes header.
-    png_set_sig_bytes(lPngPtr, 8);
-    png_read_info(lPngPtr, lInfoPtr);
-
-    // Retrieves PNG info and updates PNG structure accordingly.
-    png_int_32 lDepth, lColorType;
-    png_uint_32 lWidth, lHeight;
-    png_get_IHDR(lPngPtr, lInfoPtr, &lWidth, &lHeight, &lDepth, &lColorType, NULL, NULL, NULL);
-    m_Width = lWidth;
-    m_Height = lHeight;
-
-    // Creates a full alpha channel if transparency is encoded as
-    // an array of palette entries or a single transparent color.
-    lTransparency = false;
-    if (png_get_valid(lPngPtr, lInfoPtr, PNG_INFO_tRNS))
+    do
     {
-        png_set_tRNS_to_alpha(lPngPtr);
-        lTransparency = true;
-        // goto ERROR; // todo, this should be error for original source codes in Begin NDK Programming book
-    }
+        // Opens and checks image signature (first 8 bytes).
+        if (m_pResource->Open() != true)
+            break;
+        if (!(m_pResource->Read(lHeader, sizeof(lHeader))))
+            break;
+        if (png_sig_cmp(lHeader, 0, 8) != 0)
+            break;
 
-    // Expands PNG with less than 8Bits per channel to 8Bits.
-    if (lDepth < 8)
-    {
-        png_set_packing (lPngPtr);
-    }
-    // Shrinks PNG with 16Bits per color channel down to 8Bits.
-    else if (lDepth == 16)
-    {
-        png_set_strip_16(lPngPtr);
-    }
+        // Creates required structures.
+        lPngPtr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+        if (!lPngPtr)
+            break;
+        lInfoPtr = png_create_info_struct(lPngPtr);
+        if (!lInfoPtr)
+            break;
 
-    // Indicates that image needs conversion to RGBA if needed.
-    switch (lColorType)
-    {
-    case PNG_COLOR_TYPE_PALETTE:
-        png_set_palette_to_rgb(lPngPtr);
-        m_Format = lTransparency ? GL_RGBA : GL_RGB;
-        break;
-    case PNG_COLOR_TYPE_RGB:
-        m_Format = lTransparency ? GL_RGBA : GL_RGB;
-        break;
-    case PNG_COLOR_TYPE_RGBA:
-        m_Format = GL_RGBA;
-        break;
-    case PNG_COLOR_TYPE_GRAY:
-        png_set_expand_gray_1_2_4_to_8(lPngPtr);
-        m_Format = lTransparency ? GL_LUMINANCE_ALPHA:GL_LUMINANCE;
-        break;
-    case PNG_COLOR_TYPE_GA:
-        png_set_expand_gray_1_2_4_to_8(lPngPtr);
-        m_Format = GL_LUMINANCE_ALPHA;
-        break;
+        // Prepares reading operation by setting-up a read callback.
+        png_set_read_fn(lPngPtr, m_pResource, PNG::callback_read);
+
+        // Set-up error management. If an error occurs while reading,
+        // code will come back here and jump
+        if (setjmp(png_jmpbuf(lPngPtr)))
+            break;
+
+        // Ignores first 8 bytes already read and processes header.
+        png_set_sig_bytes(lPngPtr, 8);
+        png_read_info(lPngPtr, lInfoPtr);
+
+        // Retrieves PNG info and updates PNG structure accordingly.
+        png_get_IHDR(lPngPtr, lInfoPtr, &m_Width, &m_Height, &lBitDepth, &m_ColorType, &m_InterlaceType, &m_CompressionType, &m_FilterMethod);
+
+        // Creates a full alpha channel if transparency is encoded as
+        // an array of palette entries or a single transparent color.
+        lTransparency = false;
+        if (png_get_valid(lPngPtr, lInfoPtr, PNG_INFO_tRNS))
+        {
+            png_set_tRNS_to_alpha(lPngPtr);
+            lTransparency = true;
+            // goto ERROR; // todo, this should be error for original source codes in Begin NDK Programming book
+        }
+
+        // Expands PNG with less than 8Bits per channel to 8Bits.
+        if (lBitDepth < 8)
+        {
+            png_set_packing (lPngPtr);
+            m_BitPerChannel = 8;
+        }
+        // Shrinks PNG with 16Bits per color channel down to 8Bits.
+        else if (lBitDepth == 16)
+        {
+            png_set_strip_16(lPngPtr);
+            m_BitPerChannel = 8;
+        }
+        else
+        {
+            m_BitPerChannel = lBitDepth;
+        }
+
+        // Indicates that image needs conversion to RGBA if needed.
+        switch (m_ColorType)
+        {
+        case PNG_COLOR_TYPE_PALETTE:
+            png_set_palette_to_rgb(lPngPtr);
+            m_Format = lTransparency ? GL_RGBA : GL_RGB;
+            break;
+        case PNG_COLOR_TYPE_RGB:
+            m_Format = lTransparency ? GL_RGBA : GL_RGB;
+            break;
+        case PNG_COLOR_TYPE_RGBA:
+            m_Format = GL_RGBA;
+            break;
+        case PNG_COLOR_TYPE_GRAY:
+            png_set_expand_gray_1_2_4_to_8(lPngPtr);
+            m_Format = lTransparency ? GL_LUMINANCE_ALPHA : GL_LUMINANCE;
+            break;
+        case PNG_COLOR_TYPE_GA:
+            png_set_expand_gray_1_2_4_to_8(lPngPtr);
+            m_Format = GL_LUMINANCE_ALPHA;
+            break;
+            // todo, what about the format GL_ALPHA
+        }
+
+        switch (m_Format)
+        {
+        case GL_RGBA:
+            m_BytePerPixel = 4 * m_BitPerChannel / 8;
+            break;
+        case GL_RGB:
+            m_BytePerPixel = 3 * m_BitPerChannel / 8;
+            break;
+        case GL_LUMINANCE_ALPHA:
+            m_BytePerPixel = 2 * m_BitPerChannel / 8;
+            break;
+        case GL_LUMINANCE:
+            m_BytePerPixel = 1 * m_BitPerChannel / 8;
+            break;
+            // todo, what about the format GL_ALPHA
+        }
+
+        // Validates all transformations.
+        png_read_update_info(lPngPtr, lInfoPtr);
+
+        // Get row size in bytes.
+        lRowSize = png_get_rowbytes(lPngPtr, lInfoPtr);
+        m_BytePerRow = lRowSize;
+        if (lRowSize <= 0)
+            break;
+
+        // Ceates the image buffer that will be sent to OpenGL.
+        size_t bigsize = lRowSize * m_Height;
+
+        // todo, notebook, if the image size is 225*225 with rgb image, you will find the bigsize is 225*225*3 = 151875
+        // if you new byte[151875], a segment fault will happen with msg: Cannot access memory at address 0x4278f4f8
+        // use some even value will be fine
+        if (bigsize % 2 != 0)
+        {
+            LOGD("png load find the image's size is %d, which is odd number", bigsize);
+            bigsize++;
+            LOGD("try to make it be even: %d", bigsize);
+        }
+
+        LOGD("begin to new memory in size: %d", bigsize);
+        lImageBuffer = new png_byte[bigsize];
+        LOGD("end to new memory in size: %d", bigsize);
+
+        // todo here very much
+        // make GLTexture2D for file works fine, which will fail when try to open the file in sdcard
+        // notebook, when use both real device and emulator, adb may not answer the change, use adb kill-server to reset the adb
+
+        LOGD("begine to check the lImageBuffer: %x", lImageBuffer);
+        if (!lImageBuffer)
+            break;
+        LOGD("end to check the lImageBuffer: %x", lImageBuffer);
+
+        // Pointers to each row of the image buffer. Row order is
+        // inverted because different coordinate systems are used by
+        // OpenGL (1st pixel is at bottom left) and PNGs (top-left).
+        LOGD("begin to new memory in size: %d", m_Height);
+        lRowPtrs = new png_bytep[m_Height];
+        LOGD("end to new memory in size: %d", m_Height);
+
+        LOGD("begine to check the lRowPtrs: %x", lRowPtrs);
+        if (!lRowPtrs)
+            break;
+        LOGD("end to check the lRowPtrs: %x", lRowPtrs);
+
+        for (int32_t i = 0; i < m_Height; ++i)
+        {
+            lRowPtrs[m_Height - (i + 1)] = lImageBuffer + i * lRowSize;
+        }
+
+        LOGD("begine to png_read_image");
+        // Reads image content.
+        png_read_image(lPngPtr, lRowPtrs);
+        LOGD("end to png_read_image");
+
+        // Frees memory and resources.
+        m_pResource->Close();
+        png_destroy_read_struct(&lPngPtr, &lInfoPtr, NULL);
+        delete[] lRowPtrs;
+        m_pData = lImageBuffer;
+
+        LOGD("load png success, will return true");
+        LOGD("the image data is at %x", m_pData);
+        return true;
     }
-    // Validates all transformations.
-    png_read_update_info(lPngPtr, lInfoPtr);
+    while(0);
 
-    // Get row size in bytes.
-    lRowSize = png_get_rowbytes(lPngPtr, lInfoPtr);
-    if (lRowSize <= 0)
-        goto ERROR;
-    // Ceates the image buffer that will be sent to OpenGL.
-    lImageBuffer = new png_byte[lRowSize * lHeight];
-    if (!lImageBuffer)
-        goto ERROR;
-    // Pointers to each row of the image buffer. Row order is
-    // inverted because different coordinate systems are used by
-    // OpenGL (1st pixel is at bottom left) and PNGs (top-left).
-    lRowPtrs = new png_bytep[lHeight];
-    if (!lRowPtrs)
-        goto ERROR;
-    for (int32_t i = 0; i < lHeight; ++i)
-    {
-        lRowPtrs[lHeight - (i + 1)] = lImageBuffer + i * lRowSize;
-    }
-    // Reads image content.
-    png_read_image(lPngPtr, lRowPtrs);
-
-    // Frees memory and resources.
-    m_pResource->Close();
-    png_destroy_read_struct(&lPngPtr, &lInfoPtr, NULL);
-    delete[] lRowPtrs;
-    return lImageBuffer;
-
-ERROR:
-    LOGE("Error while reading PNG file");
+    LOGE("Error while reading PNG file: %s", m_pResource->getPath().c_str());
     m_pResource->Close();
     delete[] lRowPtrs;
     delete[] lImageBuffer;
@@ -157,7 +222,11 @@ ERROR:
         png_infop* lInfoPtrP = lInfoPtr != NULL ? &lInfoPtr : NULL;
         png_destroy_read_struct(&lPngPtr, lInfoPtrP, NULL);
     }
-    return NULL;
+    m_pData = NULL;
+    return false;
+
+    // todo, notebook, write down how to remove goto, and use while to replace it
+    // todo, load and unload should happen in some if condition
 }
 
 bool PNG::UnLoad()
@@ -169,11 +238,20 @@ bool PNG::UnLoad()
     }
     m_Width = 0;
     m_Height = 0;
-    m_BitDepth = 0;
+    m_Format = GL_RGBA;
+    m_BitPerChannel = 0;
+    m_BytePerPixel = 0;
+    m_BytePerRow = 0;
     m_ColorType = 0;
     m_InterlaceType = 0;
     m_CompressionType = 0;
     m_FilterMethod = 0;
+
+    if (m_pResource)
+    {
+        delete m_pResource;
+        m_pResource = NULL;
+    }
 }
 
 #if 0
@@ -218,7 +296,7 @@ void LoadPNGFile(std::string const file_name)
     png_set_sig_bytes(png, sig_bytes);
 
     png_read_png(png, info, (PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING | PNG_TRANSFORM_EXPAND), NULL);
-    png_get_IHDR(png, info, &m_Width, &m_Height, &m_BitDepth, &m_ColorType, &m_InterlaceType, &m_CompressionType, &m_FilterMethod);
+    png_get_IHDR(png, info, &m_Width, &m_Height, &m_BitPerChannel, &m_ColorType, &m_InterlaceType, &m_CompressionType, &m_FilterMethod);
 
     unsigned int row_bytes = png_get_rowbytes(png, info);
     if (m_pData != NULL)
@@ -247,16 +325,6 @@ unsigned int PNG::getHeight()
     return m_Height;
 }
 
-GLenum PNG::getFormat()
-{
-    return m_Format;
-}
-
-unsigned char* PNG::getData()
-{
-    return m_pData;
-}
-
 bool PNG::hasAlpha()
 {
     if (m_ColorType == PNG_COLOR_TYPE_RGBA)
@@ -266,4 +334,187 @@ bool PNG::hasAlpha()
     return false;
 }
 
-// todo here, add other getter for bit depth, interlace type, compression type, filtermethod, etc
+unsigned int PNG::getBytePerRow()
+{
+    size_t row_size = m_BytePerPixel * m_Width;
+    if (row_size != m_BytePerRow)
+    {
+        LOGD("Row Size get from libpng and calculate by byte per pixel * width is Different");
+    }
+    return m_BytePerRow;
+}
+
+GLenum PNG::getFormatInOGL()
+{
+    return m_Format;
+}
+
+GLenum PNG::getTypeInOGL()
+{
+    if ( m_BitPerChannel == 8)
+    {
+        return GL_UNSIGNED_BYTE;
+    }
+    else if (m_BitPerChannel == 16)
+    {
+        LOGD("the loading png image %s has %d bit width per channel, which may not be supported as type in glTexImage2D of OGLES", getName().c_str(), 16);
+    }
+    else if (m_BitPerChannel == 32)
+    {
+        LOGD("the loading png image %s has %d bit width per channel, which may not be supported as type in glTexImage2D of OGLES", getName().c_str(), 32);
+    }
+
+    if (m_BytePerPixel == 2)
+    {
+        if (m_Format == GL_RGBA)
+        {
+            // todo, find some way to support GL_UNSIGNED_SHORT_4_4_4_4
+            // todo, find some way to support GL_UNSIGNED_SHORT_5_5_5_1
+            LOGD("the loading png image %s has %d bit per pixel, and it's GL_RGBA format", getName().c_str(), 16);
+            LOGD("but we have no way [in libpng] to determine whether the type in glTexImage2D of OGLES is suit for GL_UNSIGNED_SHORT_4_4_4_4 or GL_UNSIGNED_SHORT_5_5_5_1 or something else");
+        }
+
+        if (m_Format == GL_RGB)
+        {
+            // todo, find some way to support GL_UNSIGNED_SHORT_5_6_5
+            LOGD("the loading png image %s has %d bit per pixel, and it's GL_RGB format", getName().c_str(), 16);
+            LOGD("but we have no way [in libpng] to determine whether the type in glTexImage2D of OGLES is suit for GL_UNSIGNED_SHORT_5_6_5 or something else");
+        }
+    } 
+
+    return GL_UNSIGNED_BYTE;
+}
+
+unsigned char* PNG::getData()
+{
+    return m_pData;
+}
+
+std::string PNG::getName() const
+{
+    return m_pResource->getPath();
+}
+
+RawImage::RawImage(BYTE* pData, unsigned int width, unsigned int height, GLenum format_ogl, GLenum type_ogl, std::string name) :
+    m_Width(width),
+    m_Height(height),
+    m_Format(format_ogl),
+    m_Type(type_ogl),
+    m_Name(name),
+    m_bHasAlpha(false),
+    m_BytePerRow(0)
+{
+    // copy the image data own
+    size_t channel_per_pixel, bit_per_channel, bit_per_pixel;
+
+    switch (format_ogl)
+    {
+    case GL_RGBA:
+        channel_per_pixel = 4;
+        m_bHasAlpha = true;
+        break;
+    case GL_RGB:
+        channel_per_pixel = 3;
+        m_bHasAlpha = false;
+        break;
+    case GL_LUMINANCE_ALPHA:
+        channel_per_pixel = 2;
+        m_bHasAlpha = true;
+        break;
+    case GL_LUMINANCE:
+        channel_per_pixel = 1;
+        m_bHasAlpha = false;
+        break;
+    case GL_ALPHA:
+        channel_per_pixel = 1;
+        m_bHasAlpha = true;
+        break;
+    }
+
+    switch (type_ogl)
+    {
+    case GL_UNSIGNED_BYTE:
+        bit_per_channel = 8;
+        bit_per_pixel = channel_per_pixel * bit_per_channel;
+        break;
+    case GL_UNSIGNED_SHORT_5_5_5_1:
+    case GL_UNSIGNED_SHORT_4_4_4_4:
+    case GL_UNSIGNED_SHORT_5_6_5:
+        bit_per_pixel = 16;
+        break;
+    }
+    m_BytePerRow = width * (bit_per_pixel / 8);
+
+    size_t size = width * height * (bit_per_pixel / 8);
+    m_pData = new BYTE[size];
+    memcpy(m_pData, pData, size);
+}
+
+RawImage::~RawImage()
+{
+    UnLoad();
+}
+
+bool RawImage::Load()
+{
+    return true;
+}
+
+bool RawImage::UnLoad()
+{
+    if (m_pData)
+    {
+        delete[] m_pData;
+        m_pData = NULL;
+    }
+    m_Width = 0;
+    m_Height = 0;
+    m_bHasAlpha = false;
+    m_BytePerRow = 0;
+    return true;
+}
+
+unsigned int RawImage::getWidth()
+{
+    return m_Width;
+}
+
+unsigned int RawImage::getHeight()
+{
+    return m_Height;
+}
+
+bool RawImage::hasAlpha()
+{
+    return m_bHasAlpha;
+}
+
+unsigned int RawImage::getBytePerRow()
+{
+    return m_BytePerRow;
+}
+
+GLenum RawImage::getFormatInOGL()
+{
+    return m_Format;
+}
+
+GLenum RawImage::getTypeInOGL()
+{
+    return m_Type;
+}
+
+BYTE* RawImage::getData()
+{
+    return m_pData;
+}
+
+std::string RawImage::getName() const
+{
+    return m_Name;
+}
+
+
+
+
+
