@@ -1,0 +1,55 @@
+(gdb) 
+Continuing.
+
+Breakpoint 8, PNG::Load (this=0x8211e29c) at jni/image.cpp:185
+185         LOGD("begin to new memory in size: %d", m_Height);
+(gdb) 
+Continuing.
+
+Breakpoint 6, GLTexture2D::Create (this=0xb8a0b658)
+    at jni/gl_renderable.cpp:588
+588     return isCreateOK();
+(gdb) s
+ElementOfRenderable::isCreateOK (this=0xb8a0b658) at jni/renderable.h:43
+43      bool isCreateOK() const { return m_bIsCreateOK; }
+(gdb) 
+GLTexture2D::Create (this=0xb8a0b658) at jni/gl_renderable.cpp:589
+589 }
+(gdb) s
+
+Program received signal SIGSEGV, Segmentation fault.
+0x8209c460 in GLRenderable::getMesh (this=0x0) at jni/gl_renderable.cpp:833
+833     return this->m_pGeometry->getMesh();
+(gdb) bt
+#0  0x8209c460 in GLRenderable::getMesh (this=0x0) at jni/gl_renderable.cpp:833
+#1  0x8209ada4 in GLInputVertexAttribute::Disable (this=0x8206cb08)
+    at jni/gl_renderable.cpp:434
+#2  0x8209a918 in GLInputVertexAttribute::~GLInputVertexAttribute (
+    this=0x8206cb08, __in_chrg=<optimized out>) at jni/gl_renderable.cpp:348
+#3  0x8209f840 in std::find_if<GLInputVertexAttribute**, GLInputVertexAttribute> (__first=0x0, __last=0x0, __pred=...)
+    at /Users/alexandercer/android/android-ndk-r9b/sources/cxx-stl/stlport/stlport/stl/_algobase.c:217
+#4  0x8209e8d8 in std::remove_if<GLInputVertexAttribute**, GLInputVertexAttribute> (__first=0x0, __last=0x0, __pred=...)
+    at /Users/alexandercer/android/android-ndk-r9b/sources/cxx-stl/stlport/stlport/stl/_algo.h:280
+#5  0x8209da3c in Geometry<GLMesh, GLSLShader, GLSampler, GLTexture2D, GLInputVertexAttribute>::addInputVertexAttribute (this=0xb8a0b4c0, val=0xb8a0b528)
+    at jni/renderable.h:248
+#6  0x8209c74c in GLRenderable::addInputVertexAttribute (this=0xb8a0b4b0, 
+    val=0xb8a0b528) at jni/gl_renderable.cpp:886
+#7  0x820a2380 in GLBasicScene::Load (this=0xb892ee18) at jni/gl_scene.cpp:280
+#8  0x820974c8 in android_handle_cmd (app=0xb8932b58, cmd=1)
+    at jni/android_task.cpp:39
+#9  0x820aec8c in process_cmd (app=0xb8932b58, source=0xb8932bac)
+    at /Users/alexandercer/android/android-ndk-r9b/sources/android/native_app_glue/android_native_app_glue.c:203
+#10 0x82097d50 in AndroidTask::Update (this=0xb8941948)
+    at jni/android_task.cpp:202
+#11 0x820a614c in Kernel::Execute (this=0x8211e2d4) at jni/kernel.cpp:53
+#12 0x82095cd0 in AndroidApplication::Run (this=0x8206cd7c)
+    at jni/android_application.cpp:43
+#13 0x820a82b8 in android_main (state=0xb8932b58) at jni/main.cpp:11
+#14 0x820aedd0 in android_app_entry (param=0xb8932b58)
+    at /Users/alexandercer/android/android-ndk-r9b/sources/android/native_app_glue/android_native_app_glue.c:232
+#15 0xb6edf1b4 in __thread_entry ()
+   from /Users/alexandercer/budding/OGLESSample_NDK/obj/local/armeabi-v7a/libc.so
+#16 0xb6edf34c in pthread_create ()
+   from /Users/alexandercer/budding/OGLESSample_NDK/obj/local/armeabi-v7a/libc.so
+#17 0x00000000 in ?? ()
+(gdb) 

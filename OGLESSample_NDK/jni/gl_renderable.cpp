@@ -820,30 +820,35 @@ std::vector<GLTexture2D*> GLRenderable::getAllTextures() const
 
 bool GLRenderable::setMesh(GLMesh* val)
 {
+    val->setRenderable(this);
     this->m_pGeometry->setMesh(val);
     return true;
 }
 
 bool GLRenderable::setShader(GLSLShader* val)
 {
+    val->setRenderable(this);
     this->m_pGeometry->setShader(val);
     return true;
 }
 
 bool GLRenderable::setSampler(GLSampler* val)
 {
+    val->setRenderable(this);
     this->m_pGeometry->setSampler(val); 
     return true;
 }
 
 bool GLRenderable::addInputVertexAttribute(GLInputVertexAttribute* val)
 {
+    val->setRenderable(this);
     this->m_pGeometry->addInputVertexAttribute(val);
     return true;
 }
 
 bool GLRenderable::addTexture(GLTexture2D* val)
 {
+    val->setRenderable(this);
     this->m_pGeometry->addTexture(val);
     return true;
 }
