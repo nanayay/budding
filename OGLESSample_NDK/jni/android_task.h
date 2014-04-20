@@ -3,22 +3,21 @@
 
 #include <android_native_app_glue.h>
 #include "task.h"
-#include "egl_renderer.h"
-#include "gl_scene.h"
+#include "android_platform.h"
+#include "engine.h"
+#include "renderer.h"
 
 class AndroidTask: public Task {
 public:
-	explicit AndroidTask(android_app* pState, Renderer* pRenderer, unsigned int priority = Task::Priority::Normal);
-	explicit AndroidTask(AndroidPlatform* pPlatform, Renderer* pRenderer, unsigned int priority = Task::Priority::Normal);
+	explicit AndroidTask(android_app* pState, Renderer* pRenderer, unsigned int priority = Task::Priority::Highest);
+	explicit AndroidTask(AndroidPlatform* pPlatform, Renderer* pRenderer, unsigned int priority = Task::Priority::Highest);
 	AndroidTask(const AndroidTask& _copy);
 	AndroidTask& operator=(const AndroidTask& _assign);
 	virtual ~AndroidTask();
 
 	// getter
-	android_app* getAppState() const {
-		return m_pState;
-	}
-	Scene* getScene() const { return m_pScene; }
+	android_app* getAppState() const { return m_pState; }
+	Engine* getEngine() const { return m_pEngine; }
 
 	virtual bool Start();
 	virtual void OnSuspend();
@@ -30,7 +29,7 @@ public:
 
 private:
 	android_app* m_pState;
-	Scene *m_pScene;
+	Engine* m_pEngine;
 
 };
 #endif

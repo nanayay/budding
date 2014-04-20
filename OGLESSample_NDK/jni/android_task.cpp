@@ -1,6 +1,7 @@
 #include "kernel.h"
 #include "android_task.h"
 #include "log.h"
+#include "gl_scene.h"
 #include "android_asset.h"
 
 static int32_t android_handle_input(struct android_app* app,
@@ -33,8 +34,10 @@ static void android_handle_cmd(struct android_app* app, int cmd) {
 		if (app->window != NULL)
 		{
 			LOGD("android_handle_cmd() app->window != null");
-			Renderer* pRenderer = (Renderer*)app->userData;
-			pRenderer->Init();
+            Engine* pEngine = (Engine*)app->userData;
+			pEngine->getRenderer()->Init();
+            pEngine->getScene()->Load();
+            pEngine->getRenderer()->Bind(pEngine->getScene());
 		}
 		else
 		{
@@ -46,8 +49,10 @@ static void android_handle_cmd(struct android_app* app, int cmd) {
 	case APP_CMD_DESTROY: {
 		//
 		LOGD("android_handle_cmd() APP_CMD_DESTROY cmd begin");
-		Renderer* pRenderer = (Renderer*)app->userData;
-		pRenderer->Destroy();
+		Engine* pEngine = (Engine*)app->userData;
+        pEngine->getRenderer()->Bind(NULL);
+        pEngine->getScene()->UnLoad();
+		pEngine->getRenderer()->Destroy();
 		LOGD("android_handle_cmd() APP_CMD_DESTROY cmd end");
 		// TODO, inform kernel to kill all task?
 		}
@@ -55,8 +60,10 @@ static void android_handle_cmd(struct android_app* app, int cmd) {
 	case APP_CMD_TERM_WINDOW: {
 		// clean up the window because it is being hidden/closed
 		LOGD("android_handle_cmd() APP_CMD_TERM_WINDOW cmd begin");
-        Renderer* pRenderer = (Renderer*)app->userData;
-        pRenderer->Destroy();
+        Engine* pEngine = (Engine*)app->userData;
+        pEngine->getRenderer()->Bind(NULL);
+        pEngine->getScene()->UnLoad();
+        pEngine->getRenderer()->Destroy();
         LOGD("android_handle_cmd() APP_CMD_TERM_WINDOW cmd end");
 		}
 		break;
@@ -90,31 +97,36 @@ static void android_handle_cmd(struct android_app* app, int cmd) {
 	}
 }
 
-AndroidTask::AndroidTask(android_app* pState, Renderer* pRenderer, unsigned int priority)
-	: m_pState(pState),
-	  m_pScene(NULL),
-	  Task(priority)
+AndroidTask::AndroidTask(android_app* pState, Renderer* pRenderer, unsigned int priority) :
+	m_pState(pState),
+	Task(priority)
 {
+    m_pEngine = new Engine();
+    m_pEngine->setRenderer(pRenderer);
+
 	m_pState->onAppCmd = ::android_handle_cmd;
 	m_pState->onInputEvent = ::android_handle_input;
-	m_pState->userData = (void*)pRenderer;
+	m_pState->userData = (void*)m_pEngine;
 }
 
 AndroidTask::AndroidTask(AndroidPlatform* pPlatform, Renderer* pRenderer, unsigned int priority) :
-		m_pState(pPlatform->getAppState()),
-		m_pScene(NULL),
-		Task(priority)
+	m_pState(pPlatform->getAppState()),
+	Task(priority)
 {
+    m_pEngine = new Engine();
+    m_pEngine->setRenderer(pRenderer);
+
+    // todo, add some class for event handler, but not use static function
 	m_pState->onAppCmd = ::android_handle_cmd;
 	m_pState->onInputEvent = ::android_handle_input;
-	m_pState->userData = (void*)pRenderer;
+    m_pState->userData = (void*)m_pEngine;
 }
 
 AndroidTask::AndroidTask(const AndroidTask& _copy)
 	:Task(_copy)
 {
-	this->m_pState = _copy.m_pState;
-	this->m_pScene = _copy.m_pScene;
+	m_pState = _copy.m_pState;
+	m_pEngine = _copy.m_pEngine;
 }
 
 AndroidTask& AndroidTask::operator=(const AndroidTask& _assign)
@@ -122,7 +134,7 @@ AndroidTask& AndroidTask::operator=(const AndroidTask& _assign)
 	if (this == &_assign)
 		return *this;
 	m_pState = _assign.getAppState();
-	m_pScene = _assign.getScene();
+	m_pEngine = _assign.getEngine();
 	m_priority = _assign.Priority();
 	m_canKill = _assign.CanKill();
 	return *this;
@@ -130,12 +142,11 @@ AndroidTask& AndroidTask::operator=(const AndroidTask& _assign)
 
 AndroidTask::~AndroidTask()
 {
-    // TODO, make some way to manage Scene, not call delete scene here
     // TODO, add code to check the pointer before delete
-    if (m_pScene)
+    if (m_pEngine)
     {
-        m_pScene->UnLoad();
-        delete m_pScene;
+        delete m_pEngine;
+        m_pEngine = NULL;
     }
 }
 
@@ -164,15 +175,16 @@ bool AndroidTask::Start() {
     // Renderer's Destory() will be called when AndroidTask's android_handle_cmd()'s APP_CMD_TERM_WINDOW, etc
 
     // todo here, add some init job here for overall app, and only need to be run once
+    // AndroidTask::Start() should be the very beginning of the native thread begin
+    // Renderer's Init will be called when windows ready, hence we have the common idea: 
+    //     Start()->Init()->Destroy()->Init()->Destory()->Stop()
+
     ANativeActivity* nativeActivity = m_pState->activity;
     AndroidAsset::setAssetManager(nativeActivity->assetManager);
 
-    Renderer* pRenderer = NULL;
-    pRenderer = (Renderer*)(getAppState()->userData);
+    Scene* pScene = new GLBasicScene();
+    m_pEngine->setScene(pScene);
 
-    m_pScene = new GLBasicScene();
-    m_pScene->Load();
-    pRenderer->Bind(m_pScene);
 
 	return true;
 }
@@ -200,11 +212,10 @@ void AndroidTask::OnResume() {
 
 void AndroidTask::Stop() {
 	// No need to call Renderable's Init() and Destory() herr, since Renderer task will call the same pointer of Scene's Renderables Vector Pointer's Renderable's Init()/Destory() in Renderer's own Init() and Destory()
-    Renderer* pRenderer = NULL;
-    pRenderer = (Renderer*)(getAppState()->userData);
-    pRenderer->Bind(NULL);
-	m_pScene->UnLoad();
-	delete m_pScene;
+
+    m_pEngine->getRenderer()->Bind(NULL);
+    m_pEngine->getScene()->UnLoad();
+    delete m_pEngine->getScene();
 }
 
 void AndroidTask::ClearClosing() {
