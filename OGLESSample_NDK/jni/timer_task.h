@@ -19,7 +19,7 @@ protected:
     virtual TimeUnit nanoTime() = 0;
 
 public:
-    explicit Timer(unsigned int priority = Task::Priority::Highest);
+    explicit Timer(unsigned int priority = Task::Priority::High);
     virtual ~Timer();
 
     bool Start();
