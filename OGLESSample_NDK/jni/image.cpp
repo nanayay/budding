@@ -173,6 +173,20 @@ bool PNG::Load()
         // todo here very much
         // make GLTexture2D for file works fine, which will fail when try to open the file in sdcard
         // notebook, when use both real device and emulator, adb may not answer the change, use adb kill-server to reset the adb
+        // notebook, on android device, new a even memory size may be fail
+        // notebook, how to debug on mac
+        // todo here very much
+        // - analysis the crash.debug.log deeply
+        // - IA will use itself to init a temp var in find_if, that will call it's Disable and call null pointer about its Renderable
+        // - 1st, not call disable when not necessory for all element of renderable
+        // - 2nd, maybe remove the fix which just call set renderable for each item when it add to renderable, see the fix with crash.log
+        // todo here very much
+        // - find why the app not crash, but now it has no view
+        // - make the texture file load from /sdcard/ be back, now it just be disable by #if 0 #endif
+        // todo notebook
+        // - how to save breakpoints and use it when begin to debug
+        // ~/android/android-ndk-r9b/ndk-gdb-py --start -x bp.gdb
+
 
         LOGD("begine to check the lImageBuffer: %x", lImageBuffer);
         if (!lImageBuffer)

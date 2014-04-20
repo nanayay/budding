@@ -1,0 +1,9 @@
+break resource.cpp:29
+break android_asset.cpp:23
+break android_asset.cpp:31
+break gl_scene.cpp:212
+break gl_renderable.cpp:517
+break gl_renderable.cpp:588
+break image.cpp:169
+break image.cpp:185
+break image.cpp:422
