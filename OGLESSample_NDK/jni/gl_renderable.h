@@ -7,7 +7,7 @@
 
 #include "type_defines.h"
 #include "renderable.h"
-#include "android_asset.h"
+#include "image.h"
 #include "log.h"
 
 // glGetError
@@ -189,14 +189,14 @@ class GLTexture
     : public Texture
 {
 public:
+    // todo, add the texture_name_id be a int, that will gain a performance
     explicit GLTexture(const std::string& texture_name_id, const std::string& texture_uniform_name, const unsigned int texture_unit_id, GLSampler* texture_sampler = NULL);
     virtual ~GLTexture();
 
     // getter
     std::string getTextureUniformname() const { return m_uniformName; }
     GLuint  getTextureHandle() const { return m_texHandle; }
-    GLenum  getTextureTarget() const { return m_texTarget; }
-    // GLint   getTextureMipLevelsNum() const { return m_mipLevels; }
+    // GLenum  getTextureTarget() const { return m_texTarget; }
     // GLint   getTextureInternalFormat() const { return m_internalFormat; }
     GLsizei getTextureWidth() const { return m_width; }
     GLsizei getTextureHeight() const { return m_height; }
@@ -208,13 +208,12 @@ public:
     void setTextureUniformName(std::string uniform_name) { m_uniformName = uniform_name; }
     void setTextureUnitID(unsigned int val) { m_textureUnit = val; }
     // void setTextureTarget(GLenum val) { m_texTarget = val; }
-    void setTextureMipLevelsNum(GLint val) { m_mipLevels = val; }
-    void setTextureInternalFormat(GLint val) { m_internalFormat = val; }
-    void setTextureWidth(GLsizei val) { m_width = val; }
-    void setTextureHeight(GLsizei val) { m_height = val; }
-    void setTextureFormat(GLenum val) { m_format = val; }
-    void setTextureType(GLenum val) { m_type = val; }
-    void setTextureUnPackAlignmentNum(GLint val) { m_unPackAlignmentNum = val; }
+    // void setTextureInternalFormat(GLint val) { m_internalFormat = val; }
+    // void setTextureWidth(GLsizei val) { m_width = val; }
+    // void setTextureHeight(GLsizei val) { m_height = val; }
+    // void setTextureFormat(GLenum val) { m_format = val; }
+    // void setTextureType(GLenum val) { m_type = val; }
+    // void setTextureUnPackAlignmentNum(GLint val) { m_unPackAlignmentNum = val; }
 
     // Todo here, set all Element's class variable in constructor, make it be default somehow
 
@@ -229,11 +228,9 @@ protected:
 
     // for glTexImage2D
     GLenum m_texTarget;
-    GLint m_mipLevels;
     GLint m_internalFormat;
     GLsizei m_width;
     GLsizei m_height;
-    GLint m_border; // border should be 0 as always
     GLenum m_format;
     GLenum m_type;
 
@@ -248,8 +245,7 @@ class GLTexture2D
 {
 public:
     explicit GLTexture2D(const std::string& texture_name_id);
-    explicit GLTexture2D(const std::string& texture_name_id, const std::string& texture_uniform_name, const unsigned int texture_unit_id, const std::string file_path, GLSampler* texture_sampler = NULL, GLRenderable* renderable = NULL);
-    explicit GLTexture2D(const std::string& texture_name_id, const std::string& texture_uniform_name, const unsigned int texture_unit_id, const AndroidAsset* texture_resource, GLSampler* texture_sampler = NULL, GLRenderable* renderable = NULL);
+    explicit GLTexture2D(const std::string& texture_name_id, const std::string& texture_uniform_name, const unsigned int texture_unit_id, Image* pImage, GLSampler* texture_sampler = NULL, GLRenderable* renderable = NULL);
     virtual ~GLTexture2D();
 
     virtual bool Create();
@@ -258,8 +254,12 @@ public:
     virtual bool Dispose();
 
 private:
-    // for image files load from out storage
-    ReadResource* m_pResource;
+    bool LoadImage();
+    bool UnloadImage();
+
+    // todo here very, move m_pImage to super class
+private:
+    Image* m_pImage;
 
 };
 

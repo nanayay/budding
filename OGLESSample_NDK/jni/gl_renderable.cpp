@@ -231,7 +231,7 @@ bool GLSLShader::CompileAndLink()
 {
     m_programId = CreateProgram(m_pVertexShaderSource->c_str(), m_pFragmentShaderSource->c_str());
 
-    LOGE("GLSL program handle create: %d", m_programId);
+    LOGD("GLSL program handle create: %d", m_programId);
 
     return m_programId == 0 ? false : true;
 }
@@ -464,15 +464,13 @@ GLTexture::GLTexture(const std::string& texture_name_id, const std::string& text
       m_textureUnit(texture_unit_id),
       m_texHandle(0),
       m_texTarget(GL_TEXTURE_2D),
-      m_mipLevels(1),
       m_internalFormat(GL_RGBA),
       m_width(0),
       m_height(0),
-      m_border(0),
       m_format(GL_RGBA),
       m_type(GL_UNSIGNED_BYTE),
       m_unPackAlignmentTarget(GL_UNPACK_ALIGNMENT),
-      m_unPackAlignmentNum(4)
+      m_unPackAlignmentNum(1)
 {
 }
 
@@ -480,28 +478,21 @@ GLTexture::~GLTexture()
 {
 }
 
-GLTexture2D::GLTexture2D(const std::string& texture_name_id)
-    : GLTexture(texture_name_id, std::string(), -1, NULL),
-      m_pResource(NULL)
+GLTexture2D::GLTexture2D(const std::string& texture_name_id) :
+    GLTexture(texture_name_id, std::string(), -1, NULL),
+    m_pImage(NULL)
 {
     // todo here
+    // - move LoadImage and UnLoadImage to super class
     // - make sure texture_uniform_name will not work on null and empty size string
     // - make sure -1 will not work on unsigned int
     m_texTarget = GL_TEXTURE_2D;
     m_pRenderable = NULL;
 }
 
-GLTexture2D::GLTexture2D(const std::string& texture_name_id, const std::string& texture_uniform_name, const unsigned int texture_unit_id, const std::string file_path, GLSampler* texture_sampler, GLRenderable* renderable)
-    : GLTexture(texture_name_id, texture_uniform_name, texture_unit_id, texture_sampler),
-      m_pResource(new ReadFile(file_path))
-{
-    m_texTarget = GL_TEXTURE_2D;
-    m_pRenderable = renderable;
-}
-
-GLTexture2D::GLTexture2D(const std::string& texture_name_id, const std::string& texture_uniform_name, const unsigned int texture_unit_id, const AndroidAsset* texture_resource, GLSampler* texture_sampler, GLRenderable* renderable)
-    : GLTexture(texture_name_id, texture_uniform_name, texture_unit_id, texture_sampler),
-      m_pResource(new AndroidAsset(*texture_resource))
+GLTexture2D::GLTexture2D(const std::string& texture_name_id, const std::string& texture_uniform_name, const unsigned int texture_unit_id, Image* pImage, GLSampler* texture_sampler, GLRenderable* renderable) :
+    GLTexture(texture_name_id, texture_uniform_name, texture_unit_id, texture_sampler),
+      m_pImage(pImage)
 {
     m_texTarget = GL_TEXTURE_2D;
     m_pRenderable = renderable;
@@ -511,10 +502,55 @@ GLTexture2D::~GLTexture2D()
 {
     this->Disable();
     this->Dispose();
-    if (m_pResource != NULL)
+
+    // todo here, maybe find a better way to manage the m_pImage's memory?
+    // todo here, use some macro that safe_release is a good code style?
+    if (m_pImage != NULL)
     {
-        delete m_pResource;
+        delete m_pImage;
+        m_pImage = NULL;
     }
+}
+
+bool GLTexture2D::LoadImage()
+{
+    m_pImage->Load();
+
+    // determine the unpack alignment
+    size_t row_size = m_pImage->getBytePerRow();
+    if (row_size % 8 == 0)
+    {
+        m_unPackAlignmentNum = 8;
+    }
+    else if (row_size % 4 == 0)
+    {
+        m_unPackAlignmentNum = 4;
+    }
+    else if (row_size % 2 == 0) 
+    {
+        m_unPackAlignmentNum = 2;
+    }
+    else
+    {
+        m_unPackAlignmentNum = 1;
+    }
+
+    // todo here, find some way to gen mipmaps or load it from outside
+
+    m_internalFormat = m_pImage->getFormatInOGL();
+    m_width = m_pImage->getWidth();
+    m_height = m_pImage->getHeight();
+    m_format = m_pImage->getFormatInOGL();
+    m_type = m_pImage->getTypeInOGL();
+
+    return true;
+}
+
+bool GLTexture2D::UnloadImage()
+{
+    m_pImage->UnLoad();
+
+    return true;
 }
 
 bool GLTexture2D::Create()
@@ -523,18 +559,27 @@ bool GLTexture2D::Create()
     {
         bool result = false;
 
-        // todo here, add the PNG reader function for m_pResource, then have the m_pImageData be the correct pointer to the texture pixel memory
+        LOGD("LoadImage begin");
+        LoadImage();
+        LOGD("LoadImage end");
+
         glGenTextures(1, &m_texHandle);
         glBindTexture(m_texTarget, m_texHandle);
 
         glPixelStorei(m_unPackAlignmentTarget, m_unPackAlignmentNum);
 
-        glTexImage2D(m_texTarget, m_mipLevels, m_internalFormat, m_width, m_height, m_border, m_format, m_type, m_pImageData);
+        GLint mipLevel = 0;
+        GLint border = 0; // border should be 0 as always
+        glTexImage2D(m_texTarget, mipLevel, m_internalFormat, m_width, m_height, border, m_format, m_type, m_pImage->getData());
 
         if (m_pTextureSampler != NULL)
         {
             m_pTextureSampler->Create();
         }
+
+        LOGD("UnLoadImage begin");
+        UnloadImage();
+        LOGD("UnLoadImage end");
 
         result = true;
 
