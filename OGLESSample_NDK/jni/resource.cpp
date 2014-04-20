@@ -1,5 +1,6 @@
 #include <sys/stat.h>
 #include "resource.h"
+#include "log.h"
 
 ReadResource::ReadResource(const std::string path)
     : m_path(path)
@@ -27,6 +28,12 @@ ReadFile::~ReadFile()
 bool ReadFile::Open()
 {
     m_FileInputStream.open(m_path.c_str(), std::ios::in | std::ios::binary);
+
+    if (m_FileInputStream.is_open() == false)
+    {
+        LOGE("ifstream try to open %s just failed", m_path.c_str());
+    }
+
     // todo, c++11, when support c++11, you can use string as open's first parameter, but not use c_str()
     return m_FileInputStream ? true : false;
     // todo, notebook, use object as the condition check, how to override operator bool, etc.
@@ -35,7 +42,14 @@ bool ReadFile::Open()
 size_t ReadFile::Read(void* pDestBuffer, const size_t bytesToRead)
 {
     m_FileInputStream.read((char*)pDestBuffer, bytesToRead);
-    return m_FileInputStream.gcount();
+    size_t result = m_FileInputStream.gcount();
+
+    if (!result)
+    {
+        LOGE("ifstream try to read %d, but just got %d", bytesToRead, result);
+    }
+
+    return result;
     // todo, notebook, how to get the just readed bytes
 }
 

@@ -17,7 +17,7 @@ public:
     virtual size_t Read(void* pDestBuffer, const size_t bytesToRead);
     virtual bool Close();
 
-    unsigned int Length() const;
+    size_t getLength() const;
 
 public:
     static void setAssetManager(AAssetManager* val) { m_pAssetManager = val; }

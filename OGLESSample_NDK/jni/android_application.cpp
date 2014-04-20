@@ -24,7 +24,9 @@ bool AndroidApplication::Initialize()
     app_dummy();
 
 #ifdef _GDB_DEBUG_
+    LOGD("Begin wait 10sec for gdb debug");
     sleep(10);
+    LOGD("End wait 10sec for gdb debug");
 #endif
 
     bool result = false;
