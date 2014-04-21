@@ -9,8 +9,12 @@ GLMesh::GLMesh(bool use_cpu_buffer, GLRenderable* renderable)
 
 GLMesh::~GLMesh()
 {
-    this->Disable();
-    this->Dispose();
+    if (isEnableOK())
+    {
+        Disable();
+    }
+
+    Dispose();
 }
 
 bool GLMesh::Create()
@@ -125,12 +129,11 @@ GLSLShader::GLSLShader(const std::string* vs_source, const std::string* fs_sourc
 
 GLSLShader::~GLSLShader()
 {
-    if (isInitDeepCopyShaderSourceStr() == true)
+    if (isEnableOK())
     {
-        DiscardShaderSource();
+        Disable();
     }
-
-    Remove();
+    Dispose();
 }
 
 GLuint GLSLShader::getProgramHandle() const
@@ -345,8 +348,11 @@ GLInputVertexAttribute::GLInputVertexAttribute(std::string name, GLRenderable* r
 
 GLInputVertexAttribute::~GLInputVertexAttribute()
 {
-    this->Disable();
-    this->Dispose();
+    if (isEnableOK())
+    {
+        Disable();
+    }
+    Dispose();
 }
 
 bool GLInputVertexAttribute::Create()
@@ -500,10 +506,12 @@ GLTexture2D::GLTexture2D(const std::string& texture_name_id, const std::string& 
 
 GLTexture2D::~GLTexture2D()
 {
-    this->Disable();
-    this->Dispose();
+    if (isEnableOK())
+    {
+        Disable();
+    }
+    Dispose();
 
-    // todo here, maybe find a better way to manage the m_pImage's memory?
     // todo here, use some macro that safe_release is a good code style?
     if (m_pImage != NULL)
     {
@@ -514,43 +522,61 @@ GLTexture2D::~GLTexture2D()
 
 bool GLTexture2D::LoadImage()
 {
-    m_pImage->Load();
+    if (m_pImage)
+    {
+        m_pImage->Load();
 
-    // determine the unpack alignment
-    size_t row_size = m_pImage->getBytePerRow();
-    if (row_size % 8 == 0)
-    {
-        m_unPackAlignmentNum = 8;
-    }
-    else if (row_size % 4 == 0)
-    {
-        m_unPackAlignmentNum = 4;
-    }
-    else if (row_size % 2 == 0) 
-    {
-        m_unPackAlignmentNum = 2;
+        // determine the unpack alignment
+        size_t row_size = m_pImage->getBytePerRow();
+        if (row_size % 8 == 0)
+        {
+            m_unPackAlignmentNum = 8;
+        }
+        else if (row_size % 4 == 0)
+        {
+            m_unPackAlignmentNum = 4;
+        }
+        else if (row_size % 2 == 0) 
+        {
+            m_unPackAlignmentNum = 2;
+        }
+        else
+        {
+            m_unPackAlignmentNum = 1;
+        }
+
+        // todo here, find some way to gen mipmaps or load it from outside
+
+        m_internalFormat = m_pImage->getFormatInOGL();
+        m_width = m_pImage->getWidth();
+        m_height = m_pImage->getHeight();
+        m_format = m_pImage->getFormatInOGL();
+        m_type = m_pImage->getTypeInOGL();
+
+        return true;
     }
     else
     {
-        m_unPackAlignmentNum = 1;
+        LOGE("can't call GLTexture2D::LoadImage(), since m_pImage is NULL");
+        return false;
     }
-
-    // todo here, find some way to gen mipmaps or load it from outside
-
-    m_internalFormat = m_pImage->getFormatInOGL();
-    m_width = m_pImage->getWidth();
-    m_height = m_pImage->getHeight();
-    m_format = m_pImage->getFormatInOGL();
-    m_type = m_pImage->getTypeInOGL();
-
-    return true;
 }
 
 bool GLTexture2D::UnloadImage()
 {
-    m_pImage->UnLoad();
+    if (m_pImage)
+    {
+        m_pImage->UnLoad();
+        delete m_pImage;
+        m_pImage = NULL;
 
-    return true;
+        return true;
+    }
+    else
+    {
+        LOGE("can't call GLTexture2D::LoadImage(), since m_pImage is NULL");
+       return false; 
+    }
 }
 
 bool GLTexture2D::Create()
@@ -668,8 +694,12 @@ GLSampler::GLSampler(GLRenderable* renderable)
 
 GLSampler::~GLSampler()
 {
-    this->Disable();
-    this->Dispose();
+    if (isEnableOK())
+    {
+        Disable();
+    }
+    Disable();
+    Dispose();
 }
 
 bool GLSampler::Create()
