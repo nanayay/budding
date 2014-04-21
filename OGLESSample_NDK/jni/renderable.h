@@ -246,7 +246,10 @@ public:
     void addInputVertexAttribute(INPUTATTRIBUTE* val)
     {
         typename std::vector<INPUTATTRIBUTE*>::iterator last = std::remove_if(m_inputVertexAttributesVector.begin(), m_inputVertexAttributesVector.end(), *val);
-        m_inputVertexAttributesVector.erase(last, m_inputVertexAttributesVector.end());
+        if (last < m_inputVertexAttributesVector.end())
+        {
+            m_inputVertexAttributesVector.erase(last, m_inputVertexAttributesVector.end());
+        }
         m_inputVertexAttributesVector.push_back(val);
     }
     void setAllTextures(std::vector<TEXTURE*> val)
@@ -256,7 +259,10 @@ public:
     void addTexture(TEXTURE* val)
     {
         typename std::vector<TEXTURE*>::iterator last = std::remove_if(m_textureVector.begin(), m_textureVector.end(), *val);
-        m_textureVector.erase(last, m_textureVector.end());
+        if (last < m_textureVector.end())
+        {
+            m_textureVector.erase(last, m_textureVector.end());
+        }
         m_textureVector.push_back(val);
     }
 
