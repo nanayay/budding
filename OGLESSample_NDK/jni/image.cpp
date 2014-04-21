@@ -183,6 +183,8 @@ bool PNG::Load()
         // todo here very much
         // - find why the app not crash, but now it has no view
         // - make the texture file load from /sdcard/ be back, now it just be disable by #if 0 #endif
+        // todo here
+        // remove redundant logd here in PNG's Load()
         // todo notebook
         // - how to save breakpoints and use it when begin to debug
         // ~/android/android-ndk-r9b/ndk-gdb-py --start -x bp.gdb
