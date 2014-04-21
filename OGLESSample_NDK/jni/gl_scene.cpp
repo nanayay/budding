@@ -112,7 +112,6 @@ namespace Models
         0, 0, 255, 255,
         255, 255, 0, 255,
     };
-    ::RawImage raw_chess_texture(tex_chess_pixels, tex_chess_width, tex_chess_height, tex_chess_pixels_format, tex_chess_pixel_type, tex_chess_name);
 
 #if 0
     // load png file in sdcard
@@ -137,11 +136,16 @@ namespace Models
     std::string tex_asset_uniform_name = std::string("u_sampleTexture2D_2");
     unsigned int tex_asset_unit_id = 2;
 
-    AndroidAsset tex_asset_png_readasset(tex_asset_filepath);
-    ::PNG tex_asset_png(&tex_asset_png_readasset);
 
     bool Import()
     {
+        // for the raw image data in hard code
+        RawImage* raw_chess_texture = new RawImage(Models::tex_chess_pixels, Models::tex_chess_width, Models::tex_chess_height, Models::tex_chess_pixels_format, Models::tex_chess_pixel_type, Models::tex_chess_name);
+
+        // for the android asset png file
+        AndroidAsset* tex_asset_png_readasset = new AndroidAsset(Models::tex_asset_filepath);
+        PNG* tex_asset_png = new PNG(tex_asset_png_readasset);
+
     #if 0
         m_pGLMesh = new GLMesh(true); // true will use client buffer, false [default] will use gpu buffer
     #else
@@ -151,11 +155,11 @@ namespace Models
         m_pIAPos = new GLInputVertexAttribute(ia_pos);
         m_pIAColor = new GLInputVertexAttribute(ia_color);
         m_pIATexCoord = new GLInputVertexAttribute(ia_texCoord);
-        m_pTex2DChess = new GLTexture2D(std::string("Texture0"), Models::tex_chess_uniform_name, Models::tex_chess_unit_id, &Models::raw_chess_texture);
+        m_pTex2DChess = new GLTexture2D(std::string("Texture0"), Models::tex_chess_uniform_name, Models::tex_chess_unit_id, raw_chess_texture);
     #if 0
         m_pTex2DSDCard = new GLTexture2D(std::string("Texture1"), Models::tex_sdcard_uniform_name, Models::tex_sdcard_unit_id, &Models::tex_sdcard_png);
     #endif
-        m_pTex2DAsset = new GLTexture2D(std::string("Texture2"), Models::tex_asset_uniform_name, Models::tex_asset_unit_id, &Models::tex_asset_png);
+        m_pTex2DAsset = new GLTexture2D(std::string("Texture2"), Models::tex_asset_uniform_name, Models::tex_asset_unit_id, tex_asset_png);
         m_pSampler = new GLSampler();
 
         // TODO Here, make the GLSLShader can also accept the char* as input
@@ -286,6 +290,7 @@ bool GLBasicScene::Load()
 #endif
     m_pGLRect->addTexture(Models::m_pTex2DAsset);
 
+    // todo here verymuch, seem the gdb stops at addTexture finished, so next is to step over 291->294
     m_pRenderablesVector->push_back(m_pGLRect);
 
     // Note
