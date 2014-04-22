@@ -5,6 +5,7 @@ break gl_scene.cpp:218
 break gl_scene.cpp:284
 break gl_scene.cpp:291
 break gl_scene.cpp:294
+break gl_scene.cpp:301
 break gl_renderable.cpp:517
 break gl_renderable.cpp:588
 break image.cpp:169
@@ -15,3 +16,6 @@ break renderable.h:228
 break renderable.h:234
 break renderable.h:248
 break renderable.h:258
+break android_task.cpp:38
+break android_task.cpp:39
+break android_task.cpp:40
