@@ -166,9 +166,7 @@ bool PNG::Load()
             LOGD("try to make it be even: %d", bigsize);
         }
 
-        LOGD("begin to new memory in size: %d", bigsize);
         lImageBuffer = new png_byte[bigsize];
-        LOGD("end to new memory in size: %d", bigsize);
 
         // todo here very much
         // make GLTexture2D for file works fine, which will fail when try to open the file in sdcard
@@ -190,32 +188,24 @@ bool PNG::Load()
         // ~/android/android-ndk-r9b/ndk-gdb-py --start -x bp.gdb
 
 
-        LOGD("begine to check the lImageBuffer: %x", lImageBuffer);
         if (!lImageBuffer)
             break;
-        LOGD("end to check the lImageBuffer: %x", lImageBuffer);
 
         // Pointers to each row of the image buffer. Row order is
         // inverted because different coordinate systems are used by
         // OpenGL (1st pixel is at bottom left) and PNGs (top-left).
-        LOGD("begin to new memory in size: %d", m_Height);
         lRowPtrs = new png_bytep[m_Height];
-        LOGD("end to new memory in size: %d", m_Height);
 
-        LOGD("begine to check the lRowPtrs: %x", lRowPtrs);
         if (!lRowPtrs)
             break;
-        LOGD("end to check the lRowPtrs: %x", lRowPtrs);
 
         for (int32_t i = 0; i < m_Height; ++i)
         {
             lRowPtrs[m_Height - (i + 1)] = lImageBuffer + i * lRowSize;
         }
 
-        LOGD("begine to png_read_image");
         // Reads image content.
         png_read_image(lPngPtr, lRowPtrs);
-        LOGD("end to png_read_image");
 
         // Frees memory and resources.
         m_pResource->Close();
@@ -223,8 +213,7 @@ bool PNG::Load()
         delete[] lRowPtrs;
         m_pData = lImageBuffer;
 
-        LOGD("load png success, will return true");
-        LOGD("the image data is at %x", m_pData);
+        LOGD("load png %s success, will return true", m_pResource->getPath().c_str());
         return true;
     }
     while(0);
