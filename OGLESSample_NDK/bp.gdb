@@ -19,3 +19,5 @@ break renderable.h:258
 break android_task.cpp:38
 break android_task.cpp:39
 break android_task.cpp:40
+break egl_render.cpp:33
+break egl_render.cpp:38

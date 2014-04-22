@@ -1,4 +1,5 @@
 #include "renderer.h"
+#include "log.h"
 
 Renderer::Renderer(unsigned int priority)
 	: m_bInitialized(false),
@@ -57,6 +58,8 @@ void Renderer::Stop()
 
 void Renderer::RenderFrame()
 {
+	LOGD("Renderer::RenderFrame begin");
+
 	if ( m_bInitialized == true && m_bRendering == true && m_pRenderablesVector != NULL)
 	{
 		for (std::vector<Renderable*>::iterator i = m_pRenderablesVector->begin(); i != m_pRenderablesVector->end(); ++i)
@@ -64,6 +67,8 @@ void Renderer::RenderFrame()
 			(*i)->Draw();
 		}
 	}
+
+	LOGD("Renderer::RenderFrame end");
 }
 
 void Renderer::Init()

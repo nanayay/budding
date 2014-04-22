@@ -53,6 +53,12 @@ protected:
     bool m_bIsCreateOK;
     bool m_bIsEnableOK;
 
+private:
+    ElementOfRenderable(ElementOfRenderable& copy_);
+    ElementOfRenderable(const ElementOfRenderable& copy_);
+    ElementOfRenderable& operator=(ElementOfRenderable& assign_);
+    ElementOfRenderable& operator=(const ElementOfRenderable& assign_);
+
 };
 
 // Class
@@ -102,13 +108,18 @@ public:
     {};
     virtual ~InputVertexAttribute() {};
 
-    std::string getName() const { return m_InputVertexAttributeName; }
+    const std::string& getName() const { return m_InputVertexAttributeName; }
 
     bool operator==(const InputVertexAttribute& val) const { return m_InputVertexAttributeName == val.getName(); }
+
+    // todo notebook, operator() is needed by find_if and remove_if, but the key here is when you use *val to find_if, it will have a temp object of current call, hence, here is the rule, not use the resource class as a function object
+    
+    /*
     bool operator()(const InputVertexAttribute* val) const
     {
         return m_InputVertexAttributeName == val->getName();
     }
+    */
 
 protected:
     std::string m_InputVertexAttributeName;
@@ -192,16 +203,38 @@ public:
     virtual ~Texture() {};
 
 public:
-    std::string getName() const { return m_nameID; }
+    const std::string& getName() const { return m_nameID; }
+    // todo notebook, when use below will be some compile error
+    // use const std::string& or just std::string as return type
+    // std::string& getName() const { return m_nameID; }
 
     bool operator==(const Texture& val) const { return m_nameID == val.getName(); }
+
+    // todo notebook, operator() is needed by find_if and remove_if, but the key here is when you use *val to find_if, it will have a temp object of current call, hence, here is the rule, not use the resource class as a function object
+
+    /*
     bool operator()(const Texture* val) const { return m_nameID == val->getName(); }
+    */
 
     void setTextureSampler(TextureSampler* val) { m_pTextureSampler = val; }
 
 protected:
     std::string m_nameID;
     TextureSampler* m_pTextureSampler;
+};
+
+template <typename CLASS>
+class CompareName
+{
+public:
+    explicit CompareName(const std::string& val) : m_val(val) {};
+    virtual ~CompareName() {};
+
+    bool operator()(const CLASS* val) { return val->getName() == m_val; }
+
+private:
+    std::string m_val;
+
 };
 
 // Geometry is more like a container than a normal class object, use template to hold the shader, input vertex attribute, mesh data for general manager
@@ -212,7 +245,7 @@ public:
     explicit Geometry(const std::string& name) : m_name(name), m_pSampler(NULL) {};
     virtual ~Geometry() {};
 
-    std::string getName() const { return m_name; }
+    std::string& getName() const { return m_name; }
 
     // Always do Shallow copy, never Deep copy for saving memory for saving memory footprint
     bool isDeepCopyData() { return false; }
@@ -225,13 +258,13 @@ public:
     INPUTATTRIBUTE* getInputVertexAttribute(std::string name) const
     {
         // vector will hold the pointer to IVA, hence you can not use find for the pointer, but only find_if for some user-defined pointer reference
-        typename std::vector<INPUTATTRIBUTE*>::const_iterator i = std::find_if(m_inputVertexAttributesVector.begin(), m_inputVertexAttributesVector.end(), INPUTATTRIBUTE(name));
+        typename std::vector<INPUTATTRIBUTE*>::const_iterator i = std::find_if(m_inputVertexAttributesVector.begin(), m_inputVertexAttributesVector.end(), CompareName<INPUTATTRIBUTE>(name));
         return i != m_inputVertexAttributesVector.end() ? *i : NULL;
     }
     std::vector<TEXTURE*> getAllTextures() const { return m_textureVector; }
     TEXTURE* getTexture(std::string name) const
     {
-        typename std::vector<TEXTURE*>::const_iterator i = std::find_if(m_textureVector.begin(), m_textureVector.end(), TEXTURE(name));
+        typename std::vector<TEXTURE*>::const_iterator i = std::find_if(m_textureVector.begin(), m_textureVector.end(), CompareName<TEXTURE>(name));
         return i != m_textureVector.end() ? *i : NULL;
     }
 
@@ -245,7 +278,7 @@ public:
     }
     void addInputVertexAttribute(INPUTATTRIBUTE* val)
     {
-        typename std::vector<INPUTATTRIBUTE*>::iterator last = std::remove_if(m_inputVertexAttributesVector.begin(), m_inputVertexAttributesVector.end(), *val);
+        typename std::vector<INPUTATTRIBUTE*>::iterator last = std::remove_if(m_inputVertexAttributesVector.begin(), m_inputVertexAttributesVector.end(), CompareName<INPUTATTRIBUTE>(val->getName()));
         if (last < m_inputVertexAttributesVector.end())
         {
             m_inputVertexAttributesVector.erase(last, m_inputVertexAttributesVector.end());
@@ -258,7 +291,7 @@ public:
     }
     void addTexture(TEXTURE* val)
     {
-        typename std::vector<TEXTURE*>::iterator last = std::remove_if(m_textureVector.begin(), m_textureVector.end(), *val);
+        typename std::vector<TEXTURE*>::iterator last = std::remove_if(m_textureVector.begin(), m_textureVector.end(), CompareName<TEXTURE>(val->getName()));
         if (last < m_textureVector.end())
         {
             m_textureVector.erase(last, m_textureVector.end());
