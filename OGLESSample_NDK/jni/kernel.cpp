@@ -41,24 +41,35 @@ Kernel::~Kernel()
 {
 }
 
-void Kernel::Execute() {
-	while (m_tasks.size() != 0) {
-		if (this->m_bRunning == false) {
+void Kernel::Execute()
+{
+	LOGD("Kernel::Execute() begin");
+
+	while (m_tasks.size() != 0)
+	{
+		if (this->m_bRunning == false)
+		{
 			LOGD("kernel KillAllTask()");
 			this->KillAllTask();
 		}
 
-		for (TaskListIterator i = m_tasks.begin(); i != m_tasks.end(); i++) {
-			if ((*i)->CanKill() != true) {
+		for (TaskListIterator i = m_tasks.begin(); i != m_tasks.end(); i++)
+		{
+			if ((*i)->CanKill() != true)
+			{
+				LOGD("Kernel::Execute() call the contained Task's Update() begin");
 				(*i)->Update();
+				LOGD("Kernel::Execute() call the contained Task's Update() end");
 			}
 		}
 
-		for (TaskListIterator i = m_tasks.begin(); i != m_tasks.end();) {
+		for (TaskListIterator i = m_tasks.begin(); i != m_tasks.end();)
+		{
 			TaskListIterator tmp = i;
 			i++;
 
-			if ((*tmp)->CanKill()) {
+			if ((*tmp)->CanKill())
+			{
 				LOGD("kernel Stop() and remove CanKill() task");
 				(*tmp)->Stop();
 				m_tasks.remove(*tmp);
@@ -66,6 +77,7 @@ void Kernel::Execute() {
 			}
 		}
 	}
+	LOGD("Kernel::Execute() end");
 }
 
 bool Kernel::AddTask(Task* pTask) {

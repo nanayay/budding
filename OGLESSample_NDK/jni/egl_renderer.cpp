@@ -35,9 +35,13 @@ void EGLRenderer::RenderFrame()
         // No need to add Render Pass for glClear calls, just add a special Renderable class, aka, GLClearRenderable to the first of vector in Renderer class, which named m_pRenderablesVector
         // In GLClearRenderable's Draw(), it will call glClear
 
+        LOGD("EglRenderer::RenderFrame() begin");
+
         Renderer::RenderFrame();
 
 		eglSwapBuffers(m_display, m_renderSurface);
+
+        LOGD("EglRenderer::RenderFrame() end");
 	}
 }
 
