@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "kernel.h"
 #include "android_task.h"
 #include "log.h"
@@ -20,75 +21,172 @@ static int32_t android_handle_input(struct android_app* app,
 	return 0;
 }
 
-static void android_handle_cmd(struct android_app* app, int cmd) {
-	switch (cmd) {
-	case APP_CMD_SAVE_STATE: {
+static void android_handle_cmd(struct android_app* app, int cmd)
+{
+	switch (cmd)
+    {
+	case APP_CMD_SAVE_STATE:
+    {
 		// The system has asked us to save our current state. Do so
 		LOGD("android_handle_cmd() APP_CMD_SAVE_STATE cmd begin");
 		LOGD("android_handle_cmd() APP_CMD_SAVE_STATE cmd end");
-		}
-		break;
-	case APP_CMD_INIT_WINDOW: {
+        break;
+	}
+	case APP_CMD_INIT_WINDOW:
+    {
 		// get the window ready for showing
 		LOGD("android_handle_cmd() APP_CMD_INIT_WINDOW cmd begin");
 		if (app->window != NULL)
 		{
 			LOGD("android_handle_cmd() app->window != null");
             Engine* pEngine = (Engine*)app->userData;
-			pEngine->getRenderer()->Init();
-            pEngine->getScene()->Load();
-            pEngine->getRenderer()->Bind(pEngine->getScene());
+            if (pEngine)
+            {
+                if (pEngine->getRenderer())
+                {
+                    pEngine->getRenderer()->Init();
+                }
+                else
+                {
+                    LOGE("Engine's renderer point to NULL, in which can't call Renderer's Init() properly in APP_CMD_INIT_WINDOW");
+                    assert(0);
+                }
+
+                if ( !pEngine->getScene())
+                {
+                    Scene* pScene = new GLBasicScene();
+                    pEngine->setScene(pScene);
+                }
+                else
+                {
+                    LOGE("Engine's scene already have some un-NULL pointer, that is unexpected in APP_CMD_INIT_WINDOW");
+                }
+
+                LOGD("begin to call Engine's Scene's Load() in APP_CMD_INIT_WINDOW");
+                pEngine->getScene()->Load();
+                LOGD("end to call Engine's Scene's Load() in APP_CMD_INIT_WINDOW");
+
+                LOGD("begin to call Engine's Renderer's Bind() to scene in APP_CMD_INIT_WINDOW");
+                pEngine->getRenderer()->Bind(pEngine->getScene());
+                LOGD("end to call Engine's Renderer's Bind() to scene in APP_CMD_INIT_WINDOW");
+            }
+            else
+            {
+                LOGE("app->userData point to NULL, in which can't get proper Engine pointer in APP_CMD_INIT_WINDOW");
+                assert(0);
+            }
+
 		}
 		else
 		{
 			LOGD("android_handle_cmd() app->window == null");
 		}
 		LOGD("android_handle_cmd() APP_CMD_INIT_WINDOW cmd end");
-		}
 		break;
-	case APP_CMD_DESTROY: {
-		//
+    }
+	case APP_CMD_DESTROY:
+    {
 		LOGD("android_handle_cmd() APP_CMD_DESTROY cmd begin");
 		Engine* pEngine = (Engine*)app->userData;
-        pEngine->getRenderer()->Bind(NULL);
-        pEngine->getScene()->UnLoad();
-		pEngine->getRenderer()->Destroy();
+        if (pEngine)
+        {
+            if (pEngine->getRenderer())
+            {
+                if (pEngine->getScene())
+                {
+                    pEngine->getRenderer()->Bind(NULL);
+                    pEngine->getScene()->UnLoad();
+
+                    if (pEngine->getScene())
+                    {
+                        delete pEngine->getScene();
+                    }
+                    pEngine->setScene(NULL);
+
+                    pEngine->getRenderer()->Destroy();
+                }
+                else
+                {
+                    LOGE("Engine's scene point to NULL, in which can't call scene's function properly in APP_CMD_DESTROY");
+                }
+            }
+            else
+            {
+                LOGE("Engine's renderer point to NULL, in which can't call Renderer's function properly in APP_CMD_DESTROY");
+            }
+        }
+        else
+        {
+            LOGE("app->userData point to NULL, in which can't get proper Engine pointer in APP_CMD_DESTROY");
+            assert(0);
+        }
 		LOGD("android_handle_cmd() APP_CMD_DESTROY cmd end");
-		// TODO, inform kernel to kill all task?
-		}
-		break;
-	case APP_CMD_TERM_WINDOW: {
+        break;
+	}
+	case APP_CMD_TERM_WINDOW:
+    {
 		// clean up the window because it is being hidden/closed
 		LOGD("android_handle_cmd() APP_CMD_TERM_WINDOW cmd begin");
         Engine* pEngine = (Engine*)app->userData;
-        pEngine->getRenderer()->Bind(NULL);
-        pEngine->getScene()->UnLoad();
-        pEngine->getRenderer()->Destroy();
+        if (pEngine)
+        {
+            if (pEngine->getRenderer())
+            {
+                if (pEngine->getScene())
+                {
+                    pEngine->getRenderer()->Bind(NULL);
+                    pEngine->getScene()->UnLoad();
+
+                    if (pEngine->getScene())
+                    {
+                        delete pEngine->getScene();
+                    }
+                    pEngine->setScene(NULL);
+
+                    pEngine->getRenderer()->Destroy();
+                }
+                else
+                {
+                    LOGE("Engine's scene point to NULL, in which can't call scene's function properly in APP_CMD_TERM_WINDOW");
+                }
+            }
+            else
+            {
+                LOGE("Engine's renderer point to NULL, in which can't call Renderer's function properly in APP_CMD_TERM_WINDOW");
+            }
+        }
+        else
+        {
+            LOGE("app->userData point to NULL, in which can't get proper Engine pointer in APP_CMD_TERM_WINDOW");
+            assert(0);
+        }
         LOGD("android_handle_cmd() APP_CMD_TERM_WINDOW cmd end");
-		}
-		break;
-	case APP_CMD_GAINED_FOCUS: {
+        break;
+	}
+	case APP_CMD_GAINED_FOCUS:
+    {
 		// when our app gains forcus, start some senser, like start monitoring the accelerometer, open camera, etc.
 		LOGD("android_handle_cmd() APP_CMD_GAINED_FOCUS cmd begin");
 		LOGD("android_handle_cmd() APP_CMD_GAINED_FOCUS cmd end");
-		}
 		break;
-	case APP_CMD_LOST_FOCUS: {
+    }
+	case APP_CMD_LOST_FOCUS:
+    {
 		// when our app loses focus, we stop some senser, like stop monitoring the accelerometer
 		// this is to avoid consuming battery while not being used
 		LOGD("android_handle_cmd() APP_CMD_LOST_FOCUS cmd begin");
 		LOGD("android_handle_cmd() APP_CMD_LOST_FOCUS cmd end");
-		}
 		break;
-	case APP_CMD_RESUME: {
-		// 
+    }
+	case APP_CMD_RESUME:
+    {
 		LOGD("android_handle_cmd() APP_CMD_RESUME cmd begin");
 		// TODO, add pRenderer->Init() here
 		LOGD("android_handle_cmd() APP_CMD_RESUME cmd end");
-		}
 		break;
-	case APP_CMD_PAUSE: {
-		//
+    }
+	case APP_CMD_PAUSE:
+    {
 		LOGD("android_handle_cmd() APP_CMD_PAUSE cmd begin");
 		// TODO, add pRenderer->Destory() here
 		LOGD("android_handle_cmd() APP_CMD_PAUSE cmd end");
@@ -182,17 +280,15 @@ bool AndroidTask::Start() {
     ANativeActivity* nativeActivity = m_pState->activity;
     AndroidAsset::setAssetManager(nativeActivity->assetManager);
 
-    Scene* pScene = new GLBasicScene();
-    m_pEngine->setScene(pScene);
-
-
 	return true;
 }
 
-void AndroidTask::OnSuspend() {
+void AndroidTask::OnSuspend()
+{
 }
 
-void AndroidTask::Update() {
+void AndroidTask::Update()
+{
 	int events;
 
 	struct android_poll_source* pSource = NULL;
@@ -207,17 +303,17 @@ void AndroidTask::Update() {
 	}
 }
 
-void AndroidTask::OnResume() {
+void AndroidTask::OnResume()
+{
 }
 
-void AndroidTask::Stop() {
+void AndroidTask::Stop()
+{
 	// No need to call Renderable's Init() and Destory() herr, since Renderer task will call the same pointer of Scene's Renderables Vector Pointer's Renderable's Init()/Destory() in Renderer's own Init() and Destory()
 
-    m_pEngine->getRenderer()->Bind(NULL);
-    m_pEngine->getScene()->UnLoad();
-    delete m_pEngine->getScene();
 }
 
-void AndroidTask::ClearClosing() {
+void AndroidTask::ClearClosing()
+{
 	Kernel::getSingleton().setRunning(true);
 }
