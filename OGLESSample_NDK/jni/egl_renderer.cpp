@@ -24,36 +24,42 @@ EGLRenderer::EGLRenderer(AndroidPlatform* pPlatform, unsigned int priority)
 {
 }
 
-EGLRenderer::~EGLRenderer() {}
+EGLRenderer::~EGLRenderer()
+{
+   if (m_bInitialized || m_bRendering)
+    {
+        Destroy();
+    } 
+}
 
 // TODO, try to have a class to feed the GLRenderable in EGLRenderer
 
 void EGLRenderer::RenderFrame()
 {
+    LOGD("EglRenderer::RenderFrame() begin");
 	if ( m_bInitialized == true && m_bRendering == true && m_width != 0 && m_height != 0)
 	{
         // No need to add Render Pass for glClear calls, just add a special Renderable class, aka, GLClearRenderable to the first of vector in Renderer class, which named m_pRenderablesVector
         // In GLClearRenderable's Draw(), it will call glClear
 
-        LOGD("EglRenderer::RenderFrame() begin");
-
+        LOGD("EglRenderer::RenderFrame() is calling Renderer::RenderFrame()");
         Renderer::RenderFrame();
 
 		eglSwapBuffers(m_display, m_renderSurface);
 
-        LOGD("EglRenderer::RenderFrame() end");
 	}
+    LOGD("EglRenderer::RenderFrame() end");
 }
 
 void EGLRenderer::Init()
 {
+    LOGD("EGLRenderer Init() begin");
+
 	if (m_pState->window == NULL)
 	{
 		LOGD("app_state->window are null, EGLRenderer can not Init() now");
 		return;
 	}
-
-	LOGD("EGLRenderer Init() begin");
 
     LOGD("Init EGL begin");
 	if (m_display == EGL_NO_DISPLAY)
@@ -159,10 +165,11 @@ void EGLRenderer::Init()
 
 void EGLRenderer::Destroy()
 {
-    LOGD("super class Renderer::Destroy() begin");
+    LOGD("Renderer::Destroy() begin");
     Renderer::Destroy();
-    LOGD("super class Renderer::Destroy() end");
+    LOGD("Renderer::Destroy() end");
 
+    LOGD("EGLRenderer::Destroy() end");
     if (m_display != EGL_NO_DISPLAY)
     {
         eglMakeCurrent(m_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
@@ -181,5 +188,6 @@ void EGLRenderer::Destroy()
     m_renderSurface = EGL_NO_SURFACE;
     m_width = 0;
     m_height = 0;
+    LOGD("EGLRenderer::Destroy() end");
 
 }

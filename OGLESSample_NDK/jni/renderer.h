@@ -20,17 +20,11 @@ protected:
 	std::vector<Renderable*> * m_pRenderablesVector;
 
 public:
-	// setter and getter
-	std::vector<Renderable*> * getRenderablsVectorPointer() const { return m_pRenderablesVector; }
+	// setter
 	void setRenderablesVectorPointer(std::vector<Renderable*> * val) { m_pRenderablesVector = val; }
 
 	// set to bind for Scene's Renderables Vector Pointer
 	bool Bind(Scene* pScene);
-
-public:
-	virtual void RenderFrame() = 0;
-	virtual void Init() = 0;
-	virtual void Destroy() = 0;
 
 public:
 	explicit Renderer(unsigned int priority = Task::Priority::Normal);
@@ -44,7 +38,13 @@ public:
 
 	bool isInitialized() const { return this->m_bInitialized; }
 	bool isRendering() const { return this->m_bRendering; }
-	bool setRendering(bool rendering) { this->m_bRendering = rendering; }
+	void setRendering(bool rendering) { this->m_bRendering = rendering; }
+
+public:
+	virtual void RenderFrame() = 0;
+	virtual void Init() = 0;
+	virtual void Destroy() = 0;
+
 };
 
 #endif
