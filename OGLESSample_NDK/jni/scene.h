@@ -8,12 +8,10 @@ class Renderer;
 class Scene
 {
 public:
-    Scene();
+    explicit Scene();
     virtual ~Scene();
 
     virtual bool Load() = 0;
-    virtual bool Bind(Renderer* pRenderer);
-    virtual bool UnBind(Renderer* pRenderer);
     virtual bool UnLoad() = 0;
 
     // Scene own the life cycle of Renderable Vector

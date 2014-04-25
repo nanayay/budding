@@ -79,22 +79,22 @@ namespace Models
         "uniform sampler2D u_sampleTexture2D_2;\n"
         "void main()\n"
         "{\n"
-            "gl_FragColor = 0.1 * v_vColor + 0.2 * texture2D(u_sampleTexture2D_0, v_vTexCoord) + 0.3 * texture2D(u_sampleTexture2D_1, v_vTexCoord) + 0.4 * texture2D(u_sampleTexture2D_2, v_vTexCoord);\n"
+            "gl_FragColor = 0.1 * v_vColor + 0.2 * texture2D(u_sampleTexture2D_0, v_vTexCoord) + 0.4 * texture2D(u_sampleTexture2D_1, v_vTexCoord) + 0.2 * texture2D(u_sampleTexture2D_2, v_vTexCoord);\n"
             // todo here, notebook, if you not use v_vColor, the compiler will optimized color, then in glGetAttribLocation to get that attribute, it will be failed
         "}\n";
 
     std::string vss(vs);
     std::string fss(fs);
 
-    GLMesh* m_pGLMesh;
-    GLSLShader* m_pGLSL;
-    GLInputVertexAttribute* m_pIAPos;
-    GLInputVertexAttribute* m_pIAColor;
-    GLInputVertexAttribute* m_pIATexCoord;
-    GLTexture2D* m_pTex2DChess;
-    GLTexture2D* m_pTex2DSDCard;
-    GLTexture2D* m_pTex2DAsset;
-    GLSampler* m_pSampler;
+    GLMesh* m_pGLMesh = NULL;
+    GLSLShader* m_pGLSL = NULL;
+    GLInputVertexAttribute* m_pIAPos = NULL;
+    GLInputVertexAttribute* m_pIAColor = NULL;
+    GLInputVertexAttribute* m_pIATexCoord = NULL;
+    GLTexture2D* m_pTex2DChess = NULL;
+    GLTexture2D* m_pTex2DSDCard = NULL;
+    GLTexture2D* m_pTex2DAsset = NULL;
+    GLSampler* m_pSampler = NULL;
 
     // pixel in hard-code
     std::string tex_chess_name = std::string("chess_2x2");
@@ -113,14 +113,12 @@ namespace Models
         255, 255, 0, 255,
     };
 
-#if 0
+#if 1 
     // load png file in sdcard
-    std::string tex_sdcard_filepath = std::string("/sdcard/ayan/sdcard.png");
+    std::string tex_sdcard_filepath = std::string("/sdcard/ayan/android_icon_sdcard.png");
     std::string tex_sdcard_uniform_name = std::string("u_sampleTexture2D_1");
     unsigned int tex_sdcard_unit_id = 1;
 
-    ReadFile tex_sdcard_png_readfile(tex_sdcard_filepath);
-    ::PNG tex_sdcard_png(&tex_sdcard_png_readfile);
     // todo here, why un-comment these two below will make compile fail
     //::LOGD("Debug info for texture in sdcard");
     //::LOGD("Image %s : alpha: %d width %dpx height %dpx", tex_sdcard_filepath.c_str(), tex_sdcard_png.has_alpha(), tex_sdcard_png.get_width(), tex_sdcard_png.get_height());
@@ -142,6 +140,10 @@ namespace Models
         // for the raw image data in hard code
         RawImage* raw_chess_texture = new RawImage(Models::tex_chess_pixels, Models::tex_chess_width, Models::tex_chess_height, Models::tex_chess_pixels_format, Models::tex_chess_pixel_type, Models::tex_chess_name);
 
+        // for the png file in sdcard
+        ReadFile* tex_sdcard_png_readfile = new ReadFile(Models::tex_sdcard_filepath);
+        PNG* tex_sdcard_png = new PNG(tex_sdcard_png_readfile);
+
         // for the android asset png file
         AndroidAsset* tex_asset_png_readasset = new AndroidAsset(Models::tex_asset_filepath);
         PNG* tex_asset_png = new PNG(tex_asset_png_readasset);
@@ -156,8 +158,8 @@ namespace Models
         m_pIAColor = new GLInputVertexAttribute(ia_color);
         m_pIATexCoord = new GLInputVertexAttribute(ia_texCoord);
         m_pTex2DChess = new GLTexture2D(std::string("Texture0"), Models::tex_chess_uniform_name, Models::tex_chess_unit_id, raw_chess_texture);
-    #if 0
-        m_pTex2DSDCard = new GLTexture2D(std::string("Texture1"), Models::tex_sdcard_uniform_name, Models::tex_sdcard_unit_id, &Models::tex_sdcard_png);
+    #if 1
+        m_pTex2DSDCard = new GLTexture2D(std::string("Texture1"), Models::tex_sdcard_uniform_name, Models::tex_sdcard_unit_id, tex_sdcard_png);
     #endif
         m_pTex2DAsset = new GLTexture2D(std::string("Texture2"), Models::tex_asset_uniform_name, Models::tex_asset_unit_id, tex_asset_png);
         m_pSampler = new GLSampler();
@@ -204,7 +206,7 @@ namespace Models
 
         m_pTex2DChess->setTextureSampler(m_pSampler);
 
-    #if 0
+    #if 1 
         m_pTex2DSDCard->setTextureSampler(m_pSampler);
     #endif
 
@@ -221,7 +223,7 @@ namespace Models
         m_pIAColor->Create();
         m_pIATexCoord->Create();
         m_pTex2DChess->Create();
-    #if 0
+    #if 1 
         m_pTex2DSDCard->Create();
     #endif
         m_pTex2DAsset->Create();
@@ -232,7 +234,12 @@ namespace Models
 
     bool DisImport()
     {
-        // TODO, find some place to Call DisImport to ignore the memory leak about ElementOfRenderable
+        // todo here, very much
+        // - check each dispose(), make sure after it delete something then assign NULL or invalid value to the delete one, like texture handle
+        // - add some safe_delete here for delete call
+        // - when code safe_delete, use some if (p) { delete p; p = NULL; }
+        // - also add the if check in dispose()
+
         m_pGLMesh->Dispose();
         m_pGLSL->Dispose();
         m_pIAPos->Dispose();
@@ -240,22 +247,22 @@ namespace Models
         m_pIATexCoord->Dispose();
         m_pSampler->Dispose();
         m_pTex2DChess->Dispose();
-    #if 0
+    #if 1 
         m_pTex2DSDCard->Dispose();
     #endif
         m_pTex2DAsset->Dispose();
 
-        delete m_pGLMesh;
-        delete m_pGLSL;
-        delete m_pIAPos;
-        delete m_pIAColor;
-        delete m_pIATexCoord;
-        delete m_pSampler;
-        delete m_pTex2DChess;
-    #if 0
-        delete m_pTex2DSDCard;
+        delete m_pGLMesh; m_pGLMesh = NULL;
+        delete m_pGLSL; m_pGLSL = NULL;
+        delete m_pIAPos; m_pIAPos = NULL;
+        delete m_pIAColor; m_pIAColor = NULL;
+        delete m_pIATexCoord; m_pIATexCoord = NULL;
+        delete m_pSampler; m_pSampler = NULL;
+        delete m_pTex2DChess; m_pTex2DChess = NULL;
+    #if 1
+        delete m_pTex2DSDCard; m_pTex2DSDCard = NULL;
     #endif
-        delete m_pTex2DAsset;
+        delete m_pTex2DAsset; m_pTex2DAsset = NULL;
 
         return true;
     }
@@ -268,7 +275,7 @@ bool GLBasicScene::Load()
     // Clear the Color and Depth buffer
     GLClearRenderable* m_pGlClear = new GLClearRenderable();
 
-    m_pGlClear->setClearColorRGB(1.0, 1.0, 1.0, 1.0);
+    m_pGlClear->setClearColorRGB(1.0, 1.0, 0.0, 1.0);
 
     m_pRenderablesVector->push_back(m_pGlClear);
 
@@ -285,7 +292,7 @@ bool GLBasicScene::Load()
     m_pGLRect->addInputVertexAttribute(Models::m_pIAColor);
     m_pGLRect->addInputVertexAttribute(Models::m_pIATexCoord);
     m_pGLRect->addTexture(Models::m_pTex2DChess);
-#if 0
+#if 1
     m_pGLRect->addTexture(Models::m_pTex2DSDCard);
 #endif
     m_pGLRect->addTexture(Models::m_pTex2DAsset);
@@ -307,8 +314,6 @@ bool GLBasicScene::UnLoad()
     {
         for (std::vector<Renderable*>::iterator i = m_pRenderablesVector->begin(); i != m_pRenderablesVector->end(); ++i)
         {
-            // TODO, check what will happen, when it's been Init() or Destroy() twice or more
-            // TODO, check what will happen, when it's been delete twice or more
             if (*i)
             {
                 (*i)->Destroy();
@@ -323,4 +328,26 @@ bool GLBasicScene::UnLoad()
     Models::DisImport();
 
     return true;
+}
+
+GLBasicScene::GLBasicScene()
+{
+}
+
+GLBasicScene::~GLBasicScene()
+{
+    if (m_pRenderablesVector)
+    {
+        for (std::vector<Renderable*>::iterator i = m_pRenderablesVector->begin(); i != m_pRenderablesVector->end(); ++i)
+        {
+            if (*i)
+            {
+                (*i)->Destroy();
+                delete (*i);
+                (*i) = NULL;
+            }
+        }
+
+        m_pRenderablesVector->erase(m_pRenderablesVector->begin(), m_pRenderablesVector->end());
+    }
 }

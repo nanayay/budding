@@ -8,10 +8,9 @@ class GLBasicScene
     : public Scene
 {
 public:
-    GLBasicScene() {};
-    virtual ~GLBasicScene() { UnLoad(); };
+    explicit GLBasicScene();
+    virtual ~GLBasicScene();
 
-protected:
     virtual bool Load();
     virtual bool UnLoad();
 
