@@ -108,7 +108,6 @@ bool GLMesh::Dispose()
     return !isCreateOK();
 }
 
-
 GLSLShader::GLSLShader(const std::string* vs_source, const std::string* fs_source, GLRenderable* renderable, bool init_deep_copy_shader_source_str)
     : Shader(init_deep_copy_shader_source_str),
       m_programId(0)

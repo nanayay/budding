@@ -57,9 +57,7 @@ void Kernel::Execute()
 		{
 			if ((*i)->CanKill() != true)
 			{
-				LOGD("Kernel::Execute() call the contained Task's Update() begin");
 				(*i)->Update();
-				LOGD("Kernel::Execute() call the contained Task's Update() end");
 			}
 		}
 
