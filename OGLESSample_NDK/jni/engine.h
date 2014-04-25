@@ -7,7 +7,7 @@
 class Engine
 {
 public:
-    explicit Engine() {};
+    explicit Engine() : m_pScene(NULL), m_pRenderer(NULL) {};
     virtual ~Engine() {};
 
     Renderer* getRenderer() const { return m_pRenderer; }
