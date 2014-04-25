@@ -73,24 +73,35 @@ void Renderer::RenderFrame()
 
 void Renderer::Init()
 {
-	if (m_bInitialized == false && m_pRenderablesVector != NULL)
+	LOGD("Renderer::Init begin");
+
+	if (m_bInitialized == false)
+	{
+		if (m_pRenderablesVector != NULL)
 	{
 		for (std::vector<Renderable*>::iterator i = m_pRenderablesVector->begin(); i != m_pRenderablesVector->end(); ++i)
 		{
-			// TODO, add the similar check for the (*i) here
 			if ((*i) != NULL)
 			{
 				(*i)->Init();
 			}
 			else
 			{
-				return;
+					LOGE("Renderer::Init() is calling its Renderables Pointer Vector, but it contain some NULL pointer, which should be a error");
+					assert(0);
+				}
 			}
+		}
+		else
+		{
+			LOGD("Find m_pRenderablesVector is NULL, hence Renderer::Init() will not call its Init()");
 		}
 
 		m_bInitialized = true;
 		m_bRendering = true;
 	}
+
+	LOGD("Renderer::Init end");
 }
 
 void Renderer::Destroy()
