@@ -37,11 +37,8 @@ void Renderer::OnSuspend()
 
 void Renderer::Update()
 {
-	LOGD("Renderer::Update begin");
-
 	if (this->m_bRendering == true && this->m_bInitialized == true && this->m_pRenderablesVector != NULL)
 	{
-		LOGD("Renderer::Update is calling RenderFrame()");
 		RenderFrame();
 	}
 	else
@@ -49,7 +46,6 @@ void Renderer::Update()
 		LOGD("Find Renderer's m_bRendering or m_bInitialized or m_pRenderablesVector should be false or NULL in Renderer::Update");
 		LOGD("That will make no RenderFrame() be called");
 	}
-	LOGD("Renderer::Update end");
 }
 
 void Renderer::OnResume()
@@ -67,18 +63,13 @@ void Renderer::Stop()
 
 void Renderer::RenderFrame()
 {
-	LOGD("Renderer::RenderFrame begin");
-
 	if ( m_bInitialized == true && m_bRendering == true && m_pRenderablesVector != NULL)
 	{
 		for (std::vector<Renderable*>::iterator i = m_pRenderablesVector->begin(); i != m_pRenderablesVector->end(); ++i)
 		{
-			LOGD("Renderer::RenderFrame is calling its Renderable's Draw()");
 			(*i)->Draw();
 		}
 	}
-
-	LOGD("Renderer::RenderFrame end");
 }
 
 void Renderer::Init()

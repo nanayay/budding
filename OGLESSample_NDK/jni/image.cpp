@@ -48,19 +48,34 @@ bool PNG::Load()
     {
         // Opens and checks image signature (first 8 bytes).
         if (m_pResource->Open() != true)
+        {
+            LOGE("PNG::Load() can't call m_pResource's Open()");
             break;
+        }
         if (!(m_pResource->Read(lHeader, sizeof(lHeader))))
+        {
+            LOGE("PNG::Load() can't call m_pResource's Read() for 8 bytes");
             break;
+        }
         if (png_sig_cmp(lHeader, 0, 8) != 0)
+        {
+            LOGE("PNG::Load() can't compare 8 bytes");
             break;
+        }
 
         // Creates required structures.
         lPngPtr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
         if (!lPngPtr)
+        {
+            LOGE("PNG::Load() can't successfully call png_create_read_struct");
             break;
+        }
         lInfoPtr = png_create_info_struct(lPngPtr);
         if (!lInfoPtr)
+        {
+            LOGE("PNG::Load() can't successfully call png_create_info_struct");
             break;
+        }
 
         // Prepares reading operation by setting-up a read callback.
         png_set_read_fn(lPngPtr, m_pResource, PNG::callback_read);
@@ -68,7 +83,10 @@ bool PNG::Load()
         // Set-up error management. If an error occurs while reading,
         // code will come back here and jump
         if (setjmp(png_jmpbuf(lPngPtr)))
+        {
+            LOGE("PNG::Load() can't successfully call setjmp(png_jmpbuff))");
             break;
+        }
 
         // Ignores first 8 bytes already read and processes header.
         png_set_sig_bytes(lPngPtr, 8);
@@ -152,7 +170,10 @@ bool PNG::Load()
         lRowSize = png_get_rowbytes(lPngPtr, lInfoPtr);
         m_BytePerRow = lRowSize;
         if (lRowSize <= 0)
+        {
+            LOGE("PNG::Load() can't successfully call png_get_rowbytes");
             break;
+        }
 
         // Ceates the image buffer that will be sent to OpenGL.
         size_t bigsize = lRowSize * m_Height;
@@ -190,7 +211,10 @@ bool PNG::Load()
 
 
         if (!lImageBuffer)
+        {
+            LOGE("PNG::Load() can't successfully new memory for lImageBuffer");
             break;
+        }
 
         // Pointers to each row of the image buffer. Row order is
         // inverted because different coordinate systems are used by
@@ -198,7 +222,10 @@ bool PNG::Load()
         lRowPtrs = new png_bytep[m_Height];
 
         if (!lRowPtrs)
+        {
+            LOGE("PNG::Load() can't successfully new memory for lRowPtrs");
             break;
+        }
 
         for (int32_t i = 0; i < m_Height; ++i)
         {
