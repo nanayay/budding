@@ -113,7 +113,7 @@ namespace Models
         255, 255, 0, 255,
     };
 
-#if 0 
+#if 1 
     // load png file in sdcard
     std::string tex_sdcard_filepath = std::string("/sdcard/ayan/android_icon_sdcard.png");
     std::string tex_sdcard_uniform_name = std::string("u_sampleTexture2D_1");
@@ -137,7 +137,7 @@ namespace Models
         RawImage* raw_chess_texture = new RawImage(Models::tex_chess_pixels, Models::tex_chess_width, Models::tex_chess_height, Models::tex_chess_pixels_format, Models::tex_chess_pixel_type, Models::tex_chess_name);
 
         // for the png file in sdcard
-    #if 0
+    #if 1
         ReadFile* tex_sdcard_png_readfile = new ReadFile(Models::tex_sdcard_filepath);
         PNG* tex_sdcard_png = new PNG(tex_sdcard_png_readfile);
     #endif
@@ -146,18 +146,15 @@ namespace Models
         AndroidAsset* tex_asset_png_readasset = new AndroidAsset(Models::tex_asset_filepath);
         PNG* tex_asset_png = new PNG(tex_asset_png_readasset);
 
-    #if 0
-        m_pGLMesh = new GLMesh(true); // true will use client buffer, false [default] will use gpu buffer
-    #else
+        // m_pGLMesh = new GLMesh(true); // true will use client buffer, false [default] will use gpu buffer
         m_pGLMesh = new GLMesh();
-    #endif
         // TODO Here, make the GLSLShader can also accept the char* as input
         m_pGLSL = new GLSLShader(&vss, &fss);
         m_pIAPos = new GLInputVertexAttribute(ia_pos);
         m_pIAColor = new GLInputVertexAttribute(ia_color);
         m_pIATexCoord = new GLInputVertexAttribute(ia_texCoord);
         m_pTex2DChess = new GLTexture2D(std::string("Texture0"), Models::tex_chess_uniform_name, Models::tex_chess_unit_id, raw_chess_texture);
-    #if 0
+    #if 1
         m_pTex2DSDCard = new GLTexture2D(std::string("Texture1"), Models::tex_sdcard_uniform_name, Models::tex_sdcard_unit_id, tex_sdcard_png);
     #endif
         m_pTex2DAsset = new GLTexture2D(std::string("Texture2"), Models::tex_asset_uniform_name, Models::tex_asset_unit_id, tex_asset_png);
@@ -201,7 +198,7 @@ namespace Models
 
         m_pTex2DChess->setTextureSampler(m_pSampler);
 
-    #if 0 
+    #if 1 
         m_pTex2DSDCard->setTextureSampler(m_pSampler);
     #endif
 
@@ -218,7 +215,7 @@ namespace Models
         m_pIAColor->Create();
         m_pIATexCoord->Create();
         m_pTex2DChess->Create();
-    #if 0 
+    #if 1 
         m_pTex2DSDCard->Create();
     #endif
         m_pTex2DAsset->Create();
@@ -242,7 +239,7 @@ namespace Models
         m_pIATexCoord->Dispose();
         m_pSampler->Dispose();
         m_pTex2DChess->Dispose();
-    #if 0 
+    #if 1 
         m_pTex2DSDCard->Dispose();
     #endif
         m_pTex2DAsset->Dispose();
@@ -254,7 +251,7 @@ namespace Models
         SAFE_DELETE(m_pIATexCoord);
         SAFE_DELETE(m_pSampler);
         SAFE_DELETE(m_pTex2DChess);
-    #if 0
+    #if 1
         SAFE_DELETE(m_pTex2DSDCard);
     #endif
         SAFE_DELETE(m_pTex2DAsset);
@@ -287,7 +284,7 @@ bool GLBasicScene::Load()
     m_pGLRect->addInputVertexAttribute(Models::m_pIAColor);
     m_pGLRect->addInputVertexAttribute(Models::m_pIATexCoord);
     m_pGLRect->addTexture(Models::m_pTex2DChess);
-#if 0
+#if 1
     m_pGLRect->addTexture(Models::m_pTex2DSDCard);
 #endif
     m_pGLRect->addTexture(Models::m_pTex2DAsset);
