@@ -2,7 +2,13 @@
 #define AY_RESOURCE_H
 
 #include <string>
+#if 0
 #include <fstream>
+#elif 0
+#include <fstream>
+#else
+#include <cstdio>
+#endif
 
 class ReadResource
 {
@@ -34,7 +40,14 @@ public:
     size_t getLength();
 
 private:
+    #if 0
+    std::ifstream* m_pFileInputStream;
+    #elif 0
     std::ifstream m_FileInputStream;
+    #else
+    FILE* m_pFile;
+    #endif
+
     size_t m_Length;
 
     // todo notebook, all file stream should not be copy-able
