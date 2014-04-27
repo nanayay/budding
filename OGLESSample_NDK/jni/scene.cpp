@@ -1,3 +1,4 @@
+#include "type_defines.h"
 #include "scene.h"
 
 Scene::Scene()
@@ -7,9 +8,5 @@ Scene::Scene()
 
 Scene::~Scene()
 {
-    if (m_pRenderablesVector)
-    {
-        delete m_pRenderablesVector;
-    }
-    m_pRenderablesVector = NULL;
+    SAFE_DELETE(m_pRenderablesVector);
 }

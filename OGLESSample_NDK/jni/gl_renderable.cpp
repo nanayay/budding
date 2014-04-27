@@ -265,16 +265,8 @@ void GLSLShader::DiscardShaderSource()
 {
     if (isInitDeepCopyShaderSourceStr() == true)
     {
-        if (m_pVertexShaderSource)
-        {
-            delete m_pVertexShaderSource;
-            m_pVertexShaderSource = NULL;
-        }
-        if (m_pFragmentShaderSource)
-        {
-            delete m_pFragmentShaderSource;
-            m_pFragmentShaderSource = NULL;
-        }
+        SAFE_DELETE(m_pVertexShaderSource);
+        SAFE_DELETE(m_pFragmentShaderSource);
     }
 }
 
@@ -511,12 +503,7 @@ GLTexture2D::~GLTexture2D()
     }
     Dispose();
 
-    // todo here, use some macro that safe_release is a good code style?
-    if (m_pImage != NULL)
-    {
-        delete m_pImage;
-        m_pImage = NULL;
-    }
+    SAFE_DELETE(m_pImage);
 }
 
 bool GLTexture2D::LoadImage()
@@ -566,8 +553,7 @@ bool GLTexture2D::UnloadImage()
     if (m_pImage)
     {
         m_pImage->UnLoad();
-        delete m_pImage;
-        m_pImage = NULL;
+        SAFE_DELETE(m_pImage);
 
         return true;
     }

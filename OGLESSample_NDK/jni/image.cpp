@@ -1,3 +1,4 @@
+#include "type_defines.h"
 #include "image.h"
 #include "log.h"
 
@@ -210,7 +211,7 @@ bool PNG::Load()
         // Frees memory and resources.
         m_pResource->Close();
         png_destroy_read_struct(&lPngPtr, &lInfoPtr, NULL);
-        delete[] lRowPtrs;
+        SAFE_DELETE_ARRAY(lRowPtrs);
         m_pData = lImageBuffer;
 
         LOGD("load png %s success, will return true", m_pResource->getPath().c_str());
@@ -220,8 +221,8 @@ bool PNG::Load()
 
     LOGE("Error while reading PNG file: %s", m_pResource->getPath().c_str());
     m_pResource->Close();
-    delete[] lRowPtrs;
-    delete[] lImageBuffer;
+    SAFE_DELETE_ARRAY(lRowPtrs);
+    SAFE_DELETE_ARRAY(lImageBuffer);
     if (lPngPtr != NULL)
     {
         png_infop* lInfoPtrP = lInfoPtr != NULL ? &lInfoPtr : NULL;
@@ -236,11 +237,7 @@ bool PNG::Load()
 
 bool PNG::UnLoad()
 {
-    if (m_pData)
-    {
-        delete[] m_pData;
-        m_pData = NULL;
-    }
+    SAFE_DELETE_ARRAY(m_pData);
     m_Width = 0;
     m_Height = 0;
     m_Format = GL_RGBA;
@@ -252,11 +249,7 @@ bool PNG::UnLoad()
     m_CompressionType = 0;
     m_FilterMethod = 0;
 
-    if (m_pResource)
-    {
-        delete m_pResource;
-        m_pResource = NULL;
-    }
+    SAFE_DELETE(m_pResource);
 }
 
 #if 0
@@ -304,10 +297,7 @@ void LoadPNGFile(std::string const file_name)
     png_get_IHDR(png, info, &m_Width, &m_Height, &m_BitPerChannel, &m_ColorType, &m_InterlaceType, &m_CompressionType, &m_FilterMethod);
 
     unsigned int row_bytes = png_get_rowbytes(png, info);
-    if (m_pData != NULL)
-    {
-        delete[] m_pData;
-    }
+    SAFE_DELETE_ARRAY(m_pData);
     m_pData = new unsigned char[row_bytes * m_Height];
 
     png_bytepp rows = png_get_rows(png, info);
@@ -467,11 +457,7 @@ bool RawImage::Load()
 
 bool RawImage::UnLoad()
 {
-    if (m_pData)
-    {
-        delete[] m_pData;
-        m_pData = NULL;
-    }
+    SAFE_DELETE_ARRAY(m_pData);
     m_Width = 0;
     m_Height = 0;
     m_bHasAlpha = false;

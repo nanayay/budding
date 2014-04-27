@@ -1,3 +1,4 @@
+#include "type_defines.h"
 #include "kernel.h"
 #include "log.h"
 
@@ -71,7 +72,7 @@ void Kernel::Execute()
 				LOGD("kernel Stop() and remove CanKill() task");
 				(*tmp)->Stop();
 				m_tasks.remove(*tmp);
-				delete *tmp;
+				SAFE_DELETE((*tmp));
 			}
 		}
 	}

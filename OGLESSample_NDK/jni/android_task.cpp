@@ -240,12 +240,7 @@ AndroidTask& AndroidTask::operator=(const AndroidTask& _assign)
 
 AndroidTask::~AndroidTask()
 {
-    // TODO, add code to check the pointer before delete
-    if (m_pEngine)
-    {
-        delete m_pEngine;
-        m_pEngine = NULL;
-    }
+    SAFE_DELETE(m_pEngine);
 }
 
 bool AndroidTask::Start() {

@@ -252,17 +252,17 @@ namespace Models
     #endif
         m_pTex2DAsset->Dispose();
 
-        delete m_pGLMesh; m_pGLMesh = NULL;
-        delete m_pGLSL; m_pGLSL = NULL;
-        delete m_pIAPos; m_pIAPos = NULL;
-        delete m_pIAColor; m_pIAColor = NULL;
-        delete m_pIATexCoord; m_pIATexCoord = NULL;
-        delete m_pSampler; m_pSampler = NULL;
-        delete m_pTex2DChess; m_pTex2DChess = NULL;
-    #if 1
-        delete m_pTex2DSDCard; m_pTex2DSDCard = NULL;
+        SAFE_DELETE(m_pGLMesh);
+        SAFE_DELETE(m_pGLSL);
+        SAFE_DELETE(m_pIAPos);
+        SAFE_DELETE(m_pIAColor);
+        SAFE_DELETE(m_pIATexCoord);
+        SAFE_DELETE(m_pSampler);
+        SAFE_DELETE(m_pTex2DChess);
+    #if 0
+        SAFE_DELETE(m_pTex2DSDCard);
     #endif
-        delete m_pTex2DAsset; m_pTex2DAsset = NULL;
+        SAFE_DELETE(m_pTex2DAsset);
 
         return true;
     }
@@ -317,8 +317,7 @@ bool GLBasicScene::UnLoad()
             if (*i)
             {
                 (*i)->Destroy();
-                delete (*i);
-                (*i) = NULL;
+                SAFE_DELETE((*i));
             }
         }
 
@@ -343,8 +342,8 @@ GLBasicScene::~GLBasicScene()
             if (*i)
             {
                 (*i)->Destroy();
-                delete (*i);
-                (*i) = NULL;
+
+                SAFE_DELETE((*i));
             }
         }
 

@@ -274,13 +274,7 @@ public:
 
     virtual ~GLRenderable()
     {
-        // TODO, check all the delete, make sure it check the pointer is not NULL before delete
-        // TODO, check all the delete, make sure it assign it to NULL, after delete
-        if (m_pGeometry != NULL)
-        {
-            delete m_pGeometry;
-            m_pGeometry = NULL;
-        }
+        SAFE_DELETE(m_pGeometry);
     }
 
     // getter
