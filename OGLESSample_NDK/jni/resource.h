@@ -50,7 +50,6 @@ private:
 
     size_t m_Length;
 
-    // todo notebook, all file stream should not be copy-able
     explicit ReadFile(ReadFile& copy_);
     ReadFile& operator=(ReadFile& assign_);
 

@@ -102,7 +102,6 @@ bool PNG::Load()
         {
             png_set_tRNS_to_alpha(lPngPtr);
             lTransparency = true;
-            // goto ERROR; // todo, this should be error for original source codes in Begin NDK Programming book
         }
 
         // Expands PNG with less than 8Bits per channel to 8Bits.
@@ -178,8 +177,6 @@ bool PNG::Load()
         // Ceates the image buffer that will be sent to OpenGL.
         size_t bigsize = lRowSize * m_Height;
 
-        // todo, notebook, if the image size is 225*225 with rgb image, you will find the bigsize is 225*225*3 = 151875
-        // if you new byte[151875], a segment fault will happen with msg: Cannot access memory at address 0x4278f4f8
         // use some even value will be fine
         if (bigsize % 2 != 0)
         {
@@ -189,26 +186,6 @@ bool PNG::Load()
         }
 
         lImageBuffer = new png_byte[bigsize];
-
-        // todo here very much
-        // make GLTexture2D for file works fine, which will fail when try to open the file in sdcard
-        // notebook, when use both real device and emulator, adb may not answer the change, use adb kill-server to reset the adb
-        // notebook, on android device, new a even memory size may be fail
-        // notebook, how to debug on mac
-        // todo here very much
-        // - analysis the crash.debug.log deeply
-        // - IA will use itself to init a temp var in find_if, that will call it's Disable and call null pointer about its Renderable
-        // - 1st, not call disable when not necessory for all element of renderable
-        // - 2nd, maybe remove the fix which just call set renderable for each item when it add to renderable, see the fix with crash.log
-        // todo here very much
-        // - find why the app not crash, but now it has no view
-        // - make the texture file load from /sdcard/ be back, now it just be disable by #if 0 #endif
-        // todo here
-        // remove redundant logd here in PNG's Load()
-        // todo notebook
-        // - how to save breakpoints and use it when begin to debug
-        // ~/android/android-ndk-r9b/ndk-gdb-py --start -x bp.gdb
-
 
         if (!lImageBuffer)
         {
@@ -257,9 +234,6 @@ bool PNG::Load()
     }
     m_pData = NULL;
     return false;
-
-    // todo, notebook, write down how to remove goto, and use while to replace it
-    // todo, load and unload should happen in some if condition
 }
 
 bool PNG::UnLoad()
@@ -278,64 +252,6 @@ bool PNG::UnLoad()
 
     SAFE_DELETE(m_pResource);
 }
-
-#if 0
-void LoadPNGFile(std::string const file_name)
-{
-    FILE* fp = fopen(file_name.c_str(), "rb");
-    if (fp == NULL)
-    {
-        LOGE("%s is not found.", file_name.c_str());
-        fclose(fp);
-        return;
-    }
-
-    png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-    if (png == NULL)
-    {
-        LOGE("png_create_read_struct error.");
-        fclose(fp);
-        return;
-    }
-
-    png_infop info = png_create_info_struct(png);
-    if (info == NULL) 
-    {
-        LOGE("png_create_info_struct error.");
-        png_destroy_read_struct(&png, NULL, NULL);
-        fclose(fp);
-        return;
-    }
-
-    if (setjmp(png_jmpbuf(png))) 
-    {
-        LOGE("png_jmpbuf error.");
-        png_destroy_read_struct(&png, &info, NULL);
-        fclose(fp);
-        return;
-    }
-
-    png_init_io(png, fp);
-
-    unsigned int sig_bytes = 0;
-    png_set_sig_bytes(png, sig_bytes);
-
-    png_read_png(png, info, (PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING | PNG_TRANSFORM_EXPAND), NULL);
-    png_get_IHDR(png, info, &m_Width, &m_Height, &m_BitPerChannel, &m_ColorType, &m_InterlaceType, &m_CompressionType, &m_FilterMethod);
-
-    unsigned int row_bytes = png_get_rowbytes(png, info);
-    SAFE_DELETE_ARRAY(m_pData);
-    m_pData = new unsigned char[row_bytes * m_Height];
-
-    png_bytepp rows = png_get_rows(png, info);
-    for (int i = 0; i < m_Height; ++i)
-    {
-        memcpy(m_pData + (row_bytes * i), rows[i], row_bytes);
-    }
-
-    png_destroy_read_struct(&png, &info, NULL);
-}
-#endif
 
 unsigned int PNG::getWidth()
 {

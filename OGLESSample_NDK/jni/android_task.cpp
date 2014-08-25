@@ -181,14 +181,12 @@ static void android_handle_cmd(struct android_app* app, int cmd)
 	case APP_CMD_RESUME:
     {
 		LOGD("android_handle_cmd() APP_CMD_RESUME cmd begin");
-		// TODO, add pRenderer->Init() here
 		LOGD("android_handle_cmd() APP_CMD_RESUME cmd end");
 		break;
     }
 	case APP_CMD_PAUSE:
     {
 		LOGD("android_handle_cmd() APP_CMD_PAUSE cmd begin");
-		// TODO, add pRenderer->Destory() here
 		LOGD("android_handle_cmd() APP_CMD_PAUSE cmd end");
 		}
 		break;
@@ -244,33 +242,19 @@ AndroidTask::~AndroidTask()
 }
 
 bool AndroidTask::Start() {
-	// Here is a good place to new the m_pScene of AndroidTask for current Scene, but not new Scene in AndroidApplication
-
-    // TODO Here
-    // SceneManager<GLScene>, scene tree, current scene, new scene, delete scene, load scene from outside files, delete them when goto other scene like menu, game scene, 
-    // Scene->GLScene->Menu Scene -> Game Scene
-    // GLBasicScene->Build(EGLRenderer)
-    //                  -> new GLRenderable vector
-    //                  -> assign to EGLRenderer
-
-	// Start() of AndroidTask only need to feed or new the Renderer, but not Init() the Renderables in Scene
+    // Start() / Stop() mean the first job and the last job will be done once 
+    // Init() / Destroy() means the init and destroy job which will be called several times
+    // Start()->Init()->Destroy()->Init()->Destory()->Stop()
 
     // Scene only manage the memory of Renderables, but never call Renderer's Init()
     // Scene is a producer
     // Renderer is a consumer
 
     // Scene's Bind will assign it own Renderables Vector Pointer to Renderer's Renderables Vector Pointer
-    // Scene should not have Init() or Destory() function, that belongs to Renderables
-    // Scene should have Load() and UnLoad() for create new renderables and delete renderables
 
     // Rendererable's Init() will be called by Renderer's Init()
     // Renderer's Init() will be called when AndroidTask's android_handle_cmd()'s APP_CMD_INIT_WINDOW
     // Renderer's Destory() will be called when AndroidTask's android_handle_cmd()'s APP_CMD_TERM_WINDOW, etc
-
-    // todo here, add some init job here for overall app, and only need to be run once
-    // AndroidTask::Start() should be the very beginning of the native thread begin
-    // Renderer's Init will be called when windows ready, hence we have the common idea: 
-    //     Start()->Init()->Destroy()->Init()->Destory()->Stop()
 
     ANativeActivity* nativeActivity = m_pState->activity;
     AndroidAsset::setAssetManager(nativeActivity->assetManager);

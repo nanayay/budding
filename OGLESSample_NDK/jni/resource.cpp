@@ -54,7 +54,6 @@ bool ReadFile::Open()
     }
 
     // todo, c++11, when support c++11, you can use string as open's first parameter, but not use c_str()
-    // todo, notebook, use object as the condition check, how to override operator bool, etc.
     #if 0
     return *m_pFileInputStream ? true : false;
     #elif 0
@@ -82,7 +81,6 @@ size_t ReadFile::Read(void* pDestBuffer, const size_t bytesToRead)
     }
 
     return result;
-    // todo, notebook, how to get the just readed bytes
 }
 
 bool ReadFile::Close()
@@ -101,7 +99,6 @@ bool ReadFile::Close()
 
 size_t ReadFile::getLength()
 {
-    // todo, notebook, how to read the file's size, without using std headers
     struct stat filestatus;
     if (stat(m_path.c_str(), &filestatus) >= 0)
     {

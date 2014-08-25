@@ -22,6 +22,4 @@ private:
 
 };
 
-// todo notebook, adb logcat -c will clear all logs
-
 #endif

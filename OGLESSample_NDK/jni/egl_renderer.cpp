@@ -32,8 +32,6 @@ EGLRenderer::~EGLRenderer()
     } 
 }
 
-// TODO, try to have a class to feed the GLRenderable in EGLRenderer
-
 void EGLRenderer::RenderFrame()
 {
     LOGD("EglRenderer::RenderFrame() begin");
@@ -132,6 +130,7 @@ void EGLRenderer::Init()
 		assert(m_renderSurface != EGL_NO_SURFACE);
 		LOGD("EGLRenderer eglCreateWindowSurface() success");
 
+        // todo here very much, since I am using ogl es 3.0 lib and headers, we should have some way to verify the version is the same of OGL context 
 		EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
 		m_context = eglCreateContext(m_display, config, EGL_NO_CONTEXT, contextAttribs);
 		assert(m_context != EGL_NO_CONTEXT);
