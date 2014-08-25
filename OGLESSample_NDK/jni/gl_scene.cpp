@@ -54,7 +54,11 @@ namespace Models
     std::string ia_texCoord("a_vTexCoord");
 
     const char* vs = 
+    #if defined(USE_GLES3)
+        "#version 300 es\n"
+    #else
         "#version 100\n"
+    #endif
         "attribute vec4 a_vPosition;\n"
         "attribute vec4 a_vColor;\n"
         "attribute vec2 a_vTexCoord;\n"
@@ -68,7 +72,12 @@ namespace Models
         "}\n";
 
     const char* fs =
+    #if defined(USE_GLES3)
+        "#version 300 es\n"
+        "#extension GL_EXT_gpu_shader4 : require\n"
+    #else
         "#version 100\n"
+    #endif
         //"precision lowp float;\n"
         //"precision mediump float;\n"
         "precision highp float;\n"
@@ -77,10 +86,13 @@ namespace Models
         "uniform sampler2D u_sampleTexture2D_0;\n"
         "uniform sampler2D u_sampleTexture2D_1;\n"
         "uniform sampler2D u_sampleTexture2D_2;\n"
+        "uniform isampler2D u_sampleTexture2D_3;\n"
         "void main()\n"
         "{\n"
-            "gl_FragColor = 0.1 * v_vColor + 0.2 * texture2D(u_sampleTexture2D_0, v_vTexCoord) + 0.4 * texture2D(u_sampleTexture2D_1, v_vTexCoord) + 0.2 * texture2D(u_sampleTexture2D_2, v_vTexCoord);\n"
-            // todo here, notebook, if you not use v_vColor, the compiler will optimized color, then in glGetAttribLocation to get that attribute, it will be failed
+            "// gl_FragColor = 0.1 * v_vColor + 0.2 * texture2D(u_sampleTexture2D_0, v_vTexCoord) + 0.2 * texture2D(u_sampleTexture2D_1, v_vTexCoord) + 0.2 * texture2D(u_sampleTexture2D_2, v_vTexCoord) + 0.3 * texture2D(u_sampleTexture2D_3, v_vTexCoord);\n"
+
+            "// gl_FragColor = 1.0 * texture2D(u_sampleTexture2D_3, v_vTexCoord); // + 0.7 * texture2D(u_sampleTexture2D_2, v_vTexCoord);\n"
+            "gl_FragColor = 1.0 * textureFetch(u_sampleTexture2D_3, v_vTexCoord);\n"
         "}\n";
 
     std::string vss(vs);
@@ -92,17 +104,24 @@ namespace Models
     GLInputVertexAttribute* m_pIAColor = NULL;
     GLInputVertexAttribute* m_pIATexCoord = NULL;
     GLTexture2D* m_pTex2DChess = NULL;
+
+#if defined(USE_PNG_IN_SDCARD)
     GLTexture2D* m_pTex2DSDCard = NULL;
+#endif
+
     GLTexture2D* m_pTex2DAsset = NULL;
+    GLTexture2D* m_pTex2DChess4x4ES3RGBA32 = NULL;
     GLSampler* m_pSampler = NULL;
 
-    // pixel in hard-code
+    // load image's pixel data in hard-code
     std::string tex_chess_name = std::string("chess_2x2");
     std::string tex_chess_uniform_name = std::string("u_sampleTexture2D_0");
     unsigned int tex_chess_unit_id = 0;
 
     int tex_chess_width = 2;
     int tex_chess_height = 2;
+    unsigned int tex_chess_bit_per_pixel = 32;
+    GLint tex_chess_internal_format = GL_RGBA;
     GLenum tex_chess_pixels_format = GL_RGBA;
     GLenum tex_chess_pixel_type = GL_UNSIGNED_BYTE;
     GLubyte tex_chess_pixels[4*4] =
@@ -113,16 +132,48 @@ namespace Models
         255, 255, 0, 255,
     };
 
-#if 1 
+    // load image's pixel data in hard-code for RGBA32I
+#if defined(USE_GLES3)
+    std::string tex_es3_rgba32i_name = std::string("es3_rgba32i_4x4");
+    std::string tex_es3_rgba32i_uniform_name = std::string("u_sampleTexture2D_3");
+    unsigned int tex_es3_rgba32i_unit_id = 3;
+
+    int tex_es3_rgba32i_width = 4;
+    int tex_es3_rgba32i_height = 4;
+    unsigned int tex_es3_rgba32i_bit_per_pixel = 32 * 4;
+    GLint tex_es3_rgba32i_internal_format = GL_RGBA32I;
+    GLenum tex_es3_rgba32i_pixels_format = GL_RGBA_INTEGER;
+    GLenum tex_es3_rgba32i_pixel_type = GL_INT;
+    int max_int = 0x7fffffff;
+    GLint tex_es3_rgba32i_pixels[4*16] =
+    {
+        max_int, 0, 0, max_int,
+        0, max_int, 0, max_int, 
+        0, 0, max_int, max_int,
+        max_int, max_int, 0, max_int,
+
+        max_int, 0, max_int, max_int,
+        max_int, max_int, max_int, max_int,
+        0, max_int, max_int, max_int,
+        max_int, max_int, 0, max_int,
+
+        max_int, max_int, 0, 0,
+        0, 0, max_int, 0,
+        0, max_int, 0, 0,
+        max_int, 0, 0, 0,
+
+        max_int, max_int, 0, max_int,
+        0, 0, max_int, max_int,
+        0, max_int, 0, max_int,
+        max_int, 0, 0, max_int
+    };
+#endif
+
+#if defined(USE_PNG_IN_SDCARD)
     // load png file in sdcard
     std::string tex_sdcard_filepath = std::string("/sdcard/ayan/android_icon_sdcard.png");
     std::string tex_sdcard_uniform_name = std::string("u_sampleTexture2D_1");
     unsigned int tex_sdcard_unit_id = 1;
-
-    // todo here, if the sdcard.png not exist in device or emulator, it will crash
-    // todo here, notebook, how to make emulator be write-able, and restart will missing the data in sdcard folder
-    // todo here, notebook, adb push sdcard.png /sdcard/ayan will rename sdcard.png locally to ayan, which not means to /sdcard/ayan/sdcard.png, but just sdcard/ayan, since ayan is only a file
-    // correct way is only adb push sdcard.png /sdcard/ayan/sdcard.png
 #endif
 
     // load png file in apk's asset
@@ -130,14 +181,13 @@ namespace Models
     std::string tex_asset_uniform_name = std::string("u_sampleTexture2D_2");
     unsigned int tex_asset_unit_id = 2;
 
-
     bool Import()
     {
         // for the raw image data in hard code
-        RawImage* raw_chess_texture = new RawImage(Models::tex_chess_pixels, Models::tex_chess_width, Models::tex_chess_height, Models::tex_chess_pixels_format, Models::tex_chess_pixel_type, Models::tex_chess_name);
+        RawImage* raw_chess_texture = new RawImage(Models::tex_chess_pixels, Models::tex_chess_width, Models::tex_chess_height, Models::tex_chess_bit_per_pixel, Models::tex_chess_internal_format,  Models::tex_chess_pixels_format, Models::tex_chess_pixel_type, Models::tex_chess_name);
 
+    #if defined(USE_PNG_IN_SDCARD)
         // for the png file in sdcard
-    #if 1
         ReadFile* tex_sdcard_png_readfile = new ReadFile(Models::tex_sdcard_filepath);
         PNG* tex_sdcard_png = new PNG(tex_sdcard_png_readfile);
     #endif
@@ -146,18 +196,25 @@ namespace Models
         AndroidAsset* tex_asset_png_readasset = new AndroidAsset(Models::tex_asset_filepath);
         PNG* tex_asset_png = new PNG(tex_asset_png_readasset);
 
-        // m_pGLMesh = new GLMesh(true); // true will use client buffer, false [default] will use gpu buffer
-        m_pGLMesh = new GLMesh();
+        // for the raw image data in hard code for ES3's RGBA32I format
+        RawImage* raw_es3_rgba32i_texture = new RawImage((BYTE*)Models::tex_es3_rgba32i_pixels, Models::tex_es3_rgba32i_width, Models::tex_es3_rgba32i_height, Models::tex_es3_rgba32i_bit_per_pixel, Models::tex_es3_rgba32i_internal_format, Models::tex_es3_rgba32i_pixels_format, Models::tex_es3_rgba32i_pixel_type, Models::tex_es3_rgba32i_name);
+
+        // m_pGLMesh = new GLMesh(true); // true will use client buffer
+        m_pGLMesh = new GLMesh(); // false [default] will use gpu buffer
         // TODO Here, make the GLSLShader can also accept the char* as input
         m_pGLSL = new GLSLShader(&vss, &fss);
         m_pIAPos = new GLInputVertexAttribute(ia_pos);
         m_pIAColor = new GLInputVertexAttribute(ia_color);
         m_pIATexCoord = new GLInputVertexAttribute(ia_texCoord);
         m_pTex2DChess = new GLTexture2D(std::string("Texture0"), Models::tex_chess_uniform_name, Models::tex_chess_unit_id, raw_chess_texture);
-    #if 1
+
+#if defined(USE_PNG_IN_SDCARD)
         m_pTex2DSDCard = new GLTexture2D(std::string("Texture1"), Models::tex_sdcard_uniform_name, Models::tex_sdcard_unit_id, tex_sdcard_png);
-    #endif
+#endif
+
         m_pTex2DAsset = new GLTexture2D(std::string("Texture2"), Models::tex_asset_uniform_name, Models::tex_asset_unit_id, tex_asset_png);
+        m_pTex2DChess4x4ES3RGBA32 = new GLTexture2D(std::string("Texture3"), Models::tex_es3_rgba32i_uniform_name, Models::tex_es3_rgba32i_unit_id, raw_es3_rgba32i_texture);
+
         m_pSampler = new GLSampler();
 
         m_pGLMesh->setVertexDataPointer(vertes);
@@ -195,19 +252,14 @@ namespace Models
         m_pSampler->addSamplerParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         m_pSampler->addSamplerParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         m_pSampler->addSamplerParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
         m_pTex2DChess->setTextureSampler(m_pSampler);
 
-    #if 1 
+    #if defined(USE_PNG_IN_SDCARD)
         m_pTex2DSDCard->setTextureSampler(m_pSampler);
     #endif
 
         m_pTex2DAsset->setTextureSampler(m_pSampler);
-
-        // Todo Notebook
-        // Note, can not call these Create() here, if you call it, when you call GLRenderable::Draw()'s glDrawElements will show crash
-        // This crash is very hard to debug, since it is not part of glGetError, nor part of gdb catch-able crash, only test-try-log can help this, you can see the debug.create.later.log and debug.create.first.log to compare
-        // The root of this crash is when the Create() is calling glFoo, the EGL is not init yet, you must wait the EGL be initialized done, then call these Create()
+        m_pTex2DChess4x4ES3RGBA32->setTextureSampler(m_pSampler);
 
         m_pGLMesh->Create();
         m_pGLSL ->Create();
@@ -215,10 +267,13 @@ namespace Models
         m_pIAColor->Create();
         m_pIATexCoord->Create();
         m_pTex2DChess->Create();
-    #if 1 
+
+    #if defined(USE_PNG_IN_SDCARD)
         m_pTex2DSDCard->Create();
     #endif
+
         m_pTex2DAsset->Create();
+        m_pTex2DChess4x4ES3RGBA32->Create();
         m_pSampler->Create();
 
         return true;
@@ -226,12 +281,6 @@ namespace Models
 
     bool DisImport()
     {
-        // todo here, very much
-        // - check each dispose(), make sure after it delete something then assign NULL or invalid value to the delete one, like texture handle
-        // - add some safe_delete here for delete call
-        // - when code safe_delete, use some if (p) { delete p; p = NULL; }
-        // - also add the if check in dispose()
-
         m_pGLMesh->Dispose();
         m_pGLSL->Dispose();
         m_pIAPos->Dispose();
@@ -239,10 +288,13 @@ namespace Models
         m_pIATexCoord->Dispose();
         m_pSampler->Dispose();
         m_pTex2DChess->Dispose();
-    #if 1 
+
+    #if defined(USE_PNG_IN_SDCARD)
         m_pTex2DSDCard->Dispose();
     #endif
+
         m_pTex2DAsset->Dispose();
+        m_pTex2DChess4x4ES3RGBA32->Dispose();
 
         SAFE_DELETE(m_pGLMesh);
         SAFE_DELETE(m_pGLSL);
@@ -251,10 +303,13 @@ namespace Models
         SAFE_DELETE(m_pIATexCoord);
         SAFE_DELETE(m_pSampler);
         SAFE_DELETE(m_pTex2DChess);
-    #if 1
+
+    #if defined(USE_PNG_IN_SDCARD)
         SAFE_DELETE(m_pTex2DSDCard);
     #endif
+
         SAFE_DELETE(m_pTex2DAsset);
+        SAFE_DELETE(m_pTex2DChess4x4ES3RGBA32);
 
         return true;
     }
@@ -267,7 +322,7 @@ bool GLBasicScene::Load()
     // Clear the Color and Depth buffer
     GLClearRenderable* m_pGlClear = new GLClearRenderable();
 
-    m_pGlClear->setClearColorRGB(1.0, 1.0, 0.0, 1.0);
+    m_pGlClear->setClearColorRGB(1.0, 1.0, 1.0, 1.0);
 
     m_pRenderablesVector->push_back(m_pGlClear);
 
@@ -284,12 +339,14 @@ bool GLBasicScene::Load()
     m_pGLRect->addInputVertexAttribute(Models::m_pIAColor);
     m_pGLRect->addInputVertexAttribute(Models::m_pIATexCoord);
     m_pGLRect->addTexture(Models::m_pTex2DChess);
-#if 1
+
+#if defined(USE_PNG_IN_SDCARD)
     m_pGLRect->addTexture(Models::m_pTex2DSDCard);
 #endif
-    m_pGLRect->addTexture(Models::m_pTex2DAsset);
 
-    // todo here verymuch, seem the gdb stops at addTexture finished, so next is to step over 291->294
+    m_pGLRect->addTexture(Models::m_pTex2DAsset);
+    m_pGLRect->addTexture(Models::m_pTex2DChess4x4ES3RGBA32);
+
     m_pRenderablesVector->push_back(m_pGLRect);
 
     // Note

@@ -533,11 +533,19 @@ bool GLTexture2D::LoadImage()
 
         // todo here, find some way to gen mipmaps or load it from outside
 
-        m_internalFormat = m_pImage->getFormatInOGL();
+        m_internalFormat = m_pImage->getInternalFormatInOGL();
         m_width = m_pImage->getWidth();
         m_height = m_pImage->getHeight();
         m_format = m_pImage->getFormatInOGL();
         m_type = m_pImage->getTypeInOGL();
+
+        if (m_pImage->hasAlpha())
+        {
+            // make OGL support blend for alpha texture
+            // todo here, maybe have some better place to handle the setting for blend
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        }
 
         return true;
     }
@@ -623,6 +631,7 @@ bool GLTexture2D::Enable()
                     dynamic_cast<GLSampler*>(m_pTextureSampler)->Enable();
                 }
 
+
                 result = true;
             }
             else
@@ -662,6 +671,9 @@ bool GLTexture2D::Dispose()
     if (isCreateOK())
     {
         bool result = false;
+
+        // todo here, very much
+        // - check each dispose(), make sure after it delete something then assign NULL or invalid value to the delete one, like texture handle
 
         glDeleteTextures(1, &m_texHandle);
         result = true;
