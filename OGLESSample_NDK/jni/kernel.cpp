@@ -2,6 +2,8 @@
 #include "kernel.h"
 #include "log.h"
 
+#include <algorithm>
+
 Kernel::Kernel() :
 		m_bRunning(true),
 		m_tasks(),
