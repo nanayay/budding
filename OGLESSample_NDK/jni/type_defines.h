@@ -4,11 +4,20 @@
 // GL types and GL function headers are dependence on the different platform, but the name of them are all the same in all platform, so include different header in different platform, but keep the same GL code and logic
 
 #if defined(__ANDROID__) || defined(ANDROID)
-    #if 1
+    #if defined(USE_GLES3) 
+        #include <GLES3/gl3.h>
+        #include <GLES3/gl3ext.h>
+    #elif defined(USE_GLES2)
         #include <GLES2/gl2.h>
-    #else
+        #include <GLES2/gl2ext.h>
+    #elif defined(UES_GLES1)
         #include <GLES/gl.h>
+        #include <GLES/glext.h>
+    #else
+        #include <GLES2/gl3.h>
+        #include <GLES2/gl3ext.h>
     #endif
+
     typedef long long TimeUnit;
     typedef unsigned char BYTE;
 
