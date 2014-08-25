@@ -20,6 +20,7 @@ public:
     virtual unsigned int getHeight() = 0;
     virtual bool hasAlpha() = 0;
     virtual unsigned int getBytePerRow() = 0;
+    virtual GLint getInternalFormatInOGL() = 0;
     virtual GLenum getFormatInOGL() = 0;
     virtual GLenum getTypeInOGL() = 0;
     virtual BYTE* getData() = 0;
@@ -41,6 +42,7 @@ public:
     virtual unsigned int getHeight();
     virtual bool hasAlpha();
     virtual unsigned int getBytePerRow();
+    virtual GLint getInternalFormatInOGL();
     virtual GLenum getFormatInOGL();
     virtual GLenum getTypeInOGL();
     virtual BYTE* getData();
@@ -72,7 +74,7 @@ class RawImage
     : public Image
 {
 public:
-    explicit RawImage(BYTE* pData, unsigned int width, unsigned int height, GLenum format_ogl, GLenum type_ogl, std::string name);
+    explicit RawImage(BYTE* pData, unsigned int width, unsigned int height, unsigned int bit_per_pixel, GLint internal_format_gl, GLenum format_ogl, GLenum type_ogl, std::string name);
     virtual ~RawImage();
 
     virtual bool Load();
@@ -82,6 +84,7 @@ public:
     virtual unsigned int getHeight();
     virtual bool hasAlpha();
     virtual unsigned int getBytePerRow();
+    virtual GLint getInternalFormatInOGL();
     virtual GLenum getFormatInOGL();
     virtual GLenum getTypeInOGL();
     virtual BYTE* getData();
@@ -91,6 +94,7 @@ private:
     BYTE* m_pData;
     unsigned int m_Width;
     unsigned int m_Height;
+    GLint m_InternalFormat;
     GLenum m_Format;
     GLenum m_Type;
     std::string m_Name;

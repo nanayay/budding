@@ -282,6 +282,12 @@ unsigned int PNG::getBytePerRow()
     return m_BytePerRow;
 }
 
+GLint PNG::getInternalFormatInOGL()
+{
+    // todo, in PNG load, didn't distinguish the internal format of ogl and format of pixel data
+    return m_Format;
+}
+
 GLenum PNG::getFormatInOGL()
 {
     return m_Format;
@@ -333,16 +339,17 @@ std::string PNG::getName() const
     return m_pResource->getPath();
 }
 
-RawImage::RawImage(BYTE* pData, unsigned int width, unsigned int height, GLenum format_ogl, GLenum type_ogl, std::string name) :
+RawImage::RawImage(BYTE* pData, unsigned int width, unsigned int height, unsigned int bit_per_pixel, GLint internal_format_gl, GLenum format_ogl, GLenum type_ogl, std::string name) :
     m_Width(width),
     m_Height(height),
+    m_InternalFormat(internal_format_gl),
     m_Format(format_ogl),
     m_Type(type_ogl),
     m_Name(name),
     m_bHasAlpha(false),
     m_BytePerRow(0)
 {
-    // copy the image data own
+#if !defined(USE_GLES3)
     size_t channel_per_pixel, bit_per_channel, bit_per_pixel;
 
     switch (format_ogl)
@@ -381,11 +388,28 @@ RawImage::RawImage(BYTE* pData, unsigned int width, unsigned int height, GLenum 
         bit_per_pixel = 16;
         break;
     }
+#endif
+
+    // set byte per row
     m_BytePerRow = width * (bit_per_pixel / 8);
 
+    // copy original raw data to RawImage's own memory
     size_t size = width * height * (bit_per_pixel / 8);
     m_pData = new BYTE[size];
     memcpy(m_pData, pData, size);
+
+    switch (m_Format)
+    {
+    case GL_RGBA:
+    case GL_RGBA_INTEGER:
+    case GL_LUMINANCE_ALPHA:
+    case GL_ALPHA:
+        m_bHasAlpha = true;
+        break;
+    default:
+        m_bHasAlpha = false;
+        break;
+    }
 }
 
 RawImage::~RawImage()
@@ -426,6 +450,11 @@ bool RawImage::hasAlpha()
 unsigned int RawImage::getBytePerRow()
 {
     return m_BytePerRow;
+}
+
+GLint RawImage::getInternalFormatInOGL()
+{
+    return m_InternalFormat;
 }
 
 GLenum RawImage::getFormatInOGL()
