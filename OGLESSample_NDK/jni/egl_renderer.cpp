@@ -65,12 +65,25 @@ void EGLRenderer::Init()
 		m_display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 		assert(m_display!= EGL_NO_DISPLAY);
 
-		EGLBoolean res = eglInitialize(m_display, NULL, NULL);
+        EGLint majorEGLVersion, minorEGLVersion;
+		EGLBoolean res = eglInitialize(m_display, &majorEGLVersion, &minorEGLVersion);
 		assert(res);
+
+        EGLint OGLESVersionToken;
+
+        #if defined(USE_GLES3)
+            OGLESVersionToken = EGL_OPENGL_ES3_BIT_KHR;
+        #elif defined(USE_GLES2)
+            OGLESVersionToken = EGL_OPENGL_ES2_BIT;
+        #elif defined(USE_GLES1)
+            OGLESVersionToken = EGL_OPENGL_ES_API;
+        #else
+            OGLESVersionToken = EGL_OPENGL_ES3_BIT_KHR;
+        #endif
 
 		const EGLint RGBX_8888_ATTRIBS[]=
 		{
-				EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+				EGL_RENDERABLE_TYPE, OGLESVersionToken,
 				EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
 				EGL_RED_SIZE,	8,
 				EGL_GREEN_SIZE, 8,
@@ -80,7 +93,7 @@ void EGLRenderer::Init()
 		};
 		const EGLint RGB_565_ATTRIBS[]=
 		{
-				EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+				EGL_RENDERABLE_TYPE, OGLESVersionToken,
 				EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
 				EGL_RED_SIZE, 5,
 				EGL_GREEN_SIZE, 6,
@@ -118,7 +131,6 @@ void EGLRenderer::Init()
         res = eglGetConfigAttrib(m_display, config, EGL_MIN_SWAP_INTERVAL, &min_swap_interval);
         assert(res);
 
-        // log the egl's max and min swap interval for eglSwapInterval
         LOGD("EGL Max Swap Interval is %d", max_swap_interval);
         LOGD("EGL Min Swap Interval is %d", min_swap_interval);
 
@@ -130,8 +142,19 @@ void EGLRenderer::Init()
 		assert(m_renderSurface != EGL_NO_SURFACE);
 		LOGD("EGLRenderer eglCreateWindowSurface() success");
 
-        // todo here very much, since I am using ogl es 3.0 lib and headers, we should have some way to verify the version is the same of OGL context 
-		EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
+        unsigned int OGLESVersion;
+
+        #if defined(USE_GLES3)
+            OGLESVersion = 3;
+        #elif defined(USE_GLES2)
+            OGLESVersion = 2;
+        #elif defined(USE_GLES1)
+            OGLESVersion = 1;
+        #else
+            OGLESVersion = 3;
+        #endif
+
+		EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, OGLESVersion, EGL_NONE };
 		m_context = eglCreateContext(m_display, config, EGL_NO_CONTEXT, contextAttribs);
 		assert(m_context != EGL_NO_CONTEXT);
 		LOGD("EGLRenderer eglCreateContext() success");

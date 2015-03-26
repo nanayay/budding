@@ -4,6 +4,10 @@
 // GL types and GL function headers are dependence on the different platform, but the name of them are all the same in all platform, so include different header in different platform, but keep the same GL code and logic
 
 #if defined(__ANDROID__) || defined(ANDROID)
+
+    #include <EGL/egl.h>
+    #include <EGL/glext.h>
+
     #if defined(USE_GLES3) 
         #include <GLES3/gl3.h>
         #include <GLES3/gl3ext.h>
