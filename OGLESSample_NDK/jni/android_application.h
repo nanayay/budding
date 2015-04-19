@@ -25,6 +25,7 @@ private:
     AndroidTimer* m_pTimer;
     AndroidTask* m_pAndroidTask;
 
+    bool InitKernel();
     bool InitTask();
     bool AddTasks();
 };

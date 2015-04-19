@@ -277,7 +277,7 @@ void AndroidTask::Update()
 			pSource->process(this->m_pState, pSource);
 		}
 		if (this->m_pState->destroyRequested) {
-			Kernel::getSingleton().setRunning(false);
+			Kernel::GetSingleton().setRunning(false);
 		}
 	}
 }
@@ -294,5 +294,5 @@ void AndroidTask::Stop()
 
 void AndroidTask::ClearClosing()
 {
-	Kernel::getSingleton().setRunning(true);
+	Kernel::GetSingleton().setRunning(true);
 }

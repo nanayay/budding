@@ -11,35 +11,6 @@ Kernel::Kernel() :
 {
 }
 
-Kernel::Kernel(Kernel& _copy)
-{
-	this->m_bRunning = _copy.isRunning();
-	this->m_tasks = _copy.m_tasks;
-	this->m_pausedTasks = _copy.m_pausedTasks;
-
-	// Remove all items in the _copy, since the tasks should have **only** one copy
-	_copy.m_tasks.clear();
-	_copy.m_pausedTasks.clear();
-	_copy.setRunning(false);
-
-}
-
-Kernel& Kernel::operator=(Kernel& _assign)
-{
-	if (this != &_assign)
-	{
-		this->m_bRunning = _assign.isRunning();
-		this->m_tasks = _assign.m_tasks;
-		this->m_pausedTasks = _assign.m_pausedTasks;
-
-		// Remove all items in the _assign, since the tasks should have **only** one copy
-		_assign.m_tasks.clear();
-		_assign.m_pausedTasks.clear();
-		_assign.setRunning(false);
-	}
-	return *this;
-}
-
 Kernel::~Kernel()
 {
 }
@@ -147,9 +118,4 @@ void Kernel::KillAllTask() {
 	for (TaskListIterator i = m_tasks.begin(); i != m_tasks.end(); i++) {
 		(*i)->setCanKill(true);
 	}
-}
-
-Kernel& Kernel::getSingleton() {
-	static Kernel instance;
-	return instance;
 }
