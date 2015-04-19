@@ -6,7 +6,7 @@
 #if defined(__ANDROID__) || defined(ANDROID)
 
     #include <EGL/egl.h>
-    #include <EGL/glext.h>
+    #include <EGL/eglext.h>
 
     #if defined(USE_GLES3) 
         #include <GLES3/gl3.h>

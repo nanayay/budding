@@ -2,7 +2,7 @@
 #define EGL_RENDERER
 
 #include <EGL/egl.h>
-#include <EGL/glext.h>
+#include <EGL/eglext.h>
 
 #include "renderer.h"
 #include "android_platform.h"
