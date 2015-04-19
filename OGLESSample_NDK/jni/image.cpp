@@ -340,6 +340,7 @@ std::string PNG::getName() const
 }
 
 RawImage::RawImage(BYTE* pData, unsigned int width, unsigned int height, unsigned int bit_per_pixel, GLint internal_format_gl, GLenum format_ogl, GLenum type_ogl, std::string name) :
+    m_pData(nullptr),
     m_Width(width),
     m_Height(height),
     m_InternalFormat(internal_format_gl),
@@ -350,7 +351,7 @@ RawImage::RawImage(BYTE* pData, unsigned int width, unsigned int height, unsigne
     m_BytePerRow(0)
 {
 #if !defined(USE_GLES3)
-    size_t channel_per_pixel, bit_per_channel, bit_per_pixel;
+    size_t channel_per_pixel, bit_per_channel;
 
     switch (format_ogl)
     {
@@ -376,28 +377,22 @@ RawImage::RawImage(BYTE* pData, unsigned int width, unsigned int height, unsigne
         break;
     }
 
-    switch (type_ogl)
+    if (!bit_per_pixel)
     {
-    case GL_UNSIGNED_BYTE:
-        bit_per_channel = 8;
-        bit_per_pixel = channel_per_pixel * bit_per_channel;
-        break;
-    case GL_UNSIGNED_SHORT_5_5_5_1:
-    case GL_UNSIGNED_SHORT_4_4_4_4:
-    case GL_UNSIGNED_SHORT_5_6_5:
-        bit_per_pixel = 16;
-        break;
+        switch (type_ogl)
+        {
+        case GL_UNSIGNED_BYTE:
+            bit_per_channel = 8;
+            bit_per_pixel = channel_per_pixel * bit_per_channel;
+            break;
+        case GL_UNSIGNED_SHORT_5_5_5_1:
+        case GL_UNSIGNED_SHORT_4_4_4_4:
+        case GL_UNSIGNED_SHORT_5_6_5:
+            bit_per_pixel = 16;
+            break;
+        }
     }
-#endif
-
-    // set byte per row
-    m_BytePerRow = width * (bit_per_pixel / 8);
-
-    // copy original raw data to RawImage's own memory
-    size_t size = width * height * (bit_per_pixel / 8);
-    m_pData = new BYTE[size];
-    memcpy(m_pData, pData, size);
-
+#else
     switch (m_Format)
     {
     case GL_RGBA:
@@ -410,6 +405,16 @@ RawImage::RawImage(BYTE* pData, unsigned int width, unsigned int height, unsigne
         m_bHasAlpha = false;
         break;
     }
+#endif
+
+    // set byte per row
+    m_BytePerRow = width * (bit_per_pixel / 8);
+
+    // copy original raw data to RawImage's own memory
+    size_t size = width * height * (bit_per_pixel / 8);
+    m_pData = new BYTE[size];
+    memcpy(m_pData, pData, size);
+
 }
 
 RawImage::~RawImage()

@@ -23,18 +23,20 @@ LOCAL_LDLIBS    := -llog -landroid -lEGL -lz
 #LOCAL_CFLAGS    += -DGLDEBUG
 #LOCAL_CFLAGS    += -D_GDB_DEBUG_
 
-ifeq ($(USE_GLES3), true)
+GLESVersion = 2
+
+ifeq ($(GLESVersion), 3)
     LOCAL_CFLAGS    += -DUSE_GLES3
     LOCAL_LDLIBS    += -lGLESv3
-else ifeq ($(USE_GLES2), true)
+else ifeq ($(GLESVersion), 2)
     LOCAL_CFLAGS    += -DUSE_GLES2
     LOCAL_LDLIBS    += -lGLESv2
-else ifeq ($(USE_GLES1), true)
+else ifeq ($(GLESVersion), 1)
     LOCAL_CFLAGS    += -DUSE_GLES1
     LOCAL_LDLIBS    += -lGLESv1_CM
 else
-    LOCAL_CFLAGS    += -DUSE_GLES3
-    LOCAL_LDLIBS    += -lGLESv3
+    LOCAL_CFLAGS    += -DUSE_GLES2
+    LOCAL_LDLIBS    += -lGLESv2
 endif
 
 LOCAL_STATIC_LIBRARIES	:= android_native_app_glue libpng

@@ -86,13 +86,17 @@ namespace Models
         "uniform sampler2D u_sampleTexture2D_0;\n"
         "uniform sampler2D u_sampleTexture2D_1;\n"
         "uniform sampler2D u_sampleTexture2D_2;\n"
+    #if defined(USE_GLES3)
         "uniform isampler2D u_sampleTexture2D_3;\n"
+    #endif
         "void main()\n"
         "{\n"
             "// gl_FragColor = 0.1 * v_vColor + 0.2 * texture2D(u_sampleTexture2D_0, v_vTexCoord) + 0.2 * texture2D(u_sampleTexture2D_1, v_vTexCoord) + 0.2 * texture2D(u_sampleTexture2D_2, v_vTexCoord) + 0.3 * texture2D(u_sampleTexture2D_3, v_vTexCoord);\n"
 
             "// gl_FragColor = 1.0 * texture2D(u_sampleTexture2D_3, v_vTexCoord); // + 0.7 * texture2D(u_sampleTexture2D_2, v_vTexCoord);\n"
-            "gl_FragColor = 1.0 * textureFetch(u_sampleTexture2D_3, v_vTexCoord);\n"
+            "// gl_FragColor = 1.0 * textureFetch(u_sampleTexture2D_3, v_vTexCoord);\n"
+            // todo, if we enable u_sampleTexture2D_3 which is isampler2d on ogl es 2.0 by accident, do we have some log or warning on runtime?
+            "gl_FragColor = 0.1 * v_vColor + 0.2 * texture2D(u_sampleTexture2D_0, v_vTexCoord) + 0.2 * texture2D(u_sampleTexture2D_1, v_vTexCoord) + 0.2 * texture2D(u_sampleTexture2D_2, v_vTexCoord);\n"
         "}\n";
 
     std::string vss(vs);
@@ -110,7 +114,11 @@ namespace Models
 #endif
 
     GLTexture2D* m_pTex2DAsset = NULL;
+
+#if defined(USE_GLES3)
     GLTexture2D* m_pTex2DChess4x4ES3RGBA32 = NULL;
+#endif
+
     GLSampler* m_pSampler = NULL;
 
     // load image's pixel data in hard-code
@@ -197,7 +205,9 @@ namespace Models
         PNG* tex_asset_png = new PNG(tex_asset_png_readasset);
 
         // for the raw image data in hard code for ES3's RGBA32I format
+    #if defined(USE_GLES3)
         RawImage* raw_es3_rgba32i_texture = new RawImage((BYTE*)Models::tex_es3_rgba32i_pixels, Models::tex_es3_rgba32i_width, Models::tex_es3_rgba32i_height, Models::tex_es3_rgba32i_bit_per_pixel, Models::tex_es3_rgba32i_internal_format, Models::tex_es3_rgba32i_pixels_format, Models::tex_es3_rgba32i_pixel_type, Models::tex_es3_rgba32i_name);
+    #endif
 
         // m_pGLMesh = new GLMesh(true); // true will use client buffer
         m_pGLMesh = new GLMesh(); // false [default] will use gpu buffer
@@ -213,7 +223,10 @@ namespace Models
 #endif
 
         m_pTex2DAsset = new GLTexture2D(std::string("Texture2"), Models::tex_asset_uniform_name, Models::tex_asset_unit_id, tex_asset_png);
+
+    #if defined(USE_GLES3)
         m_pTex2DChess4x4ES3RGBA32 = new GLTexture2D(std::string("Texture3"), Models::tex_es3_rgba32i_uniform_name, Models::tex_es3_rgba32i_unit_id, raw_es3_rgba32i_texture);
+    #endif
 
         m_pSampler = new GLSampler();
 
@@ -259,7 +272,10 @@ namespace Models
     #endif
 
         m_pTex2DAsset->setTextureSampler(m_pSampler);
+
+    #if defined(USE_GLES3)
         m_pTex2DChess4x4ES3RGBA32->setTextureSampler(m_pSampler);
+    #endif
 
         m_pGLMesh->Create();
         m_pGLSL ->Create();
@@ -273,7 +289,11 @@ namespace Models
     #endif
 
         m_pTex2DAsset->Create();
+
+    #if defined(USE_GLES3)
         m_pTex2DChess4x4ES3RGBA32->Create();
+    #endif
+
         m_pSampler->Create();
 
         return true;
@@ -294,7 +314,10 @@ namespace Models
     #endif
 
         m_pTex2DAsset->Dispose();
+
+    #if defined(USE_GLES3)
         m_pTex2DChess4x4ES3RGBA32->Dispose();
+    #endif
 
         SAFE_DELETE(m_pGLMesh);
         SAFE_DELETE(m_pGLSL);
@@ -309,7 +332,10 @@ namespace Models
     #endif
 
         SAFE_DELETE(m_pTex2DAsset);
+
+    #if defined(USE_GLES3)
         SAFE_DELETE(m_pTex2DChess4x4ES3RGBA32);
+    #endif
 
         return true;
     }
@@ -322,7 +348,7 @@ bool GLBasicScene::Load()
     // Clear the Color and Depth buffer
     GLClearRenderable* m_pGlClear = new GLClearRenderable();
 
-    m_pGlClear->setClearColorRGB(1.0, 1.0, 1.0, 1.0);
+    m_pGlClear->setClearColorRGB(1.0, 0.0, 1.0, 1.0);
 
     m_pRenderablesVector->push_back(m_pGlClear);
 
@@ -345,7 +371,10 @@ bool GLBasicScene::Load()
 #endif
 
     m_pGLRect->addTexture(Models::m_pTex2DAsset);
+
+#if defined(USE_GLES3)
     m_pGLRect->addTexture(Models::m_pTex2DChess4x4ES3RGBA32);
+#endif
 
     m_pRenderablesVector->push_back(m_pGLRect);
 
