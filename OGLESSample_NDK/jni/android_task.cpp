@@ -127,6 +127,7 @@ static void android_handle_cmd(struct android_app* app, int cmd)
     {
 		// clean up the window because it is being hidden/closed
 		LOGD("android_handle_cmd() APP_CMD_TERM_WINDOW cmd begin");
+        // todo, on asus, when press home button will make app crash here
         Engine* pEngine = (Engine*)app->userData;
         if (pEngine)
         {
