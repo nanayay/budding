@@ -31,6 +31,8 @@ bool AndroidApplication::Initialize()
 
     bool result = false;
 
+    result = InitKernel();
+
     result = InitTask();
     result = AddTasks();
 
@@ -40,12 +42,24 @@ bool AndroidApplication::Initialize()
 void AndroidApplication::Run()
 {
     LOGD("kernel execute begin");
-    Kernel::getSingleton().Execute();
+    Kernel::GetSingleton().Execute();
     LOGD("kernel execute end");
 
     LOGD("android clear closing begin");
     AndroidTask::ClearClosing();
     LOGD("android clear closing end");
+}
+
+bool AndroidApplication::InitKernel()
+{
+    LOGD("android application init kernel begin");
+    Kernel* kernel = new Kernel();
+    // todo, check is this good style to write this kind of codes
+    LOGD("android application init kernel end");
+
+    LOGD("android application kernel's pointer is %x", reinterpret_cast<int>(Kernel::GetSingletonPtr()));
+
+    return true;
 }
 
 bool AndroidApplication::InitTask()
@@ -72,13 +86,13 @@ bool AndroidApplication::AddTasks()
     bool result = true;
 
     LOGD("Android Timer add to kernel");
-    Kernel::getSingleton().AddTask(m_pTimer);
+    Kernel::GetSingleton().AddTask(m_pTimer);
 
     LOGD("EGLRenderer add to kernel");
-    Kernel::getSingleton().AddTask(m_pRenderer);
+    Kernel::GetSingleton().AddTask(m_pRenderer);
 
     LOGD("Android Task add to kernel");
-    Kernel::getSingleton().AddTask(m_pAndroidTask);
+    Kernel::GetSingleton().AddTask(m_pAndroidTask);
  
     return result;
 }
