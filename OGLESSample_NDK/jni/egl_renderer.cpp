@@ -142,7 +142,7 @@ void EGLRenderer::Init()
 		assert(m_renderSurface != EGL_NO_SURFACE);
 		LOGD("EGLRenderer eglCreateWindowSurface() success");
 
-        unsigned int OGLESVersion;
+        EGLint OGLESVersion;
 
         #if defined(USE_GLES3)
             OGLESVersion = 3;
