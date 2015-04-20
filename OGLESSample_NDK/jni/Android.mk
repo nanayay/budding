@@ -19,9 +19,17 @@ LOCAL_SRC_FILES :=  $(call LS_CPP,$(LOCAL_PATH))
 
 LOCAL_LDLIBS    := -llog -landroid -lEGL -lz
 
-#LOCAL_CFLAGS    += -DUSE_PNG_IN_SDCARD
-#LOCAL_CFLAGS    += -DGLDEBUG
-#LOCAL_CFLAGS    += -D_GDB_DEBUG_
+ifeq ($(UsePngInSDCard), true)
+	LOCAL_CFLAGS    += -DUSE_PNG_IN_SDCARD
+endif
+
+ifeq ($(EnableGLDebugCall), true)
+	LOCAL_CFLAGS    += -DGLDEBUG
+endif
+
+ifeq ($(EnableGDBWait), true)
+	LOCAL_CFLAGS    += -D_GDB_DEBUG_
+endif
 
 GLESVersion = 2
 
