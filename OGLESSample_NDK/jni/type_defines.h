@@ -18,8 +18,8 @@
         #include <GLES/gl.h>
         #include <GLES/glext.h>
     #else
-        #include <GLES2/gl3.h>
-        #include <GLES2/gl3ext.h>
+        #include <GLES2/gl2.h>
+        #include <GLES2/gl2ext.h>
     #endif
 
     typedef long long TimeUnit;

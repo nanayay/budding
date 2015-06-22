@@ -68,17 +68,20 @@ void EGLRenderer::Init()
         EGLint majorEGLVersion, minorEGLVersion;
 		EGLBoolean res = eglInitialize(m_display, &majorEGLVersion, &minorEGLVersion);
 		assert(res);
+        LOGD("EGL Major Version is %d", majorEGLVersion);
+        LOGD("EGL Minor Version is %d", minorEGLVersion);
 
         EGLint OGLESVersionToken;
 
         #if defined(USE_GLES3)
-            OGLESVersionToken = EGL_OPENGL_ES3_BIT_KHR;
+            // OGLESVersionToken = EGL_OPENGL_ES3_BIT_KHR; // Don't use EGL_OPENGL_ES3_BIT_KHR, since it only support in EGL 1.4 and we don't have it right now
+            OGLESVersionToken = EGL_OPENGL_ES2_BIT;
         #elif defined(USE_GLES2)
             OGLESVersionToken = EGL_OPENGL_ES2_BIT;
         #elif defined(USE_GLES1)
             OGLESVersionToken = EGL_OPENGL_ES_API;
         #else
-            OGLESVersionToken = EGL_OPENGL_ES3_BIT_KHR;
+            OGLESVersionToken = EGL_OPENGL_ES2_BIT;
         #endif
 
 		const EGLint RGBX_8888_ATTRIBS[]=
@@ -151,7 +154,7 @@ void EGLRenderer::Init()
         #elif defined(USE_GLES1)
             OGLESVersion = 1;
         #else
-            OGLESVersion = 3;
+            OGLESVersion = 2;
         #endif
 
 		EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, OGLESVersion, EGL_NONE };
@@ -162,6 +165,27 @@ void EGLRenderer::Init()
 		res = eglMakeCurrent(m_display, m_renderSurface, m_renderSurface, m_context);
 		assert(res);
 		LOGD("EGLRenderer eglMakeCurrent() success");
+
+        const GLubyte* glVendor;
+        const GLubyte* glRenderer;
+        const GLubyte* glVersion;
+
+        glVendor = glGetString(GL_VENDOR);
+        glRenderer = glGetString(GL_RENDERER);
+        glVersion = glGetString(GL_VERSION);
+
+        LOGD("The current GL_VENDOR: %s", glVendor);
+        LOGD("The current GL_RENDERER: %s", glRenderer);
+        LOGD("The current GL_VERSION: %s", glVersion);
+
+        #if defined(USE_GLES3)
+            GLint glMajorVersion, glMinorVersion;
+            glGetIntegerv(GL_MAJOR_VERSION, &glMajorVersion);
+            glGetIntegerv(GL_MINOR_VERSION, &glMinorVersion);
+            LOGD("These query methods only available in OGL ES 3:");
+            LOGD("    - The current OGL Context support OGL Major_Version: %d", glMajorVersion);
+            LOGD("    - The current OGL Context support OGL Minor_Version: %d", glMinorVersion);
+        #endif
 
         res = eglQuerySurface(m_display, m_renderSurface, EGL_WIDTH, &m_width);
         assert(res);
