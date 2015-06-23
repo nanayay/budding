@@ -74,8 +74,15 @@ void EGLRenderer::Init()
         EGLint OGLESVersionToken;
 
         #if defined(USE_GLES3)
-            // OGLESVersionToken = EGL_OPENGL_ES3_BIT_KHR; // Don't use EGL_OPENGL_ES3_BIT_KHR, since it only support in EGL 1.4 and we don't have it right now
-            OGLESVersionToken = EGL_OPENGL_ES2_BIT;
+            #if 0
+            OGLESVersionToken = EGL_OPENGL_ES3_BIT_KHR;
+            // Don't use EGL_OPENGL_ES3_BIT_KHR, since we don't have corresponding header files for EGL 1.4
+            #endif
+
+            // Use a magic number which comes from the spec of OGL ES 3.0
+            static const unsigned int EGL_OPENGL_ES3_BIT_KHR = 0x0040;
+            OGLESVersionToken = EGL_OPENGL_ES3_BIT_KHR;
+
         #elif defined(USE_GLES2)
             OGLESVersionToken = EGL_OPENGL_ES2_BIT;
         #elif defined(USE_GLES1)
