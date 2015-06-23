@@ -31,7 +31,7 @@ ifeq ($(EnableGDBWait), true)
 	LOCAL_CFLAGS    += -D_GDB_DEBUG_
 endif
 
-GLESVersion = 3
+GLESVersion = 2
 
 ifeq ($(GLESVersion), 3)
     LOCAL_CFLAGS    += -DUSE_GLES3
