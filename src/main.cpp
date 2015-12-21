@@ -7,16 +7,34 @@
 //
 
 #include "SDL.h"
-#include "SDL_opengles2.h"
+
+#if defined(_WIN32) || defined(_WIN64)
+    // For Windows
+    #include "SDL_main.h"
+    #include "gl\glew.h"
+    #define GL_MAJOR 4
+    #define GL_MINOR 5
+#elif defined(__IPHONEOS__)
+    // For iOS
+    #include "SDL_opengles2.h"
+    #define GL_MAJOR 2
+    #define GL_MINOR 0
+#elif defined(__ANDROID__) || defined(ANDROID)
+    // For Android
+    #include "SDL_opengles2.h"
+    #define GL_MAJOR 2
+    #define GL_MINOR 0
+#endif
 
 #include <time.h>
+#include <cstdio>
 
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 480
 
 static int screen_w, screen_h;
 static float clear_color_r = 0, clear_color_g = 0, clear_color_b = 0;
-static float milleseconds_per_frame = 16.0f;
+static Uint32 milleseconds_per_frame = 16;
 
 int
 main(int argc, char *argv[])
@@ -43,15 +61,28 @@ main(int argc, char *argv[])
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32);
     SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING, 0);
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, GL_MAJOR);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GL_MINOR);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     
     window =
-    SDL_CreateWindow(NULL, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
+    SDL_CreateWindow(nullptr, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
                      SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS);
-    
+
     context = SDL_GL_CreateContext(window);
-    
+
+#if defined(_WIN32) || defined(_WIN64)
+    glewExperimental = true;
+    GLenum res = glewInit();
+    if (res != GLEW_OK)
+    {
+        const GLubyte* error = glewGetErrorString(res);
+        SDL_ShowSimpleMessageBox(0, "glewInit() error", reinterpret_cast<const char*>(error), window);
+        SDL_Quit();
+        return -1;
+    }
+#endif
+
     if (!window) {
         printf("Could not initialize Window\n");
         return 1;
@@ -73,18 +104,19 @@ main(int argc, char *argv[])
                 int x, y;
                 SDL_GetMouseState(&x, &y);
                 if (x > y) {
-                    clear_color_g += 0.1;
+                    clear_color_g += 0.1f;
                 }
                 else {
-                    clear_color_b += 0.1;
+                    clear_color_b += 0.1f;
                 }
-                clear_color_r += 0.1;
+                clear_color_r += 0.1f;
                 
             }
         }
         
         glClearColor(clear_color_r, clear_color_g, clear_color_b, 0.0f);
-        glClearDepthf(0.0f);
+        // glClearDepthf(0.0f); // todo, this is only for gl es 2
+        glClearDepth(0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         SDL_GL_SwapWindow(window);
