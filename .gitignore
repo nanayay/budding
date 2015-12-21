@@ -28,3 +28,4 @@ proguard-project.txt
 
 *.xcworkspace
 xcuserdata
+external/SDL/.hg/cache/
