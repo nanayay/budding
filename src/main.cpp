@@ -14,16 +14,19 @@
     #include "gl\glew.h"
     #define GL_MAJOR 4
     #define GL_MINOR 5
+    #define USE_OPENGL
 #elif defined(__IPHONEOS__)
     // For iOS
     #include "SDL_opengles2.h"
     #define GL_MAJOR 2
     #define GL_MINOR 0
+    #define USE_OPENGL_ES
 #elif defined(__ANDROID__) || defined(ANDROID)
     // For Android
     #include "SDL_opengles2.h"
     #define GL_MAJOR 2
     #define GL_MINOR 0
+    #define USE_OPENGL_ES
 #endif
 
 #include <time.h>
@@ -115,8 +118,12 @@ main(int argc, char *argv[])
         }
         
         glClearColor(clear_color_r, clear_color_g, clear_color_b, 0.0f);
-        // glClearDepthf(0.0f); // todo, this is only for gl es 2
+
+#if defined(USE_OPENGL)
         glClearDepth(0.0f);
+#elif defined(USE_OPENGL_ES)
+        glClearDepthf(0.0f);
+#endif
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         SDL_GL_SwapWindow(window);
